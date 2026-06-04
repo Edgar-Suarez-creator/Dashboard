@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reporte Subproyectos · Aseguramiento Técnico</title>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<style>
+:root{
+  --bg:#0a0f1e;--bg2:#111a30;--panel:#161f38;--panel2:#1b264a;
+  --text:#e8edff;--text-2:#a8b6d4;--muted:#6b779b;
+  --accent:#46d3ff;--accent-2:#a78bfa;--good:#27d29c;--warn:#f7b955;--bad:#ff6b6b;
+  --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.45 'Inter','Segoe UI',system-ui,sans-serif}
+.wrap{max-width:1500px;margin:0 auto;padding:24px 28px 80px}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.hdr h1{margin:0;font-size:24px;letter-spacing:.3px}
+.hdr .sub{color:var(--text-2);font-size:13px;margin-top:4px}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.chip{display:inline-block;padding:5px 11px;border-radius:999px;background:rgba(70,211,255,.10);color:var(--accent);font-size:11px;font-weight:600;border:1px solid rgba(70,211,255,.25)}
+.chip-list{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.cut{color:var(--muted);font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden}
+.kpi .lbl{color:var(--text-2);font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.kpi .val{font-size:26px;font-weight:800;margin-top:4px}
+.kpi .sub{font-size:12px;color:var(--text-2);margin-top:3px}
+.kpi.good .val{color:var(--good)}
+.kpi.warn .val{color:var(--warn)}
+.kpi.bad .val{color:var(--bad)}
+.kpi .ico{position:absolute;right:14px;top:12px;font-size:22px;opacity:.4}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-bottom:22px}
+.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}
+.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}
+.span-9{grid-column:span 9}.span-12{grid-column:span 12}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card h3{margin:0;font-size:14px;letter-spacing:.4px}
+.card .desc{color:var(--text-2);font-size:12px;margin-top:2px}
+.section-title{margin:18px 0 12px;font-size:13px;color:var(--text-2);text-transform:uppercase;letter-spacing:1.2px;font-weight:700;display:flex;align-items:center;gap:10px}
+.section-title::before{content:"";width:4px;height:14px;background:var(--accent);border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--text-2);text-transform:uppercase;font-size:10.5px;letter-spacing:.6px;font-weight:600;background:rgba(255,255,255,.02)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:hover td{background:rgba(255,255,255,.025)}
+tfoot td{font-weight:800;background:rgba(70,211,255,.05);color:var(--accent)}
+.bar{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;min-width:80px}
+.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--good),var(--accent));border-radius:4px}
+.bar.warn span{background:linear-gradient(90deg,var(--warn),var(--accent-2))}
+.bar.bad span{background:linear-gradient(90deg,var(--bad),#ff9a8b)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.pill.good{background:rgba(39,210,156,.15);color:var(--good)}
+.pill.warn{background:rgba(247,185,85,.15);color:var(--warn)}
+.pill.bad{background:rgba(255,107,107,.15);color:var(--bad)}
+.b-good{color:var(--good)}.b-warn{color:var(--warn)}.b-bad{color:var(--bad)}
+.tag{background:rgba(255,255,255,.05);padding:4px 9px;border-radius:6px;font-size:11px;color:var(--text-2);border:1px solid var(--border)}
+.fuente{font-size:11px;color:var(--muted);margin-top:8px;font-style:italic}
+.tabwrap{max-height:none;overflow:visible}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.span-3,.span-4,.span-5,.span-6,.span-7,.span-8,.span-9{grid-column:span 12}}
+/* ===== KPIs clickeables ===== */
+.kpi{cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative}
+.kpi:hover{transform:translateY(-3px);border-color:rgba(70,211,255,.4);box-shadow:0 14px 30px rgba(70,211,255,.12)}
+.kpi::before{content:'↗';position:absolute;top:10px;right:14px;font-size:14px;color:var(--text-2);opacity:0;transition:.2s;font-weight:700}
+.kpi:hover::before{opacity:.85;transform:translate(2px,-2px)}
+/* ===== Celdas numéricas clicables (tabla DETALLE) ===== */
+td.drill{cursor:pointer;position:relative;transition:.15s;border-radius:4px}
+td.drill:hover{background:rgba(70,211,255,.10);color:var(--accent);transform:scale(1.04)}
+td.drill:active{transform:scale(.98)}
+/* ===== Modal emergente ===== */
+.modal-back{position:fixed;inset:0;background:rgba(3,5,11,.74);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:998;opacity:0;pointer-events:none;transition:.22s}
+.modal-back.open{opacity:1;pointer-events:auto}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.92);opacity:0;pointer-events:none;width:min(820px,94vw);max-height:88vh;background:linear-gradient(180deg,#0c1428 0%,#0a0f1e 100%);border:1px solid var(--border);border-radius:18px;z-index:999;transition:opacity .22s, transform .22s cubic-bezier(.4,0,.2,1);box-shadow:0 30px 90px rgba(0,0,0,.75);display:flex;flex-direction:column;overflow:hidden}
+.modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+.modal-head h2{margin:0;font-size:16px;color:var(--text)}
+.modal-head .sub{color:var(--text-2);font-size:11.5px;margin-top:3px}
+.modal-close{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#ff8f8f;width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:.2s}
+.modal-close:hover{background:rgba(255,107,107,.22)}
+.modal-body{padding:18px 24px 24px;overflow-y:auto;flex:1}
+.modal-kpi{display:flex;align-items:baseline;gap:14px;padding:14px 18px;background:rgba(70,211,255,.06);border:1px solid rgba(70,211,255,.18);border-radius:12px;margin-bottom:16px}
+.modal-kpi .big{font-size:34px;font-weight:800;letter-spacing:-1px;color:var(--accent);font-variant-numeric:tabular-nums}
+.modal-kpi .l{font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+.modal-section{margin-top:16px}
+.modal-section h4{font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin:0 0 10px}
+.modal table{font-size:12px}
+/* ===== Barra de filtros por sección ===== */
+.filter-bar{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr)) auto;gap:10px;padding:12px 14px;background:linear-gradient(180deg,rgba(70,211,255,.04),rgba(167,139,250,.02));border:1px solid var(--border);border-radius:12px;margin-bottom:14px;align-items:end}
+.filter-bar .field{display:flex;flex-direction:column;gap:4px}
+.filter-bar label{font-size:10px;color:var(--text-2);text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+.filter-bar select{background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;cursor:pointer;transition:.15s;max-width:100%;text-overflow:ellipsis}
+.filter-bar select:hover{border-color:rgba(70,211,255,.5)}
+.filter-bar select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(70,211,255,.15)}
+.filter-bar .reset-btn{background:rgba(255,107,107,.10);color:#ff9a9a;border:1px solid rgba(255,107,107,.3);border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:.15s;align-self:end;height:34px;white-space:nowrap}
+.filter-bar .reset-btn:hover{background:rgba(255,107,107,.18)}
+.filter-bar .count{font-size:11px;color:var(--text-2);grid-column:1/-1;padding-top:4px;border-top:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center}
+.filter-bar .count b{color:var(--accent);font-variant-numeric:tabular-nums}
+@media (max-width:980px){.filter-bar{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+  <div>
+    <h1>Reporte Consolidado · Subproyectos Selectos</h1>
+    <div class="sub" id="hdrSub">—</div>
+    <div class="chip-list" id="chipList"></div>
+  </div>
+  <div class="hdr-right">
+    <span class="chip">APPLUS+ · Aseguramiento Técnico</span>
+    <span class="cut" id="cutDate">Corte: —</span>
+    <button onclick="window.print()" style="margin-top:6px;background:transparent;border:1px solid var(--border);color:var(--text-2);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px">⤓ Exportar PDF</button>
+  </div>
+</div>
+
+<!-- ============ KPIs GLOBALES ============ -->
+<div class="kpis" id="kpiBar"></div>
+
+<!-- ============ 1. PLANNED TASK ============ -->
+<div class="section-title">▰ 1 · Planned Task — Cantidades y Avance (REQ / EJE / POR EJEC)</div>
+<div class="filter-bar" id="ptFilters" data-scope="pt">
+  <div class="field"><label>Nombre del Proyecto</label><select data-dim="nombreProyecto"><option value="">Todos</option></select></div>
+  <div class="field"><label>Descripción del Sistema</label><select data-dim="sistema"><option value="">Todos</option></select></div>
+  <div class="field"><label>Descripción Subsistema</label><select data-dim="subsistema"><option value="">Todos</option></select></div>
+  <div class="field"><label>Planta</label><select data-dim="planta"><option value="">Todas</option></select></div>
+  <button class="reset-btn" data-reset>↺ Limpiar</button>
+  <div class="count">Mostrando <b id="ptCount">—</b> certificados · <b id="ptCountSp">—</b> subproyectos</div>
+</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="card-head"><div><h3>DETALLE DE CANTIDADES Y PORCENTAJES DE AVANCE — por Subproyecto</h3>
+    <div class="desc">Fuente: <b>1. Planned Task</b> · cols G + AO..BC</div></div>
+    <span class="tag" id="ptChip">—</span></div>
+    <div class="tabwrap"><table id="tblPtSub">
+      <thead><tr>
+        <th>Subproyecto</th>
+        <th class="num">REQ</th>
+        <th class="num">EJE</th>
+        <th class="num">Por Ejec</th>
+        <th class="num">Atrasos</th>
+        <th class="num">Prog Hoy</th>
+        <th class="num">Ejec Hoy</th>
+        <th class="num">Prog al Corte</th>
+        <th class="num">Ejec al Corte</th>
+        <th class="num">% Avance</th>
+        <th>Avance</th>
+      </tr></thead>
+      <tbody></tbody><tfoot></tfoot>
+    </table></div>
+    <div class="fuente">REQ = Total requerido · EJE = Ejecutado acumulado · POR EJEC = Pendiente · PROG/EJEC AL CORTE = compromiso vs ejecutado a la fecha de corte</div>
+  </div>
+
+  <div class="card span-7">
+    <div class="card-head"><div><h3>% Avance global por Subproyecto</h3>
+    <div class="desc">Barras ordenadas — incluye comparativo EJE vs EJEC AL CORTE</div></div></div>
+    <div id="chPtAvance"></div>
+  </div>
+
+  <div class="card span-5">
+    <div class="card-head"><div><h3>Detalle por Disciplina</h3>
+    <div class="desc">Suma de los 8 subproyectos · top disciplinas</div></div></div>
+    <div class="tabwrap"><table id="tblPtDisc">
+      <thead><tr>
+        <th>Disciplina</th>
+        <th class="num">REQ</th>
+        <th class="num">EJE</th>
+        <th class="num">Pend</th>
+        <th class="num">% Av</th>
+      </tr></thead><tbody></tbody>
+    </table></div>
+  </div>
+
+  <div class="card span-12">
+    <div class="card-head"><div><h3>Línea de Tiempo — Programado vs Ejecutado (semanal)</h3>
+    <div class="desc">Comparativo por <b>AÑO/SEM</b> (cuenta de tareas)</div></div></div>
+    <div id="chPtTime"></div>
+  </div>
+</div>
+
+<!-- ============ 2. PUNCHLIST ============ -->
+<div class="section-title">▤ 2 · PunchList — Pendientes y Cierre</div>
+<div class="filter-bar" id="plFilters" data-scope="pl">
+  <div class="field"><label>Nombre del Proyecto</label><select data-dim="nombreProyecto"><option value="">Todos</option></select></div>
+  <div class="field"><label>Descripción del Sistema</label><select data-dim="sistema"><option value="">Todos</option></select></div>
+  <div class="field"><label>Descripción Subsistema</label><select data-dim="subsistema"><option value="">Todos</option></select></div>
+  <div class="field"><label>Planta</label><select data-dim="planta"><option value="">Todas</option></select></div>
+  <button class="reset-btn" data-reset>↺ Limpiar</button>
+  <div class="count">Mostrando <b id="plCount">—</b> pendientes · <b id="plCountSp">—</b> subproyectos</div>
+</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="card-head"><div><h3>Resumen Punchlist por Subproyecto</h3>
+    <div class="desc">Fuente: <b>2. PunchList</b> · cols G + AI..AV</div></div>
+    <span class="tag" id="plChip">—</span></div>
+    <div class="tabwrap"><table id="tblPlSub">
+      <thead><tr>
+        <th>Subproyecto</th>
+        <th class="num">Total</th>
+        <th class="num">Cerrados</th>
+        <th class="num">Abiertos</th>
+        <th class="num">Tipo A</th>
+        <th class="num">Tipo B</th>
+        <th class="num">Atrasos</th>
+        <th class="num">Cerrados Hoy A</th>
+        <th class="num">Cerrados Hoy B</th>
+        <th class="num">% Cierre</th>
+        <th>Avance</th>
+      </tr></thead><tbody></tbody><tfoot></tfoot>
+    </table></div>
+    <div class="fuente">Total = Abiertos + Cerrados · Tipo A = Crítico · Tipo B = No crítico</div>
+  </div>
+
+  <div class="card span-12">
+    <div class="card-head"><div><h3>% Cierre global por Subproyecto</h3>
+    <div class="desc">Barras ordenadas · hover muestra detalle completo · reacciona a los filtros</div></div></div>
+    <div id="chPlAvance"></div>
+  </div>
+
+  <div class="card span-6">
+    <div class="card-head"><div><h3>Categoría A vs B</h3>
+    <div class="desc">Abiertos vs Cerrados acumulados</div></div></div>
+    <div id="chPlCat"></div>
+  </div>
+
+  <div class="card span-6">
+    <div class="card-head"><div><h3>Punchlist por Disciplina</h3>
+    <div class="desc">Top disciplinas dentro de los 8 subproyectos</div></div></div>
+    <div class="tabwrap" style="max-height:280px;overflow:auto"><table id="tblPlDisc">
+      <thead><tr><th>Disciplina</th><th class="num">Total</th><th class="num">Cerrados</th><th class="num">Tipo A</th><th class="num">% Cierre</th></tr></thead><tbody></tbody>
+    </table></div>
+  </div>
+
+  <div class="card span-12">
+    <div class="card-head"><div><h3>Línea de Tiempo — Creados vs Cerrados (mensual)</h3>
+    <div class="desc">Comparativo por <b>FECHA EMISIÓN vs FECHA CIERRE</b></div></div></div>
+    <div id="chPlTime"></div>
+  </div>
+</div>
+
+<!-- ============ 3. REPORTE AC1-HC1 ============ -->
+<div class="section-title">⌬ 3 · Reporte AC1-HC1 ECP — Certificados de Aceptación</div>
+<div class="filter-bar" id="rcFilters" data-scope="rc">
+  <div class="field"><label>Nombre del Proyecto</label><select data-dim="nombreProyecto"><option value="">Todos</option></select></div>
+  <div class="field"><label>Descripción del Sistema</label><select data-dim="sistema"><option value="">Todos</option></select></div>
+  <div class="field"><label>Descripción Subsistema</label><select data-dim="subsistema"><option value="">Todos</option></select></div>
+  <div class="field"><label>Planta</label><select data-dim="planta"><option value="">Todas</option></select></div>
+  <button class="reset-btn" data-reset>↺ Limpiar</button>
+  <div class="count">Mostrando <b id="rcCount">—</b> certificados · <b id="rcCountSp">—</b> subproyectos</div>
+</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="card-head"><div><h3>Detalle de Certificados por Subproyecto</h3>
+    <div class="desc">Fuente: <b>3. Reporte AC1-HC1 ECP</b> · cols G + AD..AN</div></div>
+    <span class="tag" id="rcChip">—</span></div>
+    <div class="tabwrap"><table id="tblRcSub">
+      <thead><tr>
+        <th>Subproyecto</th>
+        <th class="num">Registros</th>
+        <th class="num">Ejecutados</th>
+        <th class="num">Por Ejecutar</th>
+        <th class="num">Aceptado</th>
+        <th class="num">Atrasado</th>
+        <th class="num">Entregado</th>
+        <th class="num">Enviado</th>
+        <th class="num">AC1's</th>
+        <th class="num">HC1's</th>
+        <th class="num">% Avance</th>
+        <th>Avance</th>
+      </tr></thead><tbody></tbody><tfoot></tfoot>
+    </table></div>
+    <div class="fuente">AC1 = Acceptance Certificate (mecánico) · HC1 = Hand-over Certificate (operacional)</div>
+  </div>
+
+  <div class="card span-12">
+    <div class="card-head"><div><h3>% Avance global por Subproyecto</h3>
+    <div class="desc">Barras ordenadas · hover muestra detalle completo · reacciona a los filtros</div></div></div>
+    <div id="chRcAvance"></div>
+  </div>
+
+  <div class="card span-6">
+    <div class="card-head"><div><h3>AC1 vs HC1 por Subproyecto</h3>
+    <div class="desc">Distribución de certificados emitidos</div></div></div>
+    <div id="chRcCert"></div>
+  </div>
+
+  <div class="card span-6">
+    <div class="card-head"><div><h3>Estados de Certificados</h3>
+    <div class="desc">Distribución global (los 8 subproyectos)</div></div></div>
+    <div id="chRcEst"></div>
+  </div>
+
+  <div class="card span-12">
+    <div class="card-head"><div><h3>Línea de Tiempo — Programado vs Ejecutado (mensual)</h3>
+    <div class="desc">Comparativo por <b>FECHA PROGRAMADA vs FECHA DE EJECUCIÓN</b></div></div></div>
+    <div id="chRcTime"></div>
+  </div>
+</div>
+
+<!-- ============ COMPARATIVO TRANSVERSAL ============ -->
+<div class="section-title">◐ Comparativo Transversal · Avance por Subproyecto en cada Fuente</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="card-head"><div><h3>% Avance por Subproyecto · Planned Task vs PunchList vs AC1-HC1</h3>
+    <div class="desc">Permite identificar dónde un subproyecto va mejor o peor en cada dimensión</div></div></div>
+    <div id="chComparativo"></div>
+  </div>
+</div>
+
+<footer style="text-align:center;color:var(--muted);font-size:11.5px;margin-top:30px;padding-top:18px;border-top:1px solid var(--border)">
+  <b>APPLUS+ Colombia</b> · Aseguramiento Técnico Integral · Reporte de Subproyectos · Generado automáticamente
+</footer>
+</div>
+
+<!-- ===== Modal emergente (clic en cualquier KPI) ===== -->
+<div class="modal-back" id="modalBack"></div>
+<div class="modal" id="modal">
+  <div class="modal-head">
+    <div><h2 id="modalTitle">Detalle</h2><div class="sub" id="modalSub">—</div></div>
+    <button class="modal-close" id="modalClose" title="Cerrar (Esc)">✕</button>
+  </div>
+  <div class="modal-body" id="modalBody"></div>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const COLORS = {accent:'#46d3ff',accent2:'#a78bfa',good:'#27d29c',warn:'#f7b955',bad:'#ff6b6b'};
+const APEX_BASE = {
+  chart:{background:'transparent',toolbar:{show:false},fontFamily:'Inter,sans-serif',foreColor:'#a8b6d4',animations:{enabled:true,speed:300}},
+  theme:{mode:'dark'},
+  grid:{borderColor:'rgba(255,255,255,.05)'},
+  tooltip:{theme:'dark'},
+  legend:{labels:{colors:'#a8b6d4'},fontSize:'12px',fontWeight:600},
+};
+
+const fmtN = n => (n==null||isNaN(n))?'—':new Intl.NumberFormat('es-CO',{maximumFractionDigits:0}).format(n);
+const fmtPct = n => (n==null||isNaN(n))?'—':n.toFixed(2)+'%';
+const clsPct = p => p>=90?'good':p>=70?'warn':'bad';
+
+/* ============ HEADER ============ */
+document.getElementById('hdrSub').textContent = DATA.meta.subtitulo;
+document.getElementById('cutDate').textContent = 'Corte: ' + DATA.meta.corte;
+document.getElementById('chipList').innerHTML = DATA.meta.subproyectos.map(s=>`<span class="chip">${s}</span>`).join('');
+
+/* ============ KPIs ============ */
+const PT = DATA.plannedTask, PL = DATA.punchList, RC = DATA.reporteAC1HC1;
+const kpiHTML = [
+  {lbl:'Planned Task · % Avance', val:fmtPct(PT.pctAvance), sub:`${fmtN(PT.totales.REQ||0)} REQ · ${fmtN(PT.totales.EJE||0)} EJE`, cls:clsPct(PT.pctAvance), ico:'▰'},
+  {lbl:'PunchList · % Cierre',    val:fmtPct(PL.pctCierre), sub:`${fmtN((PL.totales['TOTAL PEND ABIERTOS']||0)+(PL.totales['TOTAL PEND CERRADOS']||0))} ítems · ${fmtN(PL.totales['TOTAL PEND ABIERTOS']||0)} abiertos`, cls:clsPct(PL.pctCierre), ico:'▤'},
+  {lbl:'AC1-HC1 · % Avance',      val:fmtPct(RC.pctAvance), sub:`${fmtN(RC.totales.REGISTROS||0)} certs · ${fmtN(RC.totales.EJE||0)} ejec`, cls:clsPct(RC.pctAvance), ico:'⌬'},
+  {lbl:'Subproyectos',            val:DATA.meta.subproyectos.length, sub:'objetivos del informe', cls:'', ico:'◆'},
+].map(k=>`<div class="kpi ${k.cls}"><span class="ico">${k.ico}</span><div class="lbl">${k.lbl}</div><div class="val">${k.val}</div><div class="sub">${k.sub}</div></div>`).join('');
+document.getElementById('kpiBar').innerHTML = kpiHTML;
+
+/* ============ MODAL: detalle al tocar cualquier KPI ============ */
+const modal = document.getElementById('modal');
+const modalBack = document.getElementById('modalBack');
+function openModal(){ modal.classList.add('open'); modalBack.classList.add('open'); }
+function closeModal(){ modal.classList.remove('open'); modalBack.classList.remove('open'); }
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modalBack.addEventListener('click', closeModal);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function pillCls(p){return p>=90?'good':p>=70?'warn':'bad'}
+
+function showKpiDetail(idx){
+  const titles = ['Planned Task · % Avance', 'PunchList · % Cierre', 'AC1-HC1 · % Avance', 'Subproyectos'];
+  const subs = ['REQ vs EJE por subproyecto', 'Pendientes abiertos vs cerrados por subproyecto', 'Certificados ejecutados vs por ejecutar', 'Cobertura por las 3 fuentes'];
+  document.getElementById('modalTitle').textContent = titles[idx];
+  document.getElementById('modalSub').textContent = subs[idx];
+  const body = document.getElementById('modalBody');
+  let html = '';
+
+  if(idx===0){ // Planned Task
+    html += `<div class="modal-kpi"><div class="big">${fmtPct(PT.pctAvance)}</div><div class="l">% AVANCE GLOBAL · ${fmtN(PT.totales.REQ||0)} REQ · ${fmtN(PT.totales.EJE||0)} EJE · ${fmtN(PT.totales['POR EJEC']||0)} POR EJEC</div></div>`;
+    html += `<div class="modal-section"><h4>Por Subproyecto</h4><table><thead><tr><th>Subproyecto</th><th class="num">REQ</th><th class="num">EJE</th><th class="num">Por Ejec</th><th class="num">% Avance</th></tr></thead><tbody>`;
+    PT.porSubproyecto.forEach(r=>{const p=r.PctAvance||0;html += `<tr><td><b>${escHtml(r.SUBPROYECTO)}</b></td><td class="num">${fmtN(r.REQ)}</td><td class="num">${fmtN(r.EJE)}</td><td class="num">${fmtN(r['POR EJEC'])}</td><td class="num"><span class="pill ${pillCls(p)}">${fmtPct(p)}</span></td></tr>`;});
+    html += `</tbody></table></div>`;
+    html += `<div class="modal-section"><h4>Por Disciplina</h4><table><thead><tr><th>Disciplina</th><th class="num">REQ</th><th class="num">EJE</th><th class="num">% Avance</th></tr></thead><tbody>`;
+    (PT.porDisciplina||[]).forEach(d=>{const p=d.PctAvance||0;html += `<tr><td><b>${escHtml(d.DISCIPLINA)}</b></td><td class="num">${fmtN(d.REQ)}</td><td class="num">${fmtN(d.EJE)}</td><td class="num"><span class="pill ${pillCls(p)}">${fmtPct(p)}</span></td></tr>`;});
+    html += `</tbody></table></div>`;
+  }
+  else if(idx===1){ // PunchList
+    const abi = PL.totales['TOTAL PEND ABIERTOS']||0, cer = PL.totales['TOTAL PEND CERRADOS']||0;
+    html += `<div class="modal-kpi"><div class="big">${fmtPct(PL.pctCierre)}</div><div class="l">% CIERRE · ${fmtN(abi+cer)} ítems totales · ${fmtN(abi)} abiertos · ${fmtN(cer)} cerrados</div></div>`;
+    const cat = PL.categorias||{};
+    html += `<div class="modal-section"><h4>Categorías A / B</h4><table><thead><tr><th>Categoría</th><th class="num">Abiertos</th><th class="num">Cerrados</th><th class="num">Total</th></tr></thead><tbody>`;
+    html += `<tr><td><b>Tipo A (crítico)</b></td><td class="num">${fmtN(cat.abiertoA)}</td><td class="num">${fmtN(cat.cerradoA)}</td><td class="num">${fmtN((cat.abiertoA||0)+(cat.cerradoA||0))}</td></tr>`;
+    html += `<tr><td><b>Tipo B (no crítico)</b></td><td class="num">${fmtN(cat.abiertoB)}</td><td class="num">${fmtN(cat.cerradoB)}</td><td class="num">${fmtN((cat.abiertoB||0)+(cat.cerradoB||0))}</td></tr>`;
+    html += `</tbody></table></div>`;
+    html += `<div class="modal-section"><h4>Por Subproyecto</h4><table><thead><tr><th>Subproyecto</th><th class="num">Total</th><th class="num">Abiertos</th><th class="num">Cerrados</th><th class="num">% Cierre</th></tr></thead><tbody>`;
+    PL.porSubproyecto.forEach(r=>{const p=r.PctCierre||0;html += `<tr><td><b>${escHtml(r.SUBPROYECTO)}</b></td><td class="num">${fmtN(r.Total)}</td><td class="num">${fmtN(r['TOTAL PEND ABIERTOS'])}</td><td class="num">${fmtN(r['TOTAL PEND CERRADOS'])}</td><td class="num"><span class="pill ${pillCls(p)}">${fmtPct(p)}</span></td></tr>`;});
+    html += `</tbody></table></div>`;
+  }
+  else if(idx===2){ // AC1-HC1
+    html += `<div class="modal-kpi"><div class="big">${fmtPct(RC.pctAvance)}</div><div class="l">% AVANCE · ${fmtN(RC.totales.REGISTROS||0)} registros · ${fmtN(RC.totales.EJE||0)} ejecutados · ${fmtN(RC.totales['POR EJECUTAR']||0)} por ejecutar</div></div>`;
+    html += `<div class="modal-section"><h4>Por Subproyecto</h4><table><thead><tr><th>Subproyecto</th><th class="num">Registros</th><th class="num">Ejec.</th><th class="num">AC1's</th><th class="num">HC1's</th><th class="num">% Avance</th></tr></thead><tbody>`;
+    RC.porSubproyecto.forEach(r=>{const p=r.PctAvance||0;html += `<tr><td><b>${escHtml(r.SUBPROYECTO)}</b></td><td class="num">${fmtN(r.REGISTROS)}</td><td class="num">${fmtN(r.EJE)}</td><td class="num">${fmtN(r["REGISTROS\n AC1'S"])}</td><td class="num">${fmtN(r["REGISTROS\nHC1'S"])}</td><td class="num"><span class="pill ${pillCls(p)}">${fmtPct(p)}</span></td></tr>`;});
+    html += `</tbody></table></div>`;
+    if((RC.estados||[]).length){
+      html += `<div class="modal-section"><h4>Estados de Certificados</h4><table><thead><tr><th>Estado</th><th class="num">Total</th></tr></thead><tbody>`;
+      RC.estados.forEach(e=>{html += `<tr><td><b>${escHtml(e.estado)}</b></td><td class="num">${fmtN(e.total)}</td></tr>`;});
+      html += `</tbody></table></div>`;
+    }
+  }
+  else if(idx===3){ // Subproyectos cobertura
+    html += `<div class="modal-kpi"><div class="big">${DATA.meta.subproyectos.length}</div><div class="l">SUBPROYECTOS · vistos en las 3 fuentes (Planned Task, PunchList, AC1-HC1)</div></div>`;
+    html += `<div class="modal-section"><h4>Avance por subproyecto en cada fuente</h4><table><thead><tr><th>Subproyecto</th><th class="num">PT %</th><th class="num">PL %</th><th class="num">AC1-HC1 %</th></tr></thead><tbody>`;
+    const ptM={},plM={},rcM={};
+    PT.porSubproyecto.forEach(r=>ptM[r.SUBPROYECTO]=r.PctAvance||0);
+    PL.porSubproyecto.forEach(r=>plM[r.SUBPROYECTO]=r.PctCierre||0);
+    RC.porSubproyecto.forEach(r=>rcM[r.SUBPROYECTO]=r.PctAvance||0);
+    DATA.meta.subproyectos.forEach(sp=>{
+      const a=ptM[sp]||0,b=plM[sp]||0,c=rcM[sp]||0;
+      html += `<tr><td><b>${escHtml(sp)}</b></td><td class="num"><span class="pill ${pillCls(a)}">${fmtPct(a)}</span></td><td class="num"><span class="pill ${pillCls(b)}">${fmtPct(b)}</span></td><td class="num"><span class="pill ${pillCls(c)}">${fmtPct(c)}</span></td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  body.innerHTML = html;
+  openModal();
+}
+// Bind clicks en cada tarjeta KPI
+document.querySelectorAll('#kpiBar .kpi').forEach((el,i)=>{
+  el.addEventListener('click', ()=>showKpiDetail(i));
+});
+
+/* ============ 1. PLANNED TASK ============ */
+document.getElementById('ptChip').textContent = `${fmtN(PT.filas)} filas · ${fmtPct(PT.pctAvance)}`;
+
+// Tabla por subproyecto (cada celda numérica = clic para ver el detalle de los certificados)
+const PT_DRILL = [
+  {key:'REQ', label:'REQ'},
+  {key:'EJE', label:'EJE'},
+  {key:'POR EJEC', label:'Por Ejec'},
+  {key:'ATRASOS', label:'Atrasos'},
+  {key:'PROG HOY', label:'Prog Hoy'},
+  {key:'EJEC HOY', label:'Ejec Hoy'},
+  {key:'PROG AL CORTE', label:'Prog al Corte'},
+  {key:'EJEC AL CORTE', label:'Ejec al Corte'},
+];
+const ptBody = document.querySelector('#tblPtSub tbody');
+const ptT = PT.totales;
+ptBody.innerHTML = PT.porSubproyecto.map(r=>{
+  const pct = r.PctAvance||0, c = clsPct(pct);
+  const cells = PT_DRILL.map(d=>{
+    const v = r[d.key]||0;
+    const extraCls = (d.key==='ATRASOS' && v>0) ? 'b-bad' : '';
+    return `<td class="num drill ${extraCls}" data-sp="${r.SUBPROYECTO}" data-metric="${d.key}" data-label="${d.label}" title="Clic para ver detalle">${fmtN(v)}</td>`;
+  }).join('');
+  return `<tr>
+    <td><b>${r.SUBPROYECTO}</b></td>
+    ${cells}
+    <td class="num"><b class="b-${c}">${fmtPct(pct)}</b></td>
+    <td><div class="bar ${c==='good'?'':c}"><span style="width:${Math.min(pct,100)}%"></span></div></td>
+  </tr>`;
+}).join('');
+
+// Bind click en cada celda numérica del DETALLE DE CANTIDADES Y PORCENTAJES DE AVANCE
+document.querySelectorAll('#tblPtSub td.drill').forEach(td=>{
+  td.addEventListener('click', ()=>{
+    const sp = td.getAttribute('data-sp');
+    const metric = td.getAttribute('data-metric');
+    const label = td.getAttribute('data-label');
+    showPtCertDetail(sp, metric, label);
+  });
+});
+
+function showPtCertDetail(sp, metric, label){
+  const all = (PT.detalle && PT.detalle[sp]) || [];
+  const rows = all.filter(r => (r[metric]||0) > 0);
+  document.getElementById('modalTitle').textContent = `${label} · ${sp}`;
+  document.getElementById('modalSub').textContent = `${rows.length} certificados que componen este número (clic en celda de la tabla Planned Task)`;
+  let html = `<div class="modal-kpi"><div class="big">${fmtN(rows.length)}</div><div class="l">${escHtml(label.toUpperCase())} · SUBPROYECTO ${escHtml(sp)}</div></div>`;
+  if(!rows.length){
+    html += `<div class="modal-section" style="text-align:center;color:var(--text-2);padding:20px">No hay certificados que cumplan este criterio.</div>`;
+    document.getElementById('modalBody').innerHTML = html;
+    openModal(); return;
+  }
+  // resumen por disciplina y certificado
+  const byDisc = {}, byCert = {};
+  rows.forEach(r=>{const d=r.disc||'—', c=r.cert||'—'; byDisc[d]=(byDisc[d]||0)+1; byCert[c]=(byCert[c]||0)+1;});
+  const discList = Object.entries(byDisc).sort((a,b)=>b[1]-a[1]);
+  const certList = Object.entries(byCert).sort((a,b)=>b[1]-a[1]);
+  if(discList.length){
+    html += `<div class="modal-section"><h4>Desglose por disciplina</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    discList.forEach(([d,n])=>{html += `<span class="tag" style="font-size:11px"><b>${escHtml(d)}</b> · ${fmtN(n)}</span>`;});
+    html += `</div></div>`;
+  }
+  if(certList.length){
+    html += `<div class="modal-section"><h4>Tipos de certificado</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    certList.slice(0,30).forEach(([c,n])=>{html += `<span class="tag" style="font-size:11px"><b>${escHtml(c)}</b> · ${fmtN(n)}</span>`;});
+    if(certList.length>30) html += `<span class="tag" style="font-size:11px">… ${certList.length-30} más</span>`;
+    html += `</div></div>`;
+  }
+  // tabla detallada (hasta 500 filas)
+  html += `<div class="modal-section"><h4>Listado detallado ${rows.length>500?`(mostrando 500 de ${fmtN(rows.length)})`:''}</h4>`;
+  html += `<div style="max-height:380px;overflow:auto"><table><thead><tr><th>ID</th><th>Certificado</th><th>Descripción</th><th>Disciplina</th><th>Sistema</th><th>Subsistema</th><th>F. Programada</th><th>F. Ejecutada</th></tr></thead><tbody>`;
+  rows.slice(0,500).forEach(r=>{
+    html += `<tr><td><b style="font-family:'Consolas',monospace;font-size:11px">${escHtml(r.id||'—')}</b></td>
+      <td><b>${escHtml(r.cert||'—')}</b></td>
+      <td style="font-size:11px">${escHtml(r.nom||'').slice(0,55)}</td>
+      <td><span class="tag" style="font-size:10px">${escHtml(r.disc||'—')}</span></td>
+      <td style="font-size:11px">${escHtml(r.sis||'').slice(0,40)}</td>
+      <td style="font-size:11px">${escHtml(r.sub||'').slice(0,40)}</td>
+      <td style="font-size:11px">${r.fp||'—'}</td>
+      <td style="font-size:11px">${r.fe||'—'}</td></tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+  document.getElementById('modalBody').innerHTML = html;
+  openModal();
+}
+const totalPctPt = PT.pctAvance;
+document.querySelector('#tblPtSub tfoot').innerHTML = `<tr>
+  <td>TOTAL (8 subproyectos)</td>
+  <td class="num">${fmtN(ptT.REQ)}</td>
+  <td class="num">${fmtN(ptT.EJE)}</td>
+  <td class="num">${fmtN(ptT['POR EJEC'])}</td>
+  <td class="num">${fmtN(ptT.ATRASOS)}</td>
+  <td class="num">${fmtN(ptT['PROG HOY'])}</td>
+  <td class="num">${fmtN(ptT['EJEC HOY'])}</td>
+  <td class="num">${fmtN(ptT['PROG AL CORTE'])}</td>
+  <td class="num">${fmtN(ptT['EJEC AL CORTE'])}</td>
+  <td class="num"><b>${fmtPct(totalPctPt)}</b></td>
+  <td><div class="bar"><span style="width:${Math.min(totalPctPt,100)}%"></span></div></td>
+</tr>`;
+
+// (Gráfica chPtAvance se construye dinámicamente en renderPT al final del script)
+
+// Tabla disciplina
+const ptDiscBody = document.querySelector('#tblPtDisc tbody');
+ptDiscBody.innerHTML = (PT.porDisciplina||[]).map(r=>{
+  const pct = r.PctAvance||0, c = clsPct(pct);
+  return `<tr>
+    <td><b>${r.DISCIPLINA}</b></td>
+    <td class="num">${fmtN(r.REQ)}</td>
+    <td class="num">${fmtN(r.EJE)}</td>
+    <td class="num">${fmtN(r['POR EJEC'])}</td>
+    <td class="num"><b class="b-${c}">${fmtPct(pct)}</b></td>
+  </tr>`;
+}).join('');
+
+// Timeline PT
+if(PT.timeline && PT.timeline.length){
+  const recent = PT.timeline.slice(-30); // últimas 30 semanas
+  new ApexCharts(document.getElementById('chPtTime'),{
+    ...APEX_BASE,
+    chart:{...APEX_BASE.chart,type:'area',height:320,zoom:{enabled:true,type:'x'}},
+    series:[
+      {name:'Programado', data: recent.map(t=>t.programado)},
+      {name:'Ejecutado',  data: recent.map(t=>t.ejecutado)},
+    ],
+    xaxis:{categories:recent.map(t=>t.semana),labels:{style:{fontSize:'10px'}}},
+    colors:[COLORS.accent2, COLORS.good],
+    fill:{type:'gradient',gradient:{shade:'dark',shadeIntensity:.6,opacityFrom:.5,opacityTo:.05}},
+    stroke:{curve:'smooth',width:2.5},
+    dataLabels:{enabled:false},
+    legend:{...APEX_BASE.legend,position:'top',horizontalAlign:'right'},
+    markers:{size:3},
+  }).render();
+}else{document.getElementById('chPtTime').innerHTML='<div style="padding:40px;color:#6b779b;text-align:center">Sin datos temporales</div>';}
+
+/* ============ 2. PUNCHLIST ============ */
+document.getElementById('plChip').textContent = `${fmtN(PL.filas)} ítems · ${fmtPct(PL.pctCierre)}`;
+
+const PL_DRILL = [
+  {label:'Total', key:'__ALL__'},
+  {label:'Cerrados', key:'TOTAL PEND CERRADOS'},
+  {label:'Abiertos', key:'TOTAL PEND ABIERTOS'},
+  {label:'Tipo A', key:'TOTAL PEND TIPO A'},
+  {label:'Tipo B', key:'TOTALES PEND TIPO B'},
+  {label:'Atrasos', key:'ATRASOS'},
+  {label:'Cerrados Hoy A', key:'CERRADOS HOY\n TIPO A'},
+  {label:'Cerrados Hoy B', key:'CERRADOS HOY\n TIPO B'},
+];
+const plBody = document.querySelector('#tblPlSub tbody');
+const plT = PL.totales;
+plBody.innerHTML = PL.porSubproyecto.map(r=>{
+  const pct = r.PctCierre||0, c = clsPct(pct);
+  const vals = [r.Total, r['TOTAL PEND CERRADOS'], r['TOTAL PEND ABIERTOS'],
+                r['TOTAL PEND TIPO A'], r['TOTALES PEND TIPO B'], r.ATRASOS,
+                r['CERRADOS HOY\n TIPO A'], r['CERRADOS HOY\n TIPO B']];
+  const extraCls = ['','', (r['TOTAL PEND ABIERTOS']||0)>0?'b-warn':'b-good',
+                    '','', (r.ATRASOS||0)>0?'b-bad':'b-good','',''];
+  const cells = PL_DRILL.map((d,i)=>`<td class="num drill ${extraCls[i]}" data-sp="${r.SUBPROYECTO}" data-metric="${d.key}" data-label="${d.label}" title="Clic para ver detalle">${fmtN(vals[i])}</td>`).join('');
+  return `<tr>
+    <td><b>${r.SUBPROYECTO}</b></td>
+    ${cells}
+    <td class="num"><b class="b-${c}">${fmtPct(pct)}</b></td>
+    <td><div class="bar ${c==='good'?'':c}"><span style="width:${Math.min(pct,100)}%"></span></div></td>
+  </tr>`;
+}).join('');
+
+// Bind click en cada celda de PunchList
+document.querySelectorAll('#tblPlSub td.drill').forEach(td=>{
+  td.addEventListener('click', ()=>showPlDetail(td.getAttribute('data-sp'), td.getAttribute('data-metric'), td.getAttribute('data-label')));
+});
+
+function showPlDetail(sp, metric, label){
+  const all = (PL.detalle && PL.detalle[sp]) || [];
+  const rows = metric==='__ALL__' ? all.slice() : all.filter(r => (r[metric]||0) > 0);
+  document.getElementById('modalTitle').textContent = `${label} · ${sp} (PunchList)`;
+  document.getElementById('modalSub').textContent = `${rows.length} pendientes que componen este número`;
+  let html = `<div class="modal-kpi"><div class="big">${fmtN(rows.length)}</div><div class="l">${escHtml(label.toUpperCase())} · SUBPROYECTO ${escHtml(sp)}</div></div>`;
+  if(!rows.length){
+    html += `<div class="modal-section" style="text-align:center;color:var(--text-2);padding:20px">No hay pendientes que cumplan este criterio.</div>`;
+    document.getElementById('modalBody').innerHTML = html; openModal(); return;
+  }
+  const byDisc={}, byCat={}, byEst={};
+  rows.forEach(r=>{const d=r.disc||'—', c=r.cat||'—', e=r.estatus||'—';
+    byDisc[d]=(byDisc[d]||0)+1; byCat[c]=(byCat[c]||0)+1; byEst[e]=(byEst[e]||0)+1;});
+  html += `<div class="modal-section"><h4>Desglose</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+  Object.entries(byCat).sort((a,b)=>b[1]-a[1]).forEach(([k,n])=>{html += `<span class="tag" style="font-size:11px">Cat. <b>${escHtml(k)}</b> · ${fmtN(n)}</span>`;});
+  Object.entries(byDisc).sort((a,b)=>b[1]-a[1]).forEach(([k,n])=>{html += `<span class="tag" style="font-size:11px"><b>${escHtml(k)}</b> · ${fmtN(n)}</span>`;});
+  Object.entries(byEst).sort((a,b)=>b[1]-a[1]).slice(0,8).forEach(([k,n])=>{html += `<span class="tag" style="font-size:11px">${escHtml(k)} · ${fmtN(n)}</span>`;});
+  html += `</div></div>`;
+  html += `<div class="modal-section"><h4>Listado detallado ${rows.length>500?`(mostrando 500 de ${fmtN(rows.length)})`:''}</h4>`;
+  html += `<div style="max-height:380px;overflow:auto"><table><thead><tr><th>ID Pendiente</th><th>ID Cert.</th><th>Descripción</th><th>Disc.</th><th>Cat.</th><th>Contratista</th><th>Estatus</th><th>F. Compromiso</th><th>F. Cierre</th></tr></thead><tbody>`;
+  rows.slice(0,500).forEach(r=>{
+    const catCls = r.cat==='A'?'bad':r.cat==='B'?'warn':'';
+    html += `<tr><td><b style="font-family:'Consolas',monospace;font-size:11px">${escHtml(r.id||'—')}</b></td>
+      <td style="font-size:11px">${escHtml(r.idCert||'—')}</td>
+      <td style="font-size:11px">${escHtml(r.desc||'').slice(0,70)}</td>
+      <td><span class="tag" style="font-size:10px">${escHtml(r.disc||'—')}</span></td>
+      <td><span class="pill ${catCls}">${escHtml(r.cat||'—')}</span></td>
+      <td style="font-size:11px">${escHtml(r.contr||'').slice(0,18)}</td>
+      <td style="font-size:11px">${escHtml(r.estatus||'')}</td>
+      <td style="font-size:11px">${r.fc||'—'}</td>
+      <td style="font-size:11px">${r.fci||'—'}</td></tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+  document.getElementById('modalBody').innerHTML = html; openModal();
+}
+const totalPlT = (plT['TOTAL PEND ABIERTOS']||0)+(plT['TOTAL PEND CERRADOS']||0);
+document.querySelector('#tblPlSub tfoot').innerHTML = `<tr>
+  <td>TOTAL (8 subproyectos)</td>
+  <td class="num">${fmtN(totalPlT)}</td>
+  <td class="num">${fmtN(plT['TOTAL PEND CERRADOS'])}</td>
+  <td class="num">${fmtN(plT['TOTAL PEND ABIERTOS'])}</td>
+  <td class="num">${fmtN(plT['TOTAL PEND TIPO A'])}</td>
+  <td class="num">${fmtN(plT['TOTALES PEND TIPO B'])}</td>
+  <td class="num">${fmtN(plT.ATRASOS)}</td>
+  <td class="num">${fmtN(plT['CERRADOS HOY\n TIPO A'])}</td>
+  <td class="num">${fmtN(plT['CERRADOS HOY\n TIPO B'])}</td>
+  <td class="num"><b>${fmtPct(PL.pctCierre)}</b></td>
+  <td><div class="bar"><span style="width:${Math.min(PL.pctCierre,100)}%"></span></div></td>
+</tr>`;
+
+// Cat A vs B
+const cat = PL.categorias;
+new ApexCharts(document.getElementById('chPlCat'),{
+  ...APEX_BASE,
+  chart:{...APEX_BASE.chart,type:'bar',height:300,stacked:true},
+  series:[
+    {name:'Abiertos', data:[cat.abiertoA||0, cat.abiertoB||0]},
+    {name:'Cerrados', data:[cat.cerradoA||0, cat.cerradoB||0]},
+  ],
+  xaxis:{categories:['TIPO A · Crítico','TIPO B · No crítico']},
+  colors:[COLORS.bad, COLORS.good],
+  plotOptions:{bar:{horizontal:true,borderRadius:4,columnWidth:'40%'}},
+  dataLabels:{enabled:true,style:{fontSize:'11px',fontWeight:700}},
+  legend:{...APEX_BASE.legend,position:'top',horizontalAlign:'right'},
+}).render();
+
+// Disciplina PL
+document.querySelector('#tblPlDisc tbody').innerHTML = (PL.porDisciplina||[]).map(r=>{
+  const pct = r.PctCierre||0, c = clsPct(pct);
+  return `<tr><td><b>${r.DISCIPLINA}</b></td>
+    <td class="num">${fmtN(r.Total)}</td>
+    <td class="num">${fmtN(r['TOTAL PEND CERRADOS'])}</td>
+    <td class="num">${fmtN(r['TOTAL PEND TIPO A'])}</td>
+    <td class="num"><b class="b-${c}">${fmtPct(pct)}</b></td>
+  </tr>`;
+}).join('');
+
+// Timeline PL
+if(PL.timeline && PL.timeline.length){
+  new ApexCharts(document.getElementById('chPlTime'),{
+    ...APEX_BASE,
+    chart:{...APEX_BASE.chart,type:'area',height:320,zoom:{enabled:true,type:'x'}},
+    series:[
+      {name:'Creados', data:PL.timeline.map(t=>t.creados)},
+      {name:'Cerrados', data:PL.timeline.map(t=>t.cerrados)},
+    ],
+    xaxis:{categories:PL.timeline.map(t=>t.mes),labels:{style:{fontSize:'10px'}}},
+    colors:[COLORS.warn, COLORS.good],
+    fill:{type:'gradient',gradient:{shade:'dark',shadeIntensity:.6,opacityFrom:.5,opacityTo:.05}},
+    stroke:{curve:'smooth',width:2.5},
+    dataLabels:{enabled:false},
+    legend:{...APEX_BASE.legend,position:'top',horizontalAlign:'right'},
+    markers:{size:3},
+  }).render();
+}else{document.getElementById('chPlTime').innerHTML='<div style="padding:40px;color:#6b779b;text-align:center">Sin datos temporales</div>';}
+
+/* ============ 3. AC1-HC1 ============ */
+document.getElementById('rcChip').textContent = `${fmtN(RC.filas)} certs · ${fmtPct(RC.pctAvance)}`;
+
+const RC_DRILL = [
+  {label:'Registros', key:'REGISTROS'},
+  {label:'Ejecutados', key:'EJE'},
+  {label:'Por Ejecutar', key:'POR EJECUTAR'},
+  {label:'Aceptado', key:'ACEPTADO'},
+  {label:'Atrasado', key:'ATRASADO'},
+  {label:'Entregado', key:'ENTREGADO'},
+  {label:'Enviado', key:'ENVIADO'},
+  {label:"AC1's", key:"REGISTROS\n AC1'S"},
+  {label:"HC1's", key:"REGISTROS\nHC1'S"},
+];
+const rcBody = document.querySelector('#tblRcSub tbody');
+const rcT = RC.totales;
+rcBody.innerHTML = RC.porSubproyecto.map(r=>{
+  const pct = r.PctAvance||0, c = clsPct(pct);
+  const vals = [r.REGISTROS, r.EJE, r['POR EJECUTAR'], r.ACEPTADO, r.ATRASADO,
+                r.ENTREGADO, r.ENVIADO, r["REGISTROS\n AC1'S"], r["REGISTROS\nHC1'S"]];
+  const extraCls = ['','','','', (r.ATRASADO||0)>0?'b-bad':'b-good','','','',''];
+  const cells = RC_DRILL.map((d,i)=>`<td class="num drill ${extraCls[i]}" data-sp="${r.SUBPROYECTO}" data-metric="${d.key}" data-label="${d.label}" title="Clic para ver detalle">${fmtN(vals[i])}</td>`).join('');
+  return `<tr>
+    <td><b>${r.SUBPROYECTO}</b></td>
+    ${cells}
+    <td class="num"><b class="b-${c}">${fmtPct(pct)}</b></td>
+    <td><div class="bar ${c==='good'?'':c}"><span style="width:${Math.min(pct,100)}%"></span></div></td>
+  </tr>`;
+}).join('');
+
+// Bind click en cada celda de AC1-HC1
+document.querySelectorAll('#tblRcSub td.drill').forEach(td=>{
+  td.addEventListener('click', ()=>showRcDetail(td.getAttribute('data-sp'), td.getAttribute('data-metric'), td.getAttribute('data-label')));
+});
+
+function showRcDetail(sp, metric, label){
+  const all = (RC.detalle && RC.detalle[sp]) || [];
+  const rows = all.filter(r => (r[metric]||0) > 0);
+  document.getElementById('modalTitle').textContent = `${label} · ${sp} (AC1-HC1)`;
+  document.getElementById('modalSub').textContent = `${rows.length} certificados que componen este número`;
+  let html = `<div class="modal-kpi"><div class="big">${fmtN(rows.length)}</div><div class="l">${escHtml(label.toUpperCase())} · SUBPROYECTO ${escHtml(sp)}</div></div>`;
+  if(!rows.length){
+    html += `<div class="modal-section" style="text-align:center;color:var(--text-2);padding:20px">No hay certificados que cumplan este criterio.</div>`;
+    document.getElementById('modalBody').innerHTML = html; openModal(); return;
+  }
+  const byCert={}, byEst={}, byContr={};
+  rows.forEach(r=>{const c=r.cert||'—', e=r.estado||'—', co=r.contr||'—';
+    byCert[c]=(byCert[c]||0)+1; byEst[e]=(byEst[e]||0)+1; byContr[co]=(byContr[co]||0)+1;});
+  html += `<div class="modal-section"><h4>Tipos de certificado</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+  Object.entries(byCert).sort((a,b)=>b[1]-a[1]).slice(0,20).forEach(([k,n])=>{html += `<span class="tag" style="font-size:11px"><b>${escHtml(k)}</b> · ${fmtN(n)}</span>`;});
+  html += `</div></div>`;
+  html += `<div class="modal-section"><h4>Estados</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+  Object.entries(byEst).sort((a,b)=>b[1]-a[1]).forEach(([k,n])=>{html += `<span class="tag" style="font-size:11px">${escHtml(k)} · ${fmtN(n)}</span>`;});
+  html += `</div></div>`;
+  html += `<div class="modal-section"><h4>Listado detallado ${rows.length>500?`(mostrando 500 de ${fmtN(rows.length)})`:''}</h4>`;
+  html += `<div style="max-height:380px;overflow:auto"><table><thead><tr><th>Nº Certificado</th><th>Tipo</th><th>Descripción</th><th>Subsistema</th><th>Estado</th><th>Contratista</th><th>F. Programada</th><th>F. Ejecución</th></tr></thead><tbody>`;
+  rows.slice(0,500).forEach(r=>{
+    html += `<tr><td><b style="font-family:'Consolas',monospace;font-size:11px">${escHtml(r.numCert||'—')}</b></td>
+      <td><b>${escHtml(r.cert||'—')}</b></td>
+      <td style="font-size:11px">${escHtml(r.desc||'').slice(0,55)}</td>
+      <td style="font-size:11px">${escHtml(r.sub||'').slice(0,35)}</td>
+      <td><span class="tag" style="font-size:10px">${escHtml(r.estado||'—')}</span></td>
+      <td style="font-size:11px">${escHtml(r.contr||'').slice(0,16)}</td>
+      <td style="font-size:11px">${r.fp||'—'}</td>
+      <td style="font-size:11px">${r.fe||'—'}</td></tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+  document.getElementById('modalBody').innerHTML = html; openModal();
+}
+document.querySelector('#tblRcSub tfoot').innerHTML = `<tr>
+  <td>TOTAL (8 subproyectos)</td>
+  <td class="num">${fmtN(rcT.REGISTROS)}</td>
+  <td class="num">${fmtN(rcT.EJE)}</td>
+  <td class="num">${fmtN(rcT['POR EJECUTAR'])}</td>
+  <td class="num">${fmtN(rcT.ACEPTADO)}</td>
+  <td class="num">${fmtN(rcT.ATRASADO)}</td>
+  <td class="num">${fmtN(rcT.ENTREGADO)}</td>
+  <td class="num">${fmtN(rcT.ENVIADO)}</td>
+  <td class="num">${fmtN(rcT["REGISTROS\n AC1'S"])}</td>
+  <td class="num">${fmtN(rcT["REGISTROS\nHC1'S"])}</td>
+  <td class="num"><b>${fmtPct(RC.pctAvance)}</b></td>
+  <td><div class="bar"><span style="width:${Math.min(RC.pctAvance,100)}%"></span></div></td>
+</tr>`;
+
+// AC1 vs HC1 stacked
+if(RC.ac1Hc1 && RC.ac1Hc1.length){
+  new ApexCharts(document.getElementById('chRcCert'),{
+    ...APEX_BASE,
+    chart:{...APEX_BASE.chart,type:'bar',height:320,stacked:true},
+    series:[
+      {name:"AC1's", data:RC.ac1Hc1.map(x=>x.ac1)},
+      {name:"HC1's", data:RC.ac1Hc1.map(x=>x.hc1)},
+    ],
+    xaxis:{categories:RC.ac1Hc1.map(x=>x.subproyecto),labels:{style:{fontSize:'10px'}}},
+    colors:[COLORS.accent, COLORS.accent2],
+    plotOptions:{bar:{borderRadius:4,columnWidth:'55%'}},
+    dataLabels:{enabled:true,style:{fontSize:'10px',fontWeight:700,colors:['#fff']}},
+    legend:{...APEX_BASE.legend,position:'top',horizontalAlign:'right'},
+  }).render();
+}
+
+// Estados
+if(RC.estados && RC.estados.length){
+  new ApexCharts(document.getElementById('chRcEst'),{
+    ...APEX_BASE,
+    chart:{...APEX_BASE.chart,type:'donut',height:320},
+    series:RC.estados.map(e=>e.total),
+    labels:RC.estados.map(e=>e.estado),
+    colors:[COLORS.good, COLORS.accent, COLORS.warn, COLORS.accent2, COLORS.bad],
+    legend:{...APEX_BASE.legend,position:'right'},
+    plotOptions:{pie:{donut:{size:'62%',labels:{show:true,total:{show:true,label:'Total',color:'#a8b6d4',formatter:()=>fmtN(RC.estados.reduce((s,x)=>s+x.total,0))}}}}},
+    dataLabels:{enabled:true,style:{fontSize:'11px',fontWeight:700,colors:['#fff']}},
+  }).render();
+}
+
+// Timeline RC
+if(RC.timeline && RC.timeline.length){
+  new ApexCharts(document.getElementById('chRcTime'),{
+    ...APEX_BASE,
+    chart:{...APEX_BASE.chart,type:'area',height:320,zoom:{enabled:true,type:'x'}},
+    series:[
+      {name:'Programado', data:RC.timeline.map(t=>t.programado)},
+      {name:'Ejecutado',  data:RC.timeline.map(t=>t.ejecutado)},
+    ],
+    xaxis:{categories:RC.timeline.map(t=>t.mes),labels:{style:{fontSize:'10px'}}},
+    colors:[COLORS.accent2, COLORS.good],
+    fill:{type:'gradient',gradient:{shade:'dark',shadeIntensity:.6,opacityFrom:.5,opacityTo:.05}},
+    stroke:{curve:'smooth',width:2.5},
+    dataLabels:{enabled:false},
+    legend:{...APEX_BASE.legend,position:'top',horizontalAlign:'right'},
+    markers:{size:3},
+  }).render();
+}else{document.getElementById('chRcTime').innerHTML='<div style="padding:40px;color:#6b779b;text-align:center">Sin datos temporales</div>';}
+
+/* ============ COMPARATIVO ============ */
+const subs = DATA.meta.subproyectos;
+const ptMap = Object.fromEntries(PT.porSubproyecto.map(r=>[r.SUBPROYECTO, r.PctAvance||0]));
+const plMap = Object.fromEntries(PL.porSubproyecto.map(r=>[r.SUBPROYECTO, r.PctCierre||0]));
+const rcMap = Object.fromEntries(RC.porSubproyecto.map(r=>[r.SUBPROYECTO, r.PctAvance||0]));
+new ApexCharts(document.getElementById('chComparativo'),{
+  ...APEX_BASE,
+  chart:{...APEX_BASE.chart,type:'bar',height:380},
+  series:[
+    {name:'Planned Task · % Avance', data: subs.map(s=>+(ptMap[s]||0).toFixed(2))},
+    {name:'PunchList · % Cierre',    data: subs.map(s=>+(plMap[s]||0).toFixed(2))},
+    {name:'AC1-HC1 · % Avance',      data: subs.map(s=>+(rcMap[s]||0).toFixed(2))},
+  ],
+  xaxis:{categories:subs,labels:{style:{fontSize:'11px'}}},
+  yaxis:{max:100,labels:{formatter:v=>v.toFixed(0)+'%'}},
+  colors:[COLORS.accent, COLORS.good, COLORS.accent2],
+  plotOptions:{bar:{columnWidth:'70%',borderRadius:4,borderRadiusApplication:'end'}},
+  dataLabels:{enabled:true,formatter:v=>v.toFixed(0)+'%',style:{fontSize:'9px',colors:['#fff']}},
+  legend:{...APEX_BASE.legend,position:'top',horizontalAlign:'right'},
+  tooltip:{...APEX_BASE.tooltip,shared:true,intersect:false,y:{formatter:v=>v.toFixed(2)+'%'}},
+}).render();
+
+
+/* ====================================================================
+   FILTROS DINÁMICOS + GRÁFICA % AVANCE INTERACTIVA
+   ==================================================================== */
+
+// Aplanar detalle {sp: [rows]} a array con sp incluido
+function flattenDetalle(detalle){
+  const out = [];
+  Object.entries(detalle||{}).forEach(([sp, arr])=>{
+    (arr||[]).forEach(r=>out.push(Object.assign({}, r, {sp})));
+  });
+  return out;
+}
+
+function applyFilterFn(rows, f){
+  return rows.filter(r =>
+    (!f.nombreProyecto || r.np === f.nombreProyecto) &&
+    (!f.sistema        || r.sis === f.sistema) &&
+    (!f.subsistema     || r.sub === f.subsistema) &&
+    (!f.planta         || r.pl === f.planta)
+  );
+}
+
+function aggBySp(rows, metrics){
+  const map = {};
+  rows.forEach(r=>{
+    const sp = r.sp;
+    if(!map[sp]) { map[sp] = { SUBPROYECTO: sp }; metrics.forEach(m=>map[sp][m]=0); }
+    metrics.forEach(m=>{ map[sp][m] += (+r[m]||0); });
+  });
+  return Object.values(map);
+}
+
+function aggByDisciplina(rows, metrics){
+  const map = {};
+  rows.forEach(r=>{
+    const d = r.disc || '—';
+    if(!map[d]) { map[d] = { DISCIPLINA: d }; metrics.forEach(m=>map[d][m]=0); }
+    metrics.forEach(m=>{ map[d][m] += (+r[m]||0); });
+  });
+  return Object.values(map);
+}
+
+function buildFilterSelects(scopeId, dims){
+  const bar = document.getElementById(scopeId);
+  if(!bar || !dims) return;
+  bar.querySelectorAll('select').forEach(sel=>{
+    const dim = sel.getAttribute('data-dim');
+    const opts = (dims[dim] || []).slice();
+    opts.forEach(v=>{
+      const o = document.createElement('option');
+      o.value = v;
+      o.textContent = v.length>72 ? v.slice(0,72)+'…' : v;
+      o.title = v;
+      sel.appendChild(o);
+    });
+  });
+}
+
+// Construye config ApexCharts para barras horizontales % con tooltip rico
+function buildAvanceChartConfig(rows, opts){
+  const sorted = rows.slice().sort((a,b)=> (b[opts.metricPct]||0) - (a[opts.metricPct]||0));
+  const categories = sorted.map(r=>r.SUBPROYECTO);
+  const values = sorted.map(r=>+(r[opts.metricPct]||0).toFixed(2));
+  return {
+    ...APEX_BASE,
+    chart:{
+      ...APEX_BASE.chart, type:'bar',
+      height: Math.max(280, categories.length*44+60),
+      animations:{enabled:true,speed:600,animateGradually:{enabled:true,delay:90},dynamicAnimation:{enabled:true,speed:450}}
+    },
+    series:[{ name: opts.label, data: values }],
+    plotOptions:{
+      bar:{
+        horizontal:true, distributed:true,
+        borderRadius:8, borderRadiusApplication:'end',
+        barHeight:'72%',
+        dataLabels:{position:'top'}
+      }
+    },
+    colors: sorted.map(r=>{
+      const p = r[opts.metricPct]||0;
+      return p>=90 ? '#27d29c' : p>=70 ? '#46d3ff' : p>=40 ? '#f7b955' : '#ff6b6b';
+    }),
+    xaxis:{
+      categories, max:100,
+      labels:{style:{fontSize:'11px',colors:'#a8b6d4'}, formatter:v=>v.toFixed(0)+'%'},
+      axisBorder:{show:false}, axisTicks:{show:false}
+    },
+    yaxis:{ labels:{style:{fontSize:'11.5px',fontWeight:600,colors:'#e8edff'}} },
+    fill:{ type:'gradient', gradient:{ type:'horizontal', shadeIntensity:.35, opacityFrom:.95, opacityTo:.55, gradientToColors:undefined } },
+    dataLabels:{
+      enabled:true, textAnchor:'start', offsetX:8,
+      formatter:(v)=>v.toFixed(1)+'%',
+      style:{fontSize:'11.5px', fontWeight:800, colors:['#0a0f1e']},
+      background:{enabled:true, borderRadius:4, padding:3, borderWidth:0, opacity:.95, dropShadow:{enabled:false}}
+    },
+    grid:{ borderColor:'rgba(255,255,255,.04)', xaxis:{lines:{show:true}}, yaxis:{lines:{show:false}}, padding:{left:8,right:24,top:0,bottom:0} },
+    legend:{show:false},
+    states:{ hover:{filter:{type:'lighten',value:.08}}, active:{filter:{type:'darken',value:.05}} },
+    tooltip:{
+      enabled:true, theme:'dark', shared:false, intersect:false,
+      custom:({dataPointIndex})=>{
+        const r = sorted[dataPointIndex];
+        const extras = (opts.extraRows||[]).map(fn=>fn(r)).filter(Boolean);
+        const extraHTML = extras.map(x=>
+          `<div style="color:#a8b6d4">${escHtml(x.label)}</div>
+           <div style="text-align:right;font-weight:700;color:${x.color||'#e8edff'};font-variant-numeric:tabular-nums">${x.value}</div>`
+        ).join('');
+        const p = +(r[opts.metricPct]||0).toFixed(2);
+        const pillColor = p>=90?'#27d29c':p>=70?'#46d3ff':p>=40?'#f7b955':'#ff6b6b';
+        return `<div style="padding:13px 16px;min-width:260px;background:linear-gradient(160deg,#0c1428,#0a0f1e);border:1px solid ${pillColor};border-radius:10px;box-shadow:0 14px 38px rgba(0,0,0,.55)">
+          <div style="font-weight:800;color:#fff;font-size:13.5px;margin-bottom:10px;letter-spacing:.3px">${escHtml(r.SUBPROYECTO)}</div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px 16px;font-size:11.5px;align-items:baseline">${extraHTML}</div>
+          <div style="margin-top:11px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.14);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#a8b6d4;font-weight:700">${escHtml(opts.label)}</span>
+            <span style="font-size:20px;font-weight:900;color:${pillColor};font-variant-numeric:tabular-nums">${p.toFixed(2)}%</span>
+          </div>
+        </div>`;
+      }
+    }
+  };
+}
+
+// Estado de filtros y referencias a charts dinamicas
+const filterState = { pt:{}, pl:{}, rc:{} };
+const PT_FLAT = flattenDetalle(PT.detalle);
+const PL_FLAT = flattenDetalle(PL.detalle);
+const RC_FLAT = flattenDetalle(RC.detalle);
+let chPtAvanceI=null, chPlAvanceI=null, chRcAvanceI=null;
+
+/* ============ PT recompute + render ============ */
+const PT_METRIC_COLS = ['REQ','EJE','POR EJEC','ATRASOS','PROG HOY','EJEC HOY','PROG AL CORTE','EJEC AL CORTE'];
+function recomputePT(f){
+  const rows = applyFilterFn(PT_FLAT, f);
+  const sub = aggBySp(rows, PT_METRIC_COLS);
+  sub.forEach(s=>{
+    s.PctAvance = s.REQ>0 ? +(s.EJE/s.REQ*100).toFixed(2) : 0;
+    s.PctAvanceCorte = s['PROG AL CORTE']>0 ? +(s['EJEC AL CORTE']/s['PROG AL CORTE']*100).toFixed(2) : 0;
+  });
+  sub.sort((a,b)=>a.SUBPROYECTO.localeCompare(b.SUBPROYECTO));
+  const disc = aggByDisciplina(rows, ['REQ','EJE','POR EJEC','ATRASOS']);
+  disc.forEach(d=>{ d.PctAvance = d.REQ>0 ? +(d.EJE/d.REQ*100).toFixed(2) : 0; });
+  disc.sort((a,b)=>b.REQ-a.REQ);
+  const tot = {};
+  PT_METRIC_COLS.forEach(m=>{ tot[m] = rows.reduce((s,r)=>s+(+r[m]||0),0); });
+  const pct = tot.REQ>0 ? +(tot.EJE/tot.REQ*100).toFixed(2) : 0;
+  return { rows, sub, disc, tot, pct };
+}
+
+function renderPT(st){
+  document.getElementById('ptChip').textContent = `${fmtN(st.rows.length)} filas · ${fmtPct(st.pct)}`;
+  document.getElementById('ptCount').textContent = fmtN(st.rows.length);
+  document.getElementById('ptCountSp').textContent = st.sub.length;
+
+  // tabla por subproyecto
+  const tb = document.querySelector('#tblPtSub tbody');
+  tb.innerHTML = st.sub.map(r=>{
+    const pct = r.PctAvance||0, c = clsPct(pct);
+    const cells = PT_DRILL.map(d=>{
+      const v = r[d.key]||0;
+      const extraCls = (d.key==='ATRASOS' && v>0) ? 'b-bad' : '';
+      return `<td class="num drill ${extraCls}" data-sp="${r.SUBPROYECTO}" data-metric="${d.key}" data-label="${d.label}" title="Clic para ver detalle">${fmtN(v)}</td>`;
+    }).join('');
+    return `<tr><td><b>${r.SUBPROYECTO}</b></td>${cells}
+      <td class="num"><b class="b-${c}">${fmtPct(pct)}</b></td>
+      <td><div class="bar ${c==='good'?'':c}"><span style="width:${Math.min(pct,100)}%"></span></div></td></tr>`;
+  }).join('');
+  // rebind drill clicks
+  document.querySelectorAll('#tblPtSub td.drill').forEach(td=>{
+    td.addEventListener('click', ()=>showPtCertDetail(td.getAttribute('data-sp'), td.getAttribute('data-metric'), td.getAttribute('data-label')));
+  });
+
+  // tfoot
+  document.querySelector('#tblPtSub tfoot').innerHTML = `<tr>
+    <td>TOTAL (${st.sub.length} subproyectos)</td>
+    <td class="num">${fmtN(st.tot.REQ)}</td><td class="num">${fmtN(st.tot.EJE)}</td>
+    <td class="num">${fmtN(st.tot['POR EJEC'])}</td><td class="num">${fmtN(st.tot.ATRASOS)}</td>
+    <td class="num">${fmtN(st.tot['PROG HOY'])}</td><td class="num">${fmtN(st.tot['EJEC HOY'])}</td>
+    <td class="num">${fmtN(st.tot['PROG AL CORTE'])}</td><td class="num">${fmtN(st.tot['EJEC AL CORTE'])}</td>
+    <td class="num"><b>${fmtPct(st.pct)}</b></td>
+    <td><div class="bar"><span style="width:${Math.min(st.pct,100)}%"></span></div></td></tr>`;
+
+  // disciplina
+  document.querySelector('#tblPtDisc tbody').innerHTML = st.disc.map(r=>{
+    const pct = r.PctAvance||0, c = clsPct(pct);
+    return `<tr><td><b>${r.DISCIPLINA}</b></td>
+      <td class="num">${fmtN(r.REQ)}</td><td class="num">${fmtN(r.EJE)}</td>
+      <td class="num">${fmtN(r['POR EJEC'])}</td>
+      <td class="num"><b class="b-${c}">${fmtPct(pct)}</b></td></tr>`;
+  }).join('');
+
+  // gráfica
+  const cfg = buildAvanceChartConfig(st.sub, {
+    metricPct:'PctAvance', label:'% Avance',
+    extraRows:[
+      r=>({label:'REQ',      value: fmtN(r.REQ),       color:'#e8edff'}),
+      r=>({label:'EJE',      value: fmtN(r.EJE),       color:'#27d29c'}),
+      r=>({label:'Por Ejec', value: fmtN(r['POR EJEC']),color:'#f7b955'}),
+      r=>({label:'Atrasos',  value: fmtN(r.ATRASOS||0),color:(r.ATRASOS||0)>0?'#ff6b6b':'#a8b6d4'}),
+      r=>({label:'% al Corte',value: fmtPct(r.PctAvanceCorte),color:'#46d3ff'}),
+    ]
+  });
+  document.getElementById('chPtAvance').innerHTML = '';
+  if(chPtAvanceI){ try{ chPtAvanceI.destroy(); }catch(e){} }
+  chPtAvanceI = new ApexCharts(document.getElementById('chPtAvance'), cfg);
+  chPtAvanceI.render();
+}
+
+/* ============ PL recompute + render ============ */
+const PL_METRIC_COLS = ['REQ','EJE','POR EJE','TOTAL PEND ABIERTOS','TOTAL PEND CERRADOS',
+  'TOTAL PEND TIPO A','TOTALES PEND TIPO B','ATRASOS',
+  'ABIERTO\n TIPO A','ABIERTO\n TIPO B',
+  'CERRADOS HOY\n TIPO A','CERRADOS HOY\n TIPO B',
+  'ACUM CERRADOS\n TIPO A','ACUM CERRADOS\n TIPO B'];
+function recomputePL(f){
+  const rows = applyFilterFn(PL_FLAT, f);
+  const sub = aggBySp(rows, PL_METRIC_COLS);
+  sub.forEach(s=>{
+    const abi = s['TOTAL PEND ABIERTOS']||0, cer = s['TOTAL PEND CERRADOS']||0;
+    s.Total = abi + cer;
+    s.PctCierre = s.Total>0 ? +(cer/s.Total*100).toFixed(2) : 0;
+  });
+  sub.sort((a,b)=>a.SUBPROYECTO.localeCompare(b.SUBPROYECTO));
+  const disc = aggByDisciplina(rows, PL_METRIC_COLS);
+  disc.forEach(d=>{
+    const abi = d['TOTAL PEND ABIERTOS']||0, cer = d['TOTAL PEND CERRADOS']||0;
+    d.Total = abi + cer;
+    d.PctCierre = d.Total>0 ? +(cer/d.Total*100).toFixed(2) : 0;
+  });
+  disc.sort((a,b)=>b.Total-a.Total);
+  const tot = {};
+  PL_METRIC_COLS.forEach(m=>{ tot[m] = rows.reduce((s,r)=>s+(+r[m]||0),0); });
+  const totalAll = (tot['TOTAL PEND ABIERTOS']||0)+(tot['TOTAL PEND CERRADOS']||0);
+  const pct = totalAll>0 ? +(tot['TOTAL PEND CERRADOS']/totalAll*100).toFixed(2) : 0;
+  return { rows, sub, disc, tot, pct };
+}
+function renderPL(st){
+  document.getElementById('plChip').textContent = `${fmtN(st.rows.length)} ítems · ${fmtPct(st.pct)}`;
+  document.getElementById('plCount').textContent = fmtN(st.rows.length);
+  document.getElementById('plCountSp').textContent = st.sub.length;
+  const tb = document.querySelector('#tblPlSub tbody');
+  tb.innerHTML = st.sub.map(r=>{
+    const pct = r.PctCierre||0, c = clsPct(pct);
+    const vals = [r.Total, r['TOTAL PEND CERRADOS'], r['TOTAL PEND ABIERTOS'],
+                  r['TOTAL PEND TIPO A'], r['TOTALES PEND TIPO B'], r.ATRASOS,
+                  r['CERRADOS HOY\n TIPO A'], r['CERRADOS HOY\n TIPO B']];
+    const extraCls = ['','', (r['TOTAL PEND ABIERTOS']||0)>0?'b-warn':'b-good',
+                      '','', (r.ATRASOS||0)>0?'b-bad':'b-good','',''];
+    const cells = PL_DRILL.map((d,i)=>`<td class="num drill ${extraCls[i]}" data-sp="${r.SUBPROYECTO}" data-metric="${d.key}" data-label="${d.label}" title="Clic para ver detalle">${fmtN(vals[i])}</td>`).join('');
+    return `<tr><td><b>${r.SUBPROYECTO}</b></td>${cells}
+      <td class="num"><b class="b-${c}">${fmtPct(pct)}</b></td>
+      <td><div class="bar ${c==='good'?'':c}"><span style="width:${Math.min(pct,100)}%"></span></div></td></tr>`;
+  }).join('');
+  document.querySelectorAll('#tblPlSub td.drill').forEach(td=>{
+    td.addEventListener('click', ()=>showPlDetail(td.getAttribute('data-sp'), td.getAttribute('data-metric'), td.getAttribute('data-label')));
+  });
+  document.querySelector('#tblPlSub tfoot').innerHTML = `<tr>
+    <td>TOTAL (${st.sub.length} subproyectos)</td>
+    <td class="num">${fmtN((st.tot['TOTAL PEND ABIERTOS']||0)+(st.tot['TOTAL PEND CERRADOS']||0))}</td>
+    <td class="num">${fmtN(st.tot['TOTAL PEND CERRADOS'])}</td>
+    <td class="num">${fmtN(st.tot['TOTAL PEND ABIERTOS'])}</td>
+    <td class="num">${fmtN(st.tot['TOTAL PEND TIPO A'])}</td>
+    <td class="num">${fmtN(st.tot['TOTALES PEND TIPO B'])}</td>
+    <td class="num">${fmtN(st.tot.ATRASOS)}</td>
+    <td class="num">${fmtN(st.tot['CERRADOS HOY\n TIPO A'])}</td>
+    <td class="num">${fmtN(st.tot['CERRADOS HOY\n TIPO B'])}</td>
+    <td class="num"><b>${fmtPct(st.pct)}</b></td>
+    <td><div class="bar"><span style="width:${Math.min(st.pct,100)}%"></span></div></td></tr>`;
+  document.querySelector('#tblPlDisc tbody').innerHTML = st.disc.map(r=>{
+    const pct = r.PctCierre||0, c = clsPct(pct);
+    return `<tr><td><b>${r.DISCIPLINA}</b></td>
+      <td class="num">${fmtN(r.Total)}</td>
+      <td class="num">${fmtN(r['TOTAL PEND CERRADOS'])}</td>
+      <td class="num">${fmtN(r['TOTAL PEND TIPO A'])}</td>
+      <td class="num"><b class="b-${c}">${fmtPct(pct)}</b></td></tr>`;
+  }).join('');
+  const cfg = buildAvanceChartConfig(st.sub, {
+    metricPct:'PctCierre', label:'% Cierre',
+    extraRows:[
+      r=>({label:'Total',     value: fmtN(r.Total),                       color:'#e8edff'}),
+      r=>({label:'Cerrados',  value: fmtN(r['TOTAL PEND CERRADOS']),      color:'#27d29c'}),
+      r=>({label:'Abiertos',  value: fmtN(r['TOTAL PEND ABIERTOS']),      color:'#f7b955'}),
+      r=>({label:'Tipo A',    value: fmtN(r['TOTAL PEND TIPO A']),        color:'#ff6b6b'}),
+      r=>({label:'Tipo B',    value: fmtN(r['TOTALES PEND TIPO B']),      color:'#a78bfa'}),
+      r=>({label:'Atrasos',   value: fmtN(r.ATRASOS||0),                  color:(r.ATRASOS||0)>0?'#ff6b6b':'#a8b6d4'}),
+    ]
+  });
+  document.getElementById('chPlAvance').innerHTML = '';
+  if(chPlAvanceI){ try{ chPlAvanceI.destroy(); }catch(e){} }
+  chPlAvanceI = new ApexCharts(document.getElementById('chPlAvance'), cfg);
+  chPlAvanceI.render();
+}
+
+/* ============ RC recompute + render ============ */
+const RC_METRIC_COLS = ['REGISTROS','EJE','POR EJECUTAR','CERT GERENCIAL EJEC HOY',
+  'ACEPTADO','ATRASADO','ENTREGADO',
+  "REGISTROS\n AC1'S","REGISTROS\nHC1'S",'ENVIADO','CREADO'];
+function recomputeRC(f){
+  const rows = applyFilterFn(RC_FLAT, f);
+  const sub = aggBySp(rows, RC_METRIC_COLS);
+  sub.forEach(s=>{ s.PctAvance = s.REGISTROS>0 ? +(s.EJE/s.REGISTROS*100).toFixed(2) : 0; });
+  sub.sort((a,b)=>a.SUBPROYECTO.localeCompare(b.SUBPROYECTO));
+  const tot = {};
+  RC_METRIC_COLS.forEach(m=>{ tot[m] = rows.reduce((s,r)=>s+(+r[m]||0),0); });
+  const pct = tot.REGISTROS>0 ? +(tot.EJE/tot.REGISTROS*100).toFixed(2) : 0;
+  return { rows, sub, tot, pct };
+}
+function renderRC(st){
+  document.getElementById('rcChip').textContent = `${fmtN(st.rows.length)} certs · ${fmtPct(st.pct)}`;
+  document.getElementById('rcCount').textContent = fmtN(st.rows.length);
+  document.getElementById('rcCountSp').textContent = st.sub.length;
+  const tb = document.querySelector('#tblRcSub tbody');
+  tb.innerHTML = st.sub.map(r=>{
+    const pct = r.PctAvance||0, c = clsPct(pct);
+    const vals = [r.REGISTROS, r.EJE, r['POR EJECUTAR'], r.ACEPTADO, r.ATRASADO,
+                  r.ENTREGADO, r.ENVIADO, r["REGISTROS\n AC1'S"], r["REGISTROS\nHC1'S"]];
+    const extraCls = ['','','','', (r.ATRASADO||0)>0?'b-bad':'b-good','','','',''];
+    const cells = RC_DRILL.map((d,i)=>`<td class="num drill ${extraCls[i]}" data-sp="${r.SUBPROYECTO}" data-metric="${d.key}" data-label="${d.label}" title="Clic para ver detalle">${fmtN(vals[i])}</td>`).join('');
+    return `<tr><td><b>${r.SUBPROYECTO}</b></td>${cells}
+      <td class="num"><b class="b-${c}">${fmtPct(pct)}</b></td>
+      <td><div class="bar ${c==='good'?'':c}"><span style="width:${Math.min(pct,100)}%"></span></div></td></tr>`;
+  }).join('');
+  document.querySelectorAll('#tblRcSub td.drill').forEach(td=>{
+    td.addEventListener('click', ()=>showRcDetail(td.getAttribute('data-sp'), td.getAttribute('data-metric'), td.getAttribute('data-label')));
+  });
+  document.querySelector('#tblRcSub tfoot').innerHTML = `<tr>
+    <td>TOTAL (${st.sub.length} subproyectos)</td>
+    <td class="num">${fmtN(st.tot.REGISTROS)}</td><td class="num">${fmtN(st.tot.EJE)}</td>
+    <td class="num">${fmtN(st.tot['POR EJECUTAR'])}</td>
+    <td class="num">${fmtN(st.tot.ACEPTADO)}</td><td class="num">${fmtN(st.tot.ATRASADO)}</td>
+    <td class="num">${fmtN(st.tot.ENTREGADO)}</td><td class="num">${fmtN(st.tot.ENVIADO)}</td>
+    <td class="num">${fmtN(st.tot["REGISTROS\n AC1'S"])}</td>
+    <td class="num">${fmtN(st.tot["REGISTROS\nHC1'S"])}</td>
+    <td class="num"><b>${fmtPct(st.pct)}</b></td>
+    <td><div class="bar"><span style="width:${Math.min(st.pct,100)}%"></span></div></td></tr>`;
+  const cfg = buildAvanceChartConfig(st.sub, {
+    metricPct:'PctAvance', label:'% Avance',
+    extraRows:[
+      r=>({label:'Registros', value: fmtN(r.REGISTROS),                color:'#e8edff'}),
+      r=>({label:'Ejecutados',value: fmtN(r.EJE),                       color:'#27d29c'}),
+      r=>({label:'Por Ejec',  value: fmtN(r['POR EJECUTAR']),          color:'#f7b955'}),
+      r=>({label:'Aceptado',  value: fmtN(r.ACEPTADO),                  color:'#46d3ff'}),
+      r=>({label:'Atrasado',  value: fmtN(r.ATRASADO||0),               color:(r.ATRASADO||0)>0?'#ff6b6b':'#a8b6d4'}),
+      r=>({label:"AC1's",      value: fmtN(r["REGISTROS\n AC1'S"]),     color:'#a78bfa'}),
+      r=>({label:"HC1's",      value: fmtN(r["REGISTROS\nHC1'S"]),      color:'#a78bfa'}),
+    ]
+  });
+  document.getElementById('chRcAvance').innerHTML = '';
+  if(chRcAvanceI){ try{ chRcAvanceI.destroy(); }catch(e){} }
+  chRcAvanceI = new ApexCharts(document.getElementById('chRcAvance'), cfg);
+  chRcAvanceI.render();
+}
+
+/* ============ Wiring filtros ============ */
+function setupFilters(scope, dims, onChange){
+  buildFilterSelects(scope+'Filters', dims);
+  const bar = document.getElementById(scope+'Filters');
+  if(!bar){ console.error('No se encontro bar', scope+'Filters'); return; }
+  console.log('[setupFilters]', scope, 'dims:', dims && Object.keys(dims).map(k=>k+':'+(dims[k]||[]).length).join(', '));
+  bar.querySelectorAll('select').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const dim = sel.getAttribute('data-dim');
+      const val = sel.value;
+      console.log('[filter change]', scope, dim, '=', val);
+      if(val) filterState[scope][dim] = val;
+      else delete filterState[scope][dim];
+      try { onChange(filterState[scope]); }
+      catch(e){ console.error('[filter onChange FAIL]', scope, dim, e); }
+    });
+  });
+  bar.querySelector('[data-reset]').addEventListener('click', ()=>{
+    bar.querySelectorAll('select').forEach(s=>s.value='');
+    filterState[scope] = {};
+    try { onChange({}); }
+    catch(e){ console.error('[filter reset FAIL]', scope, e); }
+  });
+}
+
+setupFilters('pt', PT.filterDims, f=>renderPT(recomputePT(f)));
+setupFilters('pl', PL.filterDims, f=>renderPL(recomputePL(f)));
+setupFilters('rc', RC.filterDims, f=>renderRC(recomputeRC(f)));
+
+// Render inicial dinámico (reemplaza la grafica vieja chPtAvance)
+function safeCall(label, fn){
+  try { fn(); console.log('[OK]', label); }
+  catch(e){ console.error('[FAIL]', label, e); }
+}
+safeCall('renderPT init', ()=>renderPT(recomputePT({})));
+safeCall('renderPL init', ()=>renderPL(recomputePL({})));
+safeCall('renderRC init', ()=>renderRC(recomputeRC({})));
+
+</script>
+</body>
+</html>
