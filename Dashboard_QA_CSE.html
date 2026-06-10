@@ -54,6 +54,15 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:linear-grad
 tbody tr.clickable{cursor:pointer}
 tbody tr.clickable:hover{background:rgba(70,211,255,.08)}
 
+/* Sub-modal (segunda capa) */
+.modal-back.m2{z-index:1000}
+.modal.m2{z-index:1001;width:min(820px,92vw)}
+
+/* Tags clickeables */
+.tag.tag-click{cursor:pointer;background:rgba(70,211,255,.06);transition:.15s}
+.tag.tag-click:hover{background:rgba(70,211,255,.18);border-color:rgba(70,211,255,.55);transform:translateY(-1px)}
+.tag.tag-click:active{transform:translateY(0)}
+
 /* Modal kpi section */
 .modal-kpi{display:flex;align-items:baseline;gap:14px;padding:14px 18px;background:rgba(70,211,255,.06);border:1px solid rgba(70,211,255,.18);border-radius:12px;margin-bottom:16px}
 .modal-kpi .big{font-size:34px;font-weight:800;letter-spacing:-1px;color:var(--accent);font-variant-numeric:tabular-nums}
@@ -323,6 +332,16 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     <button class="modal-close" id="modalClose">✕</button>
   </div>
   <div class="modal-body" id="modalBody"></div>
+</div>
+
+<!-- Sub-modal (segunda capa) -->
+<div class="modal-back m2" id="modalBack2"></div>
+<div class="modal m2" id="modal2">
+  <div class="modal-head">
+    <div><h2 id="modal2Title">Detalle</h2><div class="sub" id="modal2Sub">—</div></div>
+    <button class="modal-close" id="modal2Close">✕</button>
+  </div>
+  <div class="modal-body" id="modal2Body"></div>
 </div>
 
 <script>
@@ -140229,14 +140248,27 @@ document.querySelectorAll('.tab').forEach(btn=>{
   });
 });
 
-// ============ Modal ============
+// ============ Modal principal ============
 const modal = document.getElementById('modal');
 const modalBack = document.getElementById('modalBack');
 function openModal(){ modal.classList.add('open'); modalBack.classList.add('open'); }
 function closeModal(){ modal.classList.remove('open'); modalBack.classList.remove('open'); }
 document.getElementById('modalClose').addEventListener('click', closeModal);
 modalBack.addEventListener('click', closeModal);
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+// ============ Sub-modal (segunda capa) ============
+const modal2 = document.getElementById('modal2');
+const modalBack2 = document.getElementById('modalBack2');
+function openModal2(){ modal2.classList.add('open'); modalBack2.classList.add('open'); }
+function closeModal2(){ modal2.classList.remove('open'); modalBack2.classList.remove('open'); }
+document.getElementById('modal2Close').addEventListener('click', closeModal2);
+modalBack2.addEventListener('click', closeModal2);
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    if(modal2.classList.contains('open')){ closeModal2(); e.stopImmediatePropagation(); return; }
+    closeModal();
+  }
+}, true);
 
 // ============ Filtros ============
 const filterState = { as:{}, nc:{}, do:{}, st:{} };
@@ -140571,14 +140603,16 @@ function showKpiDrill(scope, kpiKey){
     html += `<div class="modal-section" style="text-align:center;color:var(--text-2);padding:20px">No hay ítems que cumplan este criterio en el conjunto filtrado.</div>`;
     document.getElementById('modalBody').innerHTML = html; openModal(); return;
   }
-  // Desgloses (breakdowns)
+  // Desgloses (breakdowns) con pills clickeables
   function pushBreakdown(title, key, max=15){
     const m = {};
     subset.forEach(r => { const k = r[key] || '—'; m[k] = (m[k]||0)+1; });
     const list = Object.entries(m).sort((a,b)=>b[1]-a[1]);
     if(list.length<=1) return;
-    html += `<div class="modal-section"><h4>${title}</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
-    list.slice(0,max).forEach(([k,n])=>{html += `<span class="tag"><b>${escHtml(k)}</b> · ${fmtN(n)}</span>`;});
+    html += `<div class="modal-section"><h4>${title} <span style="color:var(--text-2);font-weight:400;text-transform:none;letter-spacing:0">· clic para ver detalle</span></h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    list.slice(0,max).forEach(([k,n])=>{
+      html += `<span class="tag tag-click" data-pillkey="${escHtml(key)}" data-pillvalue="${escHtml(k)}"><b>${escHtml(k)}</b> · ${fmtN(n)}</span>`;
+    });
     if(list.length>max) html += `<span class="tag">… ${list.length-max} más</span>`;
     html += `</div></div>`;
   }
@@ -140618,19 +140652,94 @@ function showKpiDrill(scope, kpiKey){
   }
   html += `</tr></thead><tbody>`;
   subset.slice(0,300).forEach((r,i)=>{
+    const attrs = `class="clickable" data-pkgrow-idx="${i}" title="Clic para ver detalle"`;
     if(scope==='as'){
-      html += `<tr><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.ubic)}</td><td>${escHtml(r.estado)}</td></tr>`;
+      html += `<tr ${attrs}><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.ubic)}</td><td>${escHtml(r.estado)}</td></tr>`;
     } else if(scope==='nc'){
-      html += `<tr><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.tipo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.estado)}</td></tr>`;
+      html += `<tr ${attrs}><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.tipo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.estado)}</td></tr>`;
     } else if(scope==='do'){
-      html += `<tr><td>${escHtml(r.proy)}</td><td>${escHtml((r.ejec||'').slice(0,28))}</td><td>${escHtml(r.ubic)}</td><td>${escHtml(r.estatus)}</td><td>${(+r.avance||0).toFixed(0)}%</td></tr>`;
+      html += `<tr ${attrs}><td>${escHtml(r.proy)}</td><td>${escHtml((r.ejec||'').slice(0,28))}</td><td>${escHtml(r.ubic)}</td><td>${escHtml(r.estatus)}</td><td>${(+r.avance||0).toFixed(0)}%</td></tr>`;
     } else if(scope==='st'){
-      html += `<tr><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.tipo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.estado)}</td></tr>`;
+      html += `<tr ${attrs}><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.tipo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.estado)}</td></tr>`;
     }
   });
   html += `</tbody></table></div></div>`;
   document.getElementById('modalBody').innerHTML = html; openModal();
 }
+
+// Sub-modal: al clicar una pill del breakdown, abre con las filas que coinciden
+function showPillDrill(pillKey, pillValue){
+  if(!__pkgRows.length || !__pkgSection) return;
+  const scope = __pkgSection;
+  const meta = SECTION_META[scope];
+  const subset = __pkgRows.filter(r => (r[pillKey]||'—') === pillValue);
+  // Etiqueta legible del campo
+  const fieldLabels = {
+    proy:'Proyecto', disc:'Disciplina', ejec:'Ejecutor', ubic:'Ubicación', loc:'Locación/clúster',
+    tipo:'Tipo', estado:'Estado', estatus:'Estatus', hall:'Contiene hallazgo',
+    detect:'Detectado por', asign:'Asignado a', subProy:'Subproyecto', lider:'Líder'
+  };
+  const fieldLabel = fieldLabels[pillKey] || pillKey;
+  document.getElementById('modal2Title').textContent = `${fieldLabel}: ${pillValue}`;
+  document.getElementById('modal2Sub').textContent = `${subset.length} ítems · dentro del paquete actual (${meta.label})`;
+  let html = `<div class="modal-kpi"><div class="big">${fmtN(subset.length)}</div><div class="l">${escHtml(fieldLabel.toUpperCase())} = ${escHtml(pillValue)}</div></div>`;
+  if(!subset.length){
+    html += `<div class="modal-section" style="text-align:center;color:var(--text-2);padding:20px">No hay ítems con ${fieldLabel} = ${escHtml(pillValue)} en este paquete.</div>`;
+    document.getElementById('modal2Body').innerHTML = html; openModal2(); return;
+  }
+  // Breakdowns cruzados (excluyendo el campo ya filtrado)
+  function pushB(t, key, max=15){
+    if(key===pillKey) return;
+    const m = {};
+    subset.forEach(r => { const k = r[key] || '—'; m[k] = (m[k]||0)+1; });
+    const list = Object.entries(m).sort((a,b)=>b[1]-a[1]);
+    if(list.length<=1) return;
+    html += `<div class="modal-section"><h4>${t}</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    list.slice(0,max).forEach(([k,n])=>{html += `<span class="tag"><b>${escHtml(k)}</b> · ${fmtN(n)}</span>`;});
+    if(list.length>max) html += `<span class="tag">… ${list.length-max} más</span>`;
+    html += `</div></div>`;
+  }
+  if(scope==='as'){
+    pushB('Por disciplina','disc'); pushB('Por estado','estado'); pushB('Por ubicación','ubic'); pushB('Top ejecutores','ejec');
+  } else if(scope==='nc'){
+    pushB('Por tipo','tipo'); pushB('Por estado','estado'); pushB('Por disciplina','disc'); pushB('Top ejecutores','ejec');
+  } else if(scope==='do'){
+    pushB('Por estatus','estatus'); pushB('Por proyecto','proy'); pushB('Top ejecutores','ejec'); pushB('Por ubicación','ubic');
+  } else if(scope==='st'){
+    pushB('Por tipo','tipo'); pushB('Por estado','estado'); pushB('Por disciplina','disc'); pushB('Top ejecutores','ejec');
+  }
+  // Tabla detallada
+  html += `<div class="modal-section"><h4>Listado ${subset.length>200?`(mostrando 200 de ${fmtN(subset.length)})`:''} · clic en una fila para ver detalle</h4>`;
+  html += `<div style="max-height:340px;overflow:auto"><table><thead><tr>`;
+  if(scope==='as'){
+    html += `<th>Código</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Ubic.</th><th>Estado</th>`;
+  } else if(scope==='nc'){
+    html += `<th>Código</th><th>Tipo</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Estado</th>`;
+  } else if(scope==='do'){
+    html += `<th>Proyecto</th><th>Ejecutor</th><th>Ubic.</th><th>Estatus</th><th>Avance</th>`;
+  } else if(scope==='st'){
+    html += `<th>Código</th><th>Tipo</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Estado</th>`;
+  }
+  html += `</tr></thead><tbody>`;
+  // Guardamos el subset en __pillRows para que las filas puedan abrirse en modal de detalle
+  __pillRows = subset;
+  subset.slice(0,200).forEach((r,i)=>{
+    const attrs = `class="clickable" data-pillrow-section="${scope}" data-pillrow-idx="${i}" title="Clic para ver detalle"`;
+    if(scope==='as'){
+      html += `<tr ${attrs}><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.ubic)}</td><td>${escHtml(r.estado)}</td></tr>`;
+    } else if(scope==='nc'){
+      html += `<tr ${attrs}><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.tipo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.estado)}</td></tr>`;
+    } else if(scope==='do'){
+      html += `<tr ${attrs}><td>${escHtml(r.proy)}</td><td>${escHtml((r.ejec||'').slice(0,28))}</td><td>${escHtml(r.ubic)}</td><td>${escHtml(r.estatus)}</td><td>${(+r.avance||0).toFixed(0)}%</td></tr>`;
+    } else if(scope==='st'){
+      html += `<tr ${attrs}><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.tipo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.estado)}</td></tr>`;
+    }
+  });
+  html += `</tbody></table></div></div>`;
+  document.getElementById('modal2Body').innerHTML = html; openModal2();
+}
+// Estado para las filas dentro del sub-modal
+let __pillRows = [];
 
 function showRowDetail(scope, row){
   const meta = SECTION_META[scope];
@@ -140648,8 +140757,32 @@ function showRowDetail(scope, row){
   document.getElementById('modalBody').innerHTML = html; openModal();
 }
 
-// Click delegation: KPI cards
+// Click delegation: KPIs, pills, filas
 document.addEventListener('click', (e)=>{
+  // 1) Pill (chip) dentro del modal — abre sub-modal
+  const pill = e.target.closest('.tag-click');
+  if(pill){
+    const k = pill.getAttribute('data-pillkey');
+    const v = pill.getAttribute('data-pillvalue');
+    if(k && v) showPillDrill(k, v);
+    return;
+  }
+  // 2) Filas dentro del sub-modal — abren modal de detalle de la fila
+  const trPill = e.target.closest('tr[data-pillrow-section]');
+  if(trPill){
+    const scope = trPill.getAttribute('data-pillrow-section');
+    const idx = parseInt(trPill.getAttribute('data-pillrow-idx'),10);
+    if(__pillRows[idx]) showRowDetail(scope, __pillRows[idx]);
+    return;
+  }
+  // 2.5) Filas dentro del modal principal (lista del KPI drill)
+  const trPkg = e.target.closest('tr[data-pkgrow-idx]');
+  if(trPkg && __pkgSection){
+    const idx = parseInt(trPkg.getAttribute('data-pkgrow-idx'),10);
+    if(__pkgRows[idx]) showRowDetail(__pkgSection, __pkgRows[idx]);
+    return;
+  }
+  // 3) KPI cards arriba
   const kpi = e.target.closest('.kpi[data-kpi]');
   if(kpi){
     const scope = kpi.getAttribute('data-section');
@@ -140657,17 +140790,13 @@ document.addEventListener('click', (e)=>{
     showKpiDrill(scope, key);
     return;
   }
-  // Filas de tabla
-  const tr = e.target.closest('tbody tr.clickable');
-  if(tr){
+  // 4) Filas en tablas principales (parte baja de cada sección)
+  const tr = e.target.closest('tbody tr.clickable[data-section]');
+  if(tr && !tr.getAttribute('data-pillrow-section')){
     const scope = tr.getAttribute('data-section');
     const idx = parseInt(tr.getAttribute('data-idx'),10);
-    const meta = SECTION_META[scope];
-    if(meta){
-      const rows = getFilteredRowsForSection(scope);
-      const row = rows[idx];
-      if(row) showRowDetail(scope, row);
-    }
+    const rows = getFilteredRowsForSection(scope);
+    if(rows[idx]) showRowDetail(scope, rows[idx]);
   }
 });
 
