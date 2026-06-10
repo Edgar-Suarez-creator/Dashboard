@@ -50,6 +50,42 @@ tr:hover td{background:rgba(255,255,255,.025)}
 .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:10.5px;font-weight:700}
 .empty{padding:30px;text-align:center;color:var(--muted)}
 footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--border);color:var(--muted);font-size:11px;text-align:center}
+
+/* ===== Modales (ventanas emergentes) ===== */
+.modal-back{position:fixed;inset:0;background:rgba(3,5,11,.74);backdrop-filter:blur(6px);z-index:998;opacity:0;pointer-events:none;transition:.22s}
+.modal-back.open{opacity:1;pointer-events:auto}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.92);opacity:0;pointer-events:none;width:min(880px,94vw);max-height:88vh;background:linear-gradient(180deg,#161f38 0%,#0c1428 100%);border:1px solid var(--border);border-radius:18px;z-index:999;transition:.22s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.75)}
+.modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+.modal-head h2{margin:0;font-size:16px;color:var(--text)}
+.modal-head .ms{color:var(--text-2);font-size:11.5px;margin-top:3px}
+.modal-close{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#ff8f8f;width:32px;height:32px;border-radius:9px;cursor:pointer;font-size:15px;font-weight:700}
+.modal-body{padding:18px 22px;overflow-y:auto;flex:1}
+.modal-kpi{display:flex;align-items:baseline;gap:14px;padding:14px 18px;background:rgba(70,211,255,.08);border:1px solid rgba(70,211,255,.2);border-radius:12px;margin-bottom:14px}
+.modal-kpi .big{font-size:30px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.modal-kpi .l{font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:.7px;font-weight:700}
+.modal-section{margin-top:14px}
+.modal-section h4{font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:.9px;font-weight:700;margin:0 0 9px}
+.tag-pill{display:inline-block;padding:3px 9px;border-radius:8px;background:rgba(70,211,255,.06);color:var(--text);font-size:11px;border:1px solid rgba(70,211,255,.18);cursor:pointer;transition:.15s}
+.tag-pill:hover{background:rgba(70,211,255,.2);border-color:rgba(70,211,255,.55);transform:translateY(-1px)}
+.detail-grid{display:grid;grid-template-columns:150px 1fr;gap:7px 14px;font-size:12.5px}
+.detail-grid .dk{color:var(--text-2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:10px;padding-top:3px}
+.detail-grid .dv{color:var(--text);word-break:break-word}
+.detail-grid .dv.muted{color:var(--muted);font-style:italic}
+
+/* Sub-modal */
+.modal-back.m2{z-index:1000}
+.modal.m2{z-index:1001;width:min(760px,92vw)}
+
+/* KPI clickeables */
+.kpi[data-kpi]{cursor:pointer;transition:.18s}
+.kpi[data-kpi]:hover{transform:translateY(-3px);border-color:rgba(70,211,255,.45);box-shadow:0 14px 30px rgba(70,211,255,.12)}
+.kpi[data-kpi]:hover .val{filter:brightness(1.15)}
+.kpi[data-kpi]::after{content:'🔍';position:absolute;top:10px;right:12px;font-size:11px;opacity:0;transition:.2s}
+.kpi[data-kpi]:hover::after{opacity:.85}
+tbody tr.clickable{cursor:pointer}
+tbody tr.clickable:hover td{background:rgba(70,211,255,.08)}
+
 @media(max-width:1200px){.kpis{grid-template-columns:repeat(2,1fr)}[class*=span-]{grid-column:span 12}}
 </style>
 </head>
@@ -101,6 +137,26 @@ footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--border);color
 </div>
 
 <footer id="ftr">APPLUS+ · Dashboard de Preservación</footer>
+</div>
+
+<!-- Modales -->
+<div class="modal-back" id="modalBack"></div>
+<div class="modal" id="modal">
+  <div class="modal-head">
+    <div><h2 id="modalT">Detalle</h2><div class="ms" id="modalS">—</div></div>
+    <button class="modal-close" id="modalX">✕</button>
+  </div>
+  <div class="modal-body" id="modalB"></div>
+</div>
+
+<!-- Sub-modal -->
+<div class="modal-back m2" id="modalBack2"></div>
+<div class="modal m2" id="modal2">
+  <div class="modal-head">
+    <div><h2 id="modalT2">Detalle</h2><div class="ms" id="modalS2">—</div></div>
+    <button class="modal-close" id="modalX2">✕</button>
+  </div>
+  <div class="modal-body" id="modalB2"></div>
 </div>
 
 <script>
@@ -1643,16 +1699,16 @@ function renderKPIs(arr){
   const bombas=arr.filter(e=>e.tipo==='Bombas').length, skids=arr.filter(e=>e.tipo==='Skids').length;
   document.getElementById('hVal').textContent=money(valor);
   const k=[
-    {lbl:'Equipos (filtro)',val:arr.length,sub:`${new Set(arr.map(e=>e.tipo)).size} tipos · ${new Set(arr.map(e=>e.proyecta)).size} proyectos`,cls:'acc'},
-    {lbl:'Valor almacenado',val:money(valor),sub:'exposición financiera',cls:'good'},
-    {lbl:'Días prom. almac.',val:fmtN(prom),sub:`máx ${fmtN(max)} días`,cls:'warn'},
-    {lbl:'Críticos > 1 año',val:c365,sub:`${arr.length?Math.round(c365/arr.length*100):0}% del total`,cls:'orange'},
-    {lbl:'Críticos > 2 años',val:c730,sub:'mayor riesgo preservación',cls:'bad'},
-    {lbl:'Bombas',val:bombas,sub:'equipo rotativo',cls:'acc'},
-    {lbl:'Skids',val:skids,sub:'paquetes/plataformas',cls:'v2'},
-    {lbl:'En bodega / sitio',val:`${arr.filter(e=>/bodega/i.test(e.ubicacion)).length}/${arr.filter(e=>!/bodega/i.test(e.ubicacion)).length}`,sub:'ubicación',cls:'acc'},
+    {key:'todos', lbl:'Equipos (filtro)',val:arr.length,sub:`${new Set(arr.map(e=>e.tipo)).size} tipos · ${new Set(arr.map(e=>e.proyecta)).size} proyectos`,cls:'acc'},
+    {key:'valor', lbl:'Valor almacenado',val:money(valor),sub:'exposición financiera',cls:'good'},
+    {key:'todos', lbl:'Días prom. almac.',val:fmtN(prom),sub:`máx ${fmtN(max)} días`,cls:'warn'},
+    {key:'c365', lbl:'Críticos > 1 año',val:c365,sub:`${arr.length?Math.round(c365/arr.length*100):0}% del total`,cls:'orange'},
+    {key:'c730', lbl:'Críticos > 2 años',val:c730,sub:'mayor riesgo preservación',cls:'bad'},
+    {key:'bombas', lbl:'Bombas',val:bombas,sub:'equipo rotativo',cls:'acc'},
+    {key:'skids', lbl:'Skids',val:skids,sub:'paquetes/plataformas',cls:'v2'},
+    {key:'ubic', lbl:'En bodega / sitio',val:`${arr.filter(e=>/bodega/i.test(e.ubicacion)).length}/${arr.filter(e=>!/bodega/i.test(e.ubicacion)).length}`,sub:'ubicación',cls:'acc'},
   ];
-  document.getElementById('kpiBar').innerHTML=k.map(x=>`<div class="kpi ${x.cls}"><div class="lbl">${x.lbl}</div><div class="val">${x.val}</div><div class="sub">${esc(x.sub)}</div></div>`).join('');
+  document.getElementById('kpiBar').innerHTML=k.map(x=>`<div class="kpi ${x.cls}" data-kpi="${x.key}"><div class="lbl">${x.lbl}</div><div class="val">${x.val}</div><div class="sub">${esc(x.sub)}</div></div>`).join('');
 }
 function renderMatriz(arr){
   const tipos=[...new Set(arr.map(e=>e.tipo))];
@@ -1665,16 +1721,212 @@ function renderAging(arr){
   barV('chAging',items,(it)=>AGING_COLOR[it.label]||C.accent);
 }
 function renderTabla(arr){
-  document.getElementById('tblInfo').textContent=`${arr.length} equipos · valor ${money(arr.reduce((s,e)=>s+e.valorTotal,0))}`;
+  document.getElementById('tblInfo').textContent=`${arr.length} equipos · valor ${money(arr.reduce((s,e)=>s+e.valorTotal,0))} · clic en una fila para ver el detalle completo`;
   const sorted=[...arr].sort((a,b)=>b.dias-a.dias);
-  document.querySelector('#tblEq tbody').innerHTML=sorted.map(e=>{
+  __tblRows = sorted;
+  document.querySelector('#tblEq tbody').innerHTML=sorted.map((e,i)=>{
     const [cls,txt]=riesgo(e.dias);
-    return `<tr><td><b>${esc(e.tag)}</b></td><td>${esc(e.descripcion).slice(0,28)}</td><td>${esc(e.tipo)}</td><td>${esc(e.proyecta)}</td>
+    return `<tr class="clickable" data-row-idx="${i}" title="Clic para ver detalle">
+      <td><b>${esc(e.tag)}</b></td><td>${esc(e.descripcion).slice(0,28)}</td><td>${esc(e.tipo)}</td><td>${esc(e.proyecta)}</td>
       <td>${esc(e.destino).slice(0,22)}</td><td>${esc(e.fabricante).slice(0,24)}</td><td>${esc(e.ubicacion).slice(0,26)}</td>
       <td class="num">${money(e.valorTotal)}</td><td class="num">${fmtN(e.dias)}</td>
       <td><span class="pill" style="background:rgba(255,255,255,.06);color:var(--${cls})">${txt}</span></td></tr>`;
   }).join('');
 }
+
+/* ============ MODALES ============ */
+const modal = document.getElementById('modal'), modalBack = document.getElementById('modalBack');
+const modal2 = document.getElementById('modal2'), modalBack2 = document.getElementById('modalBack2');
+function openModal(){ modal.classList.add('open'); modalBack.classList.add('open'); }
+function closeModal(){ modal.classList.remove('open'); modalBack.classList.remove('open'); }
+function openModal2(){ modal2.classList.add('open'); modalBack2.classList.add('open'); }
+function closeModal2(){ modal2.classList.remove('open'); modalBack2.classList.remove('open'); }
+document.getElementById('modalX').addEventListener('click', closeModal);
+document.getElementById('modalX2').addEventListener('click', closeModal2);
+modalBack.addEventListener('click', closeModal);
+modalBack2.addEventListener('click', closeModal2);
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    if(modal2.classList.contains('open')){ closeModal2(); e.stopImmediatePropagation(); return; }
+    closeModal();
+  }
+}, true);
+
+// Estado del paquete actual abierto en el modal principal
+let __tblRows = [];
+let __pkgRows = [];
+
+// Definición legible de campos para el modal de detalle de equipo
+const EQUIPO_FIELDS = [
+  ['TAG / Serial',  'tag'],
+  ['Descripción',   'descripcion'],
+  ['Tipo de equipo','tipo'],
+  ['Código Proyecta','proyecta'],
+  ['Nombre Proyecto','nombreProy'],
+  ['Destino',       'destino'],
+  ['Fabricante',    'fabricante'],
+  ['Ubicación',     'ubicacion'],
+  ['Denominación',  'denominacion'],
+  ['SAP',           'sap'],
+  ['Cantidad',      'cantidad'],
+  ['Valor unitario','valorUnit'],
+  ['Valor total',   'valorTotal'],
+  ['Fecha ingreso', 'fechaIngreso'],
+  ['Días almacenado','dias'],
+];
+
+const KPI_DRILLS = {
+  'todos':  { title:'Todos los equipos filtrados',  filter: () => true },
+  'valor':  { title:'Equipos por valor (mayor a menor)', filter: () => true, sortBy:'valorTotal' },
+  'c365':   { title:'Equipos críticos · más de 1 año en almacenamiento', filter: e => e.dias > 365 },
+  'c730':   { title:'Equipos críticos · más de 2 años en almacenamiento', filter: e => e.dias > 730 },
+  'bombas': { title:'Equipos tipo Bomba', filter: e => e.tipo === 'Bombas' },
+  'skids':  { title:'Equipos tipo Skid',  filter: e => e.tipo === 'Skids' },
+  'ubic':   { title:'Equipos por ubicación', filter: () => true },
+};
+
+function showKpiDrill(kpiKey){
+  const cfg = KPI_DRILLS[kpiKey]; if(!cfg) return;
+  const arr = filtered().filter(cfg.filter);
+  if(cfg.sortBy) arr.sort((a,b)=> (b[cfg.sortBy]||0)-(a[cfg.sortBy]||0));
+  else arr.sort((a,b)=> b.dias - a.dias);
+  __pkgRows = arr;
+  document.getElementById('modalT').textContent = cfg.title;
+  document.getElementById('modalS').textContent = `${arr.length} equipos · respetando filtros actuales`;
+  const valor = arr.reduce((s,e)=>s+(e.valorTotal||0),0);
+  let html = `<div class="modal-kpi"><div class="big">${fmtN(arr.length)}</div><div class="l">${esc(cfg.title.toUpperCase())} · VALOR ${money(valor)}</div></div>`;
+  if(!arr.length){
+    html += `<div class="modal-section" style="text-align:center;color:var(--muted);padding:24px">No hay equipos que cumplan este criterio.</div>`;
+    document.getElementById('modalB').innerHTML = html; openModal(); return;
+  }
+  // Desgloses clickeables (pills)
+  function pushBreak(title, key, max=12){
+    const m = {};
+    arr.forEach(e => { const k = e[key] || '—'; m[k] = (m[k]||0)+1; });
+    const list = Object.entries(m).sort((a,b)=>b[1]-a[1]);
+    if(list.length<=1) return;
+    html += `<div class="modal-section"><h4>${title} · clic para ver detalle</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    list.slice(0,max).forEach(([k,n])=>{
+      html += `<span class="tag-pill" data-pillkey="${esc(key)}" data-pillvalue="${esc(k)}"><b>${esc(k)}</b> · ${fmtN(n)}</span>`;
+    });
+    if(list.length>max) html += `<span class="tag-pill" style="cursor:default">… ${list.length-max} más</span>`;
+    html += `</div></div>`;
+  }
+  pushBreak('Por tipo','tipo');
+  pushBreak('Por Código Proyecta','proyecta');
+  pushBreak('Por ubicación','ubicacion');
+  pushBreak('Por fabricante','fabricante');
+  // Tabla detallada
+  html += `<div class="modal-section"><h4>Listado · clic en una fila para ver detalle completo</h4>`;
+  html += `<div style="max-height:340px;overflow:auto;border:1px solid var(--border);border-radius:8px"><table><thead><tr><th>TAG</th><th>Descripción</th><th>Tipo</th><th>Proyecta</th><th>Ubicación</th><th class="num">Valor</th><th class="num">Días</th></tr></thead><tbody>`;
+  arr.slice(0,300).forEach((e,i)=>{
+    html += `<tr class="clickable" data-pkg-idx="${i}" title="Clic para ver detalle"><td><b>${esc(e.tag)}</b></td><td>${esc(e.descripcion).slice(0,32)}</td><td>${esc(e.tipo)}</td><td>${esc(e.proyecta)}</td><td>${esc(e.ubicacion).slice(0,26)}</td><td class="num">${money(e.valorTotal)}</td><td class="num">${fmtN(e.dias)}</td></tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+  document.getElementById('modalB').innerHTML = html; openModal();
+}
+
+function showEquipoDetail(eq, useModal2){
+  const titleEl = useModal2 ? 'modalT2' : 'modalT';
+  const subEl   = useModal2 ? 'modalS2' : 'modalS';
+  const bodyEl  = useModal2 ? 'modalB2' : 'modalB';
+  document.getElementById(titleEl).textContent = `Detalle · ${eq.tag || '(sin TAG)'}`;
+  document.getElementById(subEl).textContent = `${eq.tipo} · ${eq.proyecta}`;
+  let html = `<div class="modal-kpi"><div class="big">📦</div><div class="l">${esc((eq.tipo||'').toUpperCase())} · CÓDIGO PROYECTA ${esc(eq.proyecta)}</div></div>`;
+  html += `<div class="modal-section"><div class="detail-grid">`;
+  EQUIPO_FIELDS.forEach(([label,key])=>{
+    let v = eq[key];
+    if(key==='valorUnit' || key==='valorTotal') v = money(v);
+    else if(key==='dias') v = fmtN(v)+' días';
+    else if(key==='cantidad') v = fmtN(v);
+    const display = (v===null||v===undefined||v===''||v==='—') ? `<span class="dv muted">—</span>` : `<span class="dv">${esc(v)}</span>`;
+    html += `<span class="dk">${esc(label)}</span>${display}`;
+  });
+  html += `</div></div>`;
+  // Indicador de riesgo
+  const [cls,txt] = riesgo(eq.dias);
+  const colors = {good:'#27d29c', warn:'#f7b955', orange:'#ff8c42', bad:'#ff6b6b'};
+  html += `<div class="modal-section"><h4>Riesgo de preservación</h4><span class="pill" style="background:rgba(255,255,255,.06);color:${colors[cls]};font-size:13px;padding:4px 12px">${txt} · ${fmtN(eq.dias)} días en almacenamiento</span></div>`;
+  document.getElementById(bodyEl).innerHTML = html;
+  if(useModal2) openModal2(); else openModal();
+}
+
+function showPillDrill(pillKey, pillValue){
+  if(!__pkgRows.length) return;
+  const subset = __pkgRows.filter(e => (e[pillKey]||'—') === pillValue);
+  const labels = {tipo:'Tipo', proyecta:'Código Proyecta', ubicacion:'Ubicación', fabricante:'Fabricante'};
+  const fieldLabel = labels[pillKey] || pillKey;
+  document.getElementById('modalT2').textContent = `${fieldLabel}: ${pillValue}`;
+  document.getElementById('modalS2').textContent = `${subset.length} equipos · dentro del subconjunto actual`;
+  const valor = subset.reduce((s,e)=>s+(e.valorTotal||0),0);
+  let html = `<div class="modal-kpi"><div class="big">${fmtN(subset.length)}</div><div class="l">${esc(fieldLabel.toUpperCase())} = ${esc(pillValue)} · VALOR ${money(valor)}</div></div>`;
+  if(!subset.length){
+    html += `<div class="modal-section" style="text-align:center;color:var(--muted);padding:20px">Sin equipos en este desglose.</div>`;
+    document.getElementById('modalB2').innerHTML = html; openModal2(); return;
+  }
+  // Desgloses cruzados
+  function pushB(title, key, max=10){
+    if(key===pillKey) return;
+    const m = {};
+    subset.forEach(e => { const k = e[key] || '—'; m[k] = (m[k]||0)+1; });
+    const list = Object.entries(m).sort((a,b)=>b[1]-a[1]);
+    if(list.length<=1) return;
+    html += `<div class="modal-section"><h4>${title}</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    list.slice(0,max).forEach(([k,n])=>{ html += `<span class="tag-pill" style="cursor:default"><b>${esc(k)}</b> · ${fmtN(n)}</span>`; });
+    html += `</div></div>`;
+  }
+  pushB('Por tipo','tipo'); pushB('Por proyecta','proyecta'); pushB('Por ubicación','ubicacion'); pushB('Por fabricante','fabricante');
+  // Tabla
+  html += `<div class="modal-section"><h4>Listado · clic para ver detalle de un equipo</h4>`;
+  html += `<div style="max-height:320px;overflow:auto;border:1px solid var(--border);border-radius:8px"><table><thead><tr><th>TAG</th><th>Descripción</th><th>Proyecta</th><th>Ubicación</th><th class="num">Valor</th><th class="num">Días</th></tr></thead><tbody>`;
+  subset.slice(0,200).forEach((e,i)=>{
+    html += `<tr class="clickable" data-sub-idx="${i}"><td><b>${esc(e.tag)}</b></td><td>${esc(e.descripcion).slice(0,32)}</td><td>${esc(e.proyecta)}</td><td>${esc(e.ubicacion).slice(0,24)}</td><td class="num">${money(e.valorTotal)}</td><td class="num">${fmtN(e.dias)}</td></tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+  document.getElementById('modalB2').innerHTML = html; openModal2();
+  __subRows = subset;
+}
+let __subRows = [];
+
+// Click delegation
+document.addEventListener('click', (ev)=>{
+  // 1) Pill clickeable
+  const pill = ev.target.closest('.tag-pill[data-pillkey]');
+  if(pill){
+    showPillDrill(pill.getAttribute('data-pillkey'), pill.getAttribute('data-pillvalue'));
+    return;
+  }
+  // 2) Fila dentro de sub-modal
+  const trSub = ev.target.closest('tr[data-sub-idx]');
+  if(trSub){
+    const idx = parseInt(trSub.getAttribute('data-sub-idx'),10);
+    if(__subRows[idx]){
+      // Cerrar sub-modal y mostrar detalle en modal2? Mejor abrir detalle en sub-modal directamente
+      showEquipoDetail(__subRows[idx], true);
+    }
+    return;
+  }
+  // 3) Fila dentro del modal principal (KPI drill)
+  const trPkg = ev.target.closest('tr[data-pkg-idx]');
+  if(trPkg){
+    const idx = parseInt(trPkg.getAttribute('data-pkg-idx'),10);
+    if(__pkgRows[idx]) showEquipoDetail(__pkgRows[idx], true);
+    return;
+  }
+  // 4) KPI card
+  const kpi = ev.target.closest('.kpi[data-kpi]');
+  if(kpi){
+    showKpiDrill(kpi.getAttribute('data-kpi'));
+    return;
+  }
+  // 5) Fila de la tabla principal
+  const trMain = ev.target.closest('tr.clickable[data-row-idx]');
+  if(trMain){
+    const idx = parseInt(trMain.getAttribute('data-row-idx'),10);
+    if(__tblRows[idx]) showEquipoDetail(__tblRows[idx], false);
+  }
+});
+
 renderAll();
 </script>
 </body>
