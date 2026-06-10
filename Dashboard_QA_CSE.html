@@ -44,6 +44,27 @@ body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:linear-grad
 .kpi .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--text-2);font-weight:700}
 .kpi .val{font-size:26px;font-weight:800;color:var(--text);margin-top:4px;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
 .kpi .sub{font-size:11px;color:var(--muted);margin-top:2px}
+.kpi[data-kpi]{cursor:pointer;transition:.18s}
+.kpi[data-kpi]:hover{transform:translateY(-3px);border-color:rgba(70,211,255,.45);box-shadow:0 14px 34px rgba(70,211,255,.14)}
+.kpi[data-kpi]:hover .val{color:var(--accent)}
+.kpi[data-kpi]::after{content:'🔍';position:absolute;top:10px;right:12px;font-size:11px;opacity:0;transition:.2s}
+.kpi[data-kpi]:hover::after{opacity:.85}
+
+/* Tabla rows clickeables */
+tbody tr.clickable{cursor:pointer}
+tbody tr.clickable:hover{background:rgba(70,211,255,.08)}
+
+/* Modal kpi section */
+.modal-kpi{display:flex;align-items:baseline;gap:14px;padding:14px 18px;background:rgba(70,211,255,.06);border:1px solid rgba(70,211,255,.18);border-radius:12px;margin-bottom:16px}
+.modal-kpi .big{font-size:34px;font-weight:800;letter-spacing:-1px;color:var(--accent);font-variant-numeric:tabular-nums}
+.modal-kpi .l{font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+.modal-section{margin-top:16px}
+.modal-section h4{font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin:0 0 10px}
+.tag{display:inline-block;padding:3px 9px;border-radius:8px;background:rgba(70,211,255,.08);color:var(--text);font-size:11px;border:1px solid rgba(70,211,255,.18)}
+.detail-grid{display:grid;grid-template-columns:140px 1fr;gap:8px 14px;font-size:12.5px}
+.detail-grid .k{color:var(--text-2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:10px;padding-top:3px}
+.detail-grid .v{color:var(--text);word-break:break-word}
+.detail-grid .v.muted{color:var(--muted);font-style:italic}
 
 /* Filter bar */
 .filter-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr)) auto;gap:10px;padding:12px 14px;background:linear-gradient(180deg,rgba(70,211,255,.04),rgba(167,139,250,.02));border:1px solid var(--border);border-radius:12px;margin-bottom:14px;align-items:end}
@@ -140339,14 +140360,316 @@ function renderTimeline(id, data, label1='Creados', label2='Cerrados'){
   charts[id].render();
 }
 
+// ============ Field maps (deben declararse antes de SECTION_META) ============
+const FIELD_MAP_AS_PRE = {proyecto:'proy', disciplina:'disc', ejecutor:'ejec', ubicacion:'ubic'};
+const FIELD_MAP_NC_PRE = {proyecto:'proy', disciplina:'disc', tipo:'tipo', ejecutor:'ejec', ubicacion:'ubic', estado:'estado'};
+const FIELD_MAP_DO_PRE = {proyecto:'proy', aliado:'ejec', ejecutor:'ejec', ubicacion:'ubic', estatus:'estatus'};
+const FIELD_MAP_ST_PRE = {proyecto:'proy', disciplina:'disc', tipo:'tipo', ejecutor:'ejec', localizacion:'loc', estado:'estado'};
+
 // ============ KPI builder ============
-function kpiHTML(items){
-  return items.map(k=>`<div class="kpi ${k.cls||''}">
-    <div class="lbl">${escHtml(k.lbl)}</div>
-    <div class="val">${k.val}</div>
-    <div class="sub">${escHtml(k.sub||'')}</div>
-  </div>`).join('');
+function kpiHTML(items, scope){
+  return items.map(k=>{
+    const dk = k.key ? ` data-kpi="${k.key}" data-section="${scope}"` : '';
+    return `<div class="kpi ${k.cls||''}"${dk}>
+      <div class="lbl">${escHtml(k.lbl)}</div>
+      <div class="val">${k.val}</div>
+      <div class="sub">${escHtml(k.sub||'')}</div>
+    </div>`;
+  }).join('');
 }
+
+// ============ Drill modal builders ============
+// Estado del paquete actualmente abierto (filas + meta) para uso compartido
+let __pkgRows = [];
+let __pkgSection = null;
+
+const SECTION_META = {
+  as: {
+    label: 'Aspectos Relevantes',
+    fields: [
+      ['Código',        'codigo'],
+      ['Proyecto',      'proy'],
+      ['Tipo visita',   'tipo'],
+      ['Disciplina',    'disc'],
+      ['Ejecutor',      'ejec'],
+      ['Ubicación',     'ubic'],
+      ['Locación / clúster', 'loc'],
+      ['Subproyecto',   'subProy'],
+      ['Detectado por', 'detect'],
+      ['Asignado a',    'asign'],
+      ['Líder',         'lider'],
+      ['Contiene hallazgo', 'hall'],
+      ['Estado',        'estado'],
+      ['F. visita',     'fvis'],
+      ['F. compromiso', 'fcom'],
+      ['F. cierre',     'fcie'],
+      ['Días a fecha',  'dias'],
+      ['Duración gestión', 'dur'],
+      ['ODS',           'ods'],
+      ['Aspecto / descripción', 'aspecto'],
+    ],
+    drills: {
+      'totales': r => true,
+      'abiertas': r => (r.estado||'').toUpperCase() === 'ABIERTA',
+      'cerradas': r => (r.estado||'').toUpperCase() === 'CERRADA',
+      'con_hallazgo': r => ['SÍ','SI'].includes((r.hall||'').toUpperCase()),
+      'disciplinas': r => true,
+      'ejecutores': r => true,
+    },
+    drillLabels: {
+      'totales':'Aspectos totales',
+      'abiertas':'Aspectos abiertos',
+      'cerradas':'Aspectos cerrados',
+      'con_hallazgo':'Aspectos con hallazgo',
+      'disciplinas':'Disciplinas distintas',
+      'ejecutores':'Ejecutores distintos',
+    },
+    rowsKey: () => DATA.aspectos.rows,
+    fieldMap: FIELD_MAP_AS_PRE,
+  },
+  nc: {
+    label: 'NCR / OBS / PNC',
+    fields: [
+      ['Código',         'codigo'],
+      ['Tipo',           'tipo'],
+      ['Proyecto',       'proy'],
+      ['Disciplina',     'disc'],
+      ['Ejecutor',       'ejec'],
+      ['Ubicación',      'ubic'],
+      ['Locación/clúster','loc'],
+      ['Detectado por',  'detect'],
+      ['Detectado en',   'detectH'],
+      ['Asignado a',     'asign'],
+      ['Líder',          'lider'],
+      ['Estado',         'estado'],
+      ['F. hallazgo',    'fhall'],
+      ['F. compromiso',  'fcom'],
+      ['F. cierre',      'fcie'],
+      ['Duración gestión','dur'],
+      ['ODS',            'ods'],
+    ],
+    drills: {
+      'totales': () => true,
+      'ncr': r => r.tipo === 'NCR',
+      'obs': r => r.tipo === 'OBS',
+      'pnc': r => r.tipo === 'PNC',
+      'abiertos': r => (r.estado||'').includes('ABIERT'),
+      'cerrados': r => (r.estado||'').includes('CERRAD'),
+    },
+    drillLabels: {
+      'totales':'Hallazgos totales',
+      'ncr':'NCR · No conformidades',
+      'obs':'OBS · Observaciones',
+      'pnc':'PNC · Producto no conforme',
+      'abiertos':'Hallazgos abiertos',
+      'cerrados':'Hallazgos cerrados',
+    },
+    rowsKey: () => DATA.ncr.rows,
+    fieldMap: FIELD_MAP_NC_PRE,
+  },
+  do: {
+    label: 'Dossier',
+    fields: [
+      ['Proyecto',         'proy'],
+      ['Ejecutor / aliado','ejec'],
+      ['Ubicación',        'ubic'],
+      ['Locación/clúster', 'loc'],
+      ['Estatus dossier',  'estatus'],
+      ['Avance %',         'avance'],
+      ['Atraso %',         'atraso'],
+      ['Avance obra %',    'pctObra'],
+      ['Año',              'anio'],
+      ['Requerido',        'req'],
+      ['F. PDT dossier',   'fpdt'],
+      ['1ra fecha revisión','frev1'],
+      ['Última fecha revisión','frevu'],
+      ['F. de aval',       'faval'],
+      ['Terminación contractual', 'termCtr'],
+      ['Estado ODS',       'estOds'],
+      ['Líder',            'lider'],
+      ['ODS',              'ods'],
+      ['Duración gestión', 'dur'],
+    ],
+    drills: {
+      'totales': () => true,
+      'avalados': r => r.estatus === 'AVALADO' || r.estatus === 'FINALIZADO',
+      'criticos': r => r.estatus === 'CRITICO',
+      'en_tiempo': r => r.estatus === 'EN TIEMPO',
+      'moderados': r => r.estatus === 'MODERADO',
+      'avance_prom': () => true,
+    },
+    drillLabels: {
+      'totales':'Dossieres totales',
+      'avalados':'Dossieres avalados o finalizados',
+      'criticos':'Dossieres críticos',
+      'en_tiempo':'Dossieres en tiempo',
+      'moderados':'Dossieres moderados',
+      'avance_prom':'Todos los dossieres (avance promedio)',
+    },
+    rowsKey: () => DATA.dossier.rows,
+    fieldMap: FIELD_MAP_DO_PRE,
+  },
+  st: {
+    label: 'Solicitudes Técnicas',
+    fields: [
+      ['Código',           'codigo'],
+      ['Tipo',             'tipo'],
+      ['Proyecto',         'proy'],
+      ['Disciplina',       'disc'],
+      ['Ejecutor',         'ejec'],
+      ['Localización',     'loc'],
+      ['Estado',           'estado'],
+      ['F. emisión',       'femit'],
+      ['F. cierre',        'fcie'],
+      ['Duración total',   'dur'],
+      ['Días Aut. Técnica','durAT'],
+      ['Días Respuesta',   'durResp'],
+      ['Días Aprobación',  'durAprob'],
+      ['ODS',              'ods'],
+      ['Descripción',      'desc'],
+    ],
+    drills: {
+      'totales': () => true,
+      'abiertas': r => (r.estado||'').toUpperCase() === 'ABIERTA',
+      'cerradas': r => (r.estado||'').toUpperCase() === 'CERRADA',
+      'tq':  r => r.tipo === 'TQ',
+      'ddr_cr': r => r.tipo === 'DDR' || r.tipo === 'CR',
+      'moc': r => r.tipo === 'MoC',
+    },
+    drillLabels: {
+      'totales':'Solicitudes totales',
+      'abiertas':'Solicitudes abiertas',
+      'cerradas':'Solicitudes cerradas',
+      'tq':'Consultas técnicas (TQ)',
+      'ddr_cr':'Desviaciones / Cambios (DDR+CR)',
+      'moc':'Cambios MoC',
+    },
+    rowsKey: () => DATA.soltec.rows,
+    fieldMap: FIELD_MAP_ST_PRE,
+  },
+};
+
+function getFilteredRowsForSection(scope){
+  const meta = SECTION_META[scope];
+  const all = meta.rowsKey();
+  const f = filterState[scope];
+  return applyFilters(all, f, meta.fieldMap);
+}
+
+function showKpiDrill(scope, kpiKey){
+  const meta = SECTION_META[scope];
+  const filterFn = meta.drills[kpiKey] || (()=>true);
+  const all = getFilteredRowsForSection(scope);
+  const subset = all.filter(filterFn);
+  __pkgRows = subset;
+  __pkgSection = scope;
+  const title = meta.drillLabels[kpiKey] || meta.label;
+  document.getElementById('modalTitle').textContent = `${title} — ${meta.label}`;
+  document.getElementById('modalSub').textContent = `${subset.length} ítems · respetando filtros actuales (proyecto, disciplina, etc.)`;
+  let html = `<div class="modal-kpi"><div class="big">${fmtN(subset.length)}</div><div class="l">${escHtml(title.toUpperCase())} · DEL TOTAL ${fmtN(all.length)} TRAS FILTROS</div></div>`;
+  if(!subset.length){
+    html += `<div class="modal-section" style="text-align:center;color:var(--text-2);padding:20px">No hay ítems que cumplan este criterio en el conjunto filtrado.</div>`;
+    document.getElementById('modalBody').innerHTML = html; openModal(); return;
+  }
+  // Desgloses (breakdowns)
+  function pushBreakdown(title, key, max=15){
+    const m = {};
+    subset.forEach(r => { const k = r[key] || '—'; m[k] = (m[k]||0)+1; });
+    const list = Object.entries(m).sort((a,b)=>b[1]-a[1]);
+    if(list.length<=1) return;
+    html += `<div class="modal-section"><h4>${title}</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    list.slice(0,max).forEach(([k,n])=>{html += `<span class="tag"><b>${escHtml(k)}</b> · ${fmtN(n)}</span>`;});
+    if(list.length>max) html += `<span class="tag">… ${list.length-max} más</span>`;
+    html += `</div></div>`;
+  }
+  if(scope==='as'){
+    pushBreakdown('Por disciplina','disc');
+    pushBreakdown('Por ubicación','ubic');
+    pushBreakdown('Por estado','estado');
+    pushBreakdown('Top ejecutores','ejec');
+  } else if(scope==='nc'){
+    pushBreakdown('Por tipo','tipo');
+    pushBreakdown('Por estado','estado');
+    pushBreakdown('Por disciplina','disc');
+    pushBreakdown('Top ejecutores','ejec');
+  } else if(scope==='do'){
+    pushBreakdown('Por estatus','estatus');
+    pushBreakdown('Por proyecto','proy');
+    pushBreakdown('Top ejecutores / aliados','ejec');
+    pushBreakdown('Por ubicación','ubic');
+  } else if(scope==='st'){
+    pushBreakdown('Por tipo','tipo');
+    pushBreakdown('Por estado','estado');
+    pushBreakdown('Por disciplina','disc');
+    pushBreakdown('Top ejecutores','ejec');
+  }
+  // Tabla detallada (hasta 300 filas)
+  html += `<div class="modal-section"><h4>Listado detallado ${subset.length>300?`(mostrando 300 de ${fmtN(subset.length)})`:''}</h4>`;
+  html += `<div style="max-height:340px;overflow:auto"><table><thead><tr>`;
+  // Cabeceras según scope
+  if(scope==='as'){
+    html += `<th>Código</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Ubic.</th><th>Estado</th>`;
+  } else if(scope==='nc'){
+    html += `<th>Código</th><th>Tipo</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Estado</th>`;
+  } else if(scope==='do'){
+    html += `<th>Proyecto</th><th>Ejecutor</th><th>Ubic.</th><th>Estatus</th><th>Avance</th>`;
+  } else if(scope==='st'){
+    html += `<th>Código</th><th>Tipo</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Estado</th>`;
+  }
+  html += `</tr></thead><tbody>`;
+  subset.slice(0,300).forEach((r,i)=>{
+    if(scope==='as'){
+      html += `<tr><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.ubic)}</td><td>${escHtml(r.estado)}</td></tr>`;
+    } else if(scope==='nc'){
+      html += `<tr><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.tipo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.estado)}</td></tr>`;
+    } else if(scope==='do'){
+      html += `<tr><td>${escHtml(r.proy)}</td><td>${escHtml((r.ejec||'').slice(0,28))}</td><td>${escHtml(r.ubic)}</td><td>${escHtml(r.estatus)}</td><td>${(+r.avance||0).toFixed(0)}%</td></tr>`;
+    } else if(scope==='st'){
+      html += `<tr><td style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</td><td>${escHtml(r.tipo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.estado)}</td></tr>`;
+    }
+  });
+  html += `</tbody></table></div></div>`;
+  document.getElementById('modalBody').innerHTML = html; openModal();
+}
+
+function showRowDetail(scope, row){
+  const meta = SECTION_META[scope];
+  const titleField = row.codigo || row.proy || row.ejec || '(sin código)';
+  document.getElementById('modalTitle').textContent = `Detalle · ${titleField}`;
+  document.getElementById('modalSub').textContent = `${meta.label}`;
+  let html = `<div class="modal-kpi"><div class="big">📄</div><div class="l">${escHtml(meta.label.toUpperCase())} · REGISTRO COMPLETO</div></div>`;
+  html += `<div class="modal-section"><div class="detail-grid">`;
+  meta.fields.forEach(([label, key])=>{
+    const v = row[key];
+    const display = (v===null||v===undefined||v==='') ? '<span class="v muted">—</span>' : `<span class="v">${escHtml(v)}</span>`;
+    html += `<span class="k">${escHtml(label)}</span>${display}`;
+  });
+  html += `</div></div>`;
+  document.getElementById('modalBody').innerHTML = html; openModal();
+}
+
+// Click delegation: KPI cards
+document.addEventListener('click', (e)=>{
+  const kpi = e.target.closest('.kpi[data-kpi]');
+  if(kpi){
+    const scope = kpi.getAttribute('data-section');
+    const key = kpi.getAttribute('data-kpi');
+    showKpiDrill(scope, key);
+    return;
+  }
+  // Filas de tabla
+  const tr = e.target.closest('tbody tr.clickable');
+  if(tr){
+    const scope = tr.getAttribute('data-section');
+    const idx = parseInt(tr.getAttribute('data-idx'),10);
+    const meta = SECTION_META[scope];
+    if(meta){
+      const rows = getFilteredRowsForSection(scope);
+      const row = rows[idx];
+      if(row) showRowDetail(scope, row);
+    }
+  }
+});
 
 // ============ Section renderers ============
 const FIELD_MAP_AS = {proyecto:'proy', disciplina:'disc', ejecutor:'ejec', ubicacion:'ubic'};
@@ -140385,13 +140708,13 @@ function renderAspectos(){
   document.getElementById('asCountHal').textContent = fmtN(hal);
 
   document.getElementById('kpiAs').innerHTML = kpiHTML([
-    {lbl:'Aspectos totales', val: fmtN(rows.length), sub:'tras filtros', cls:''},
-    {lbl:'Abiertas', val: fmtN(ab), sub:rows.length?fmtPct(ab/rows.length*100):'—', cls:'warn'},
-    {lbl:'Cerradas', val: fmtN(ce), sub:rows.length?fmtPct(ce/rows.length*100):'—', cls:'good'},
-    {lbl:'Con hallazgo', val: fmtN(hal), sub:rows.length?fmtPct(hal/rows.length*100):'—', cls:'bad'},
-    {lbl:'Disciplinas distintas', val: fmtN(new Set(rows.map(r=>r.disc).filter(Boolean)).size), sub:'', cls:'accent2'},
-    {lbl:'Ejecutores distintos', val: fmtN(new Set(rows.map(r=>r.ejec).filter(Boolean)).size), sub:'', cls:'accent2'},
-  ]);
+    {key:'totales', lbl:'Aspectos totales', val: fmtN(rows.length), sub:'tras filtros', cls:''},
+    {key:'abiertas', lbl:'Abiertas', val: fmtN(ab), sub:rows.length?fmtPct(ab/rows.length*100):'—', cls:'warn'},
+    {key:'cerradas', lbl:'Cerradas', val: fmtN(ce), sub:rows.length?fmtPct(ce/rows.length*100):'—', cls:'good'},
+    {key:'con_hallazgo', lbl:'Con hallazgo', val: fmtN(hal), sub:rows.length?fmtPct(hal/rows.length*100):'—', cls:'bad'},
+    {key:'disciplinas', lbl:'Disciplinas distintas', val: fmtN(new Set(rows.map(r=>r.disc).filter(Boolean)).size), sub:'clic para ver lista', cls:'accent2'},
+    {key:'ejecutores', lbl:'Ejecutores distintos', val: fmtN(new Set(rows.map(r=>r.ejec).filter(Boolean)).size), sub:'clic para ver lista', cls:'accent2'},
+  ], 'as');
 
   renderDonut('chAsEstado', countBy(rows,'estado'), [COLORS.warn, COLORS.good]);
   renderDonut('chAsTipo', countBy(rows,'tipo'), PALETTE);
@@ -140402,10 +140725,10 @@ function renderAspectos(){
 
   // Tabla
   const tb = document.querySelector('#tblAs tbody');
-  tb.innerHTML = rows.slice(0,300).map(r=>{
+  tb.innerHTML = rows.slice(0,300).map((r,i)=>{
     const ecls = (r.estado||'').toUpperCase()==='CERRADA' ? 'good' : 'warn';
     const hcls = ['SÍ','SI'].includes((r.hall||'').toUpperCase()) ? 'bad' : 'muted';
-    return `<tr>
+    return `<tr class="clickable" data-section="as" data-idx="${i}" title="Clic para ver detalle">
       <td><b style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</b></td>
       <td>${escHtml(r.proy)}</td>
       <td><span class="pill accent">${escHtml(r.disc)}</span></td>
@@ -140432,13 +140755,13 @@ function renderNcr(){
   const ce  = rows.filter(r=>(r.estado||'').includes('CERRAD')).length;
 
   document.getElementById('kpiNc').innerHTML = kpiHTML([
-    {lbl:'Hallazgos totales', val: fmtN(rows.length), sub:'tras filtros'},
-    {lbl:'NCR', val: fmtN(ncr), sub:'No conformidades', cls:'bad'},
-    {lbl:'OBS', val: fmtN(obs), sub:'Observaciones', cls:'warn'},
-    {lbl:'PNC', val: fmtN(pnc), sub:'Producto No Conforme', cls:'accent2'},
-    {lbl:'Abiertos', val: fmtN(ab), sub:rows.length?fmtPct(ab/rows.length*100):'—', cls:'warn'},
-    {lbl:'Cerrados', val: fmtN(ce), sub:rows.length?fmtPct(ce/rows.length*100):'—', cls:'good'},
-  ]);
+    {key:'totales', lbl:'Hallazgos totales', val: fmtN(rows.length), sub:'tras filtros'},
+    {key:'ncr', lbl:'NCR', val: fmtN(ncr), sub:'No conformidades', cls:'bad'},
+    {key:'obs', lbl:'OBS', val: fmtN(obs), sub:'Observaciones', cls:'warn'},
+    {key:'pnc', lbl:'PNC', val: fmtN(pnc), sub:'Producto No Conforme', cls:'accent2'},
+    {key:'abiertos', lbl:'Abiertos', val: fmtN(ab), sub:rows.length?fmtPct(ab/rows.length*100):'—', cls:'warn'},
+    {key:'cerrados', lbl:'Cerrados', val: fmtN(ce), sub:rows.length?fmtPct(ce/rows.length*100):'—', cls:'good'},
+  ], 'nc');
 
   renderDonut('chNcTipo', countBy(rows,'tipo'), [COLORS.bad, COLORS.warn, COLORS.accent2]);
   renderDonut('chNcEstado', countBy(rows,'estado'), [COLORS.warn, COLORS.good, COLORS.accent]);
@@ -140448,10 +140771,10 @@ function renderNcr(){
   renderTimeline('chNcTime', timelineBy(rows,'fhall','estado','ABIERTO'), 'Hallazgos', 'Cerrados');
 
   const tb = document.querySelector('#tblNc tbody');
-  tb.innerHTML = rows.slice(0,300).map(r=>{
+  tb.innerHTML = rows.slice(0,300).map((r,i)=>{
     const tcls = r.tipo==='NCR'?'bad':r.tipo==='OBS'?'warn':'accent2';
     const ecls = (r.estado||'').includes('CERRAD')?'good':'warn';
-    return `<tr>
+    return `<tr class="clickable" data-section="nc" data-idx="${i}" title="Clic para ver detalle">
       <td><b style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</b></td>
       <td><span class="pill ${tcls}">${escHtml(r.tipo)}</span></td>
       <td>${escHtml(r.proy)}</td>
@@ -140480,13 +140803,13 @@ function renderDossier(){
   const av  = rows.filter(r=>r.estatus==='AVALADO' || r.estatus==='FINALIZADO').length;
 
   document.getElementById('kpiDo').innerHTML = kpiHTML([
-    {lbl:'Dossieres totales', val: fmtN(rows.length), sub:'tras filtros'},
-    {lbl:'Avalados / Finaliz.', val: fmtN(av), sub:rows.length?fmtPct(av/rows.length*100):'—', cls:'good'},
-    {lbl:'Críticos', val: fmtN(cri), sub:rows.length?fmtPct(cri/rows.length*100):'—', cls:'bad'},
-    {lbl:'En tiempo', val: fmtN(en), sub:rows.length?fmtPct(en/rows.length*100):'—', cls:'accent'},
-    {lbl:'Moderados', val: fmtN(mo), sub:rows.length?fmtPct(mo/rows.length*100):'—', cls:'warn'},
-    {lbl:'Avance promedio', val: avgAv.toFixed(1)+'%', sub:'a la fecha', cls:'accent2'},
-  ]);
+    {key:'totales', lbl:'Dossieres totales', val: fmtN(rows.length), sub:'tras filtros'},
+    {key:'avalados', lbl:'Avalados / Finaliz.', val: fmtN(av), sub:rows.length?fmtPct(av/rows.length*100):'—', cls:'good'},
+    {key:'criticos', lbl:'Críticos', val: fmtN(cri), sub:rows.length?fmtPct(cri/rows.length*100):'—', cls:'bad'},
+    {key:'en_tiempo', lbl:'En tiempo', val: fmtN(en), sub:rows.length?fmtPct(en/rows.length*100):'—', cls:'accent'},
+    {key:'moderados', lbl:'Moderados', val: fmtN(mo), sub:rows.length?fmtPct(mo/rows.length*100):'—', cls:'warn'},
+    {key:'avance_prom', lbl:'Avance promedio', val: avgAv.toFixed(1)+'%', sub:'a la fecha', cls:'accent2'},
+  ], 'do');
 
   renderDonut('chDoEstatus', countBy(rows,'estatus'), [COLORS.bad, COLORS.good, COLORS.warn, COLORS.accent, COLORS.accent2]);
 
@@ -140502,11 +140825,11 @@ function renderDossier(){
   renderBarH('chDoEjec', countBy(rows,'ejec',15), COLORS.orange);
 
   const tb = document.querySelector('#tblDo tbody');
-  tb.innerHTML = rows.slice(0,300).map(r=>{
+  tb.innerHTML = rows.slice(0,300).map((r,i)=>{
     const scls = r.estatus==='CRITICO'?'bad':r.estatus==='EN TIEMPO'?'accent':r.estatus==='MODERADO'?'warn':'good';
     const av = +r.avance||0;
     const acls = av>=90?'good':av>=50?'warn':'bad';
-    return `<tr>
+    return `<tr class="clickable" data-section="do" data-idx="${i}" title="Clic para ver detalle">
       <td>${escHtml(r.proy)}</td>
       <td>${escHtml((r.ejec||'').slice(0,30))}</td>
       <td>${escHtml(r.ubic)}</td>
@@ -140535,13 +140858,13 @@ function renderSoltec(){
   const moc= rows.filter(r=>r.tipo==='MoC').length;
 
   document.getElementById('kpiSt').innerHTML = kpiHTML([
-    {lbl:'Solicitudes totales', val: fmtN(rows.length), sub:'tras filtros'},
-    {lbl:'Abiertas', val: fmtN(ab), sub:rows.length?fmtPct(ab/rows.length*100):'—', cls:'warn'},
-    {lbl:'Cerradas', val: fmtN(ce), sub:rows.length?fmtPct(ce/rows.length*100):'—', cls:'good'},
-    {lbl:'TQ · Consultas', val: fmtN(tq), sub:'', cls:'accent'},
-    {lbl:'DDR + CR', val: fmtN(ddr+cr), sub:'desviaciones', cls:'accent2'},
-    {lbl:'MoC', val: fmtN(moc), sub:'cambios', cls:'warn'},
-  ]);
+    {key:'totales', lbl:'Solicitudes totales', val: fmtN(rows.length), sub:'tras filtros'},
+    {key:'abiertas', lbl:'Abiertas', val: fmtN(ab), sub:rows.length?fmtPct(ab/rows.length*100):'—', cls:'warn'},
+    {key:'cerradas', lbl:'Cerradas', val: fmtN(ce), sub:rows.length?fmtPct(ce/rows.length*100):'—', cls:'good'},
+    {key:'tq', lbl:'TQ · Consultas', val: fmtN(tq), sub:'', cls:'accent'},
+    {key:'ddr_cr', lbl:'DDR + CR', val: fmtN(ddr+cr), sub:'desviaciones', cls:'accent2'},
+    {key:'moc', lbl:'MoC', val: fmtN(moc), sub:'cambios', cls:'warn'},
+  ], 'st');
 
   renderDonut('chStTipo', countBy(rows,'tipo'), PALETTE);
   renderDonut('chStEstado', countBy(rows,'estado'), [COLORS.warn, COLORS.good]);
@@ -140551,10 +140874,10 @@ function renderSoltec(){
   renderTimeline('chStTime', timelineBy(rows,'femit','estado'), 'Emitidas', 'Cerradas');
 
   const tb = document.querySelector('#tblSt tbody');
-  tb.innerHTML = rows.slice(0,300).map(r=>{
+  tb.innerHTML = rows.slice(0,300).map((r,i)=>{
     const tcls = r.tipo==='TQ'?'accent':r.tipo==='DDR'?'warn':r.tipo==='CR'?'accent2':'bad';
     const ecls = (r.estado||'').toUpperCase()==='CERRADA'?'good':'warn';
-    return `<tr>
+    return `<tr class="clickable" data-section="st" data-idx="${i}" title="Clic para ver detalle">
       <td><b style="font-family:Consolas,monospace;font-size:11px">${escHtml(r.codigo)}</b></td>
       <td><span class="pill ${tcls}">${escHtml(r.tipo)}</span></td>
       <td>${escHtml(r.proy)}</td>
