@@ -76,6 +76,9 @@ footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--border);color
 /* Sub-modal */
 .modal-back.m2{z-index:1000}
 .modal.m2{z-index:1001;width:min(760px,92vw)}
+/* Tercer modal (detalle final) */
+.modal-back.m3{z-index:1002}
+.modal.m3{z-index:1003;width:min(700px,92vw)}
 
 /* KPI clickeables */
 .kpi[data-kpi]{cursor:pointer;transition:.18s}
@@ -157,6 +160,16 @@ tbody tr.clickable:hover td{background:rgba(70,211,255,.08)}
     <button class="modal-close" id="modalX2">✕</button>
   </div>
   <div class="modal-body" id="modalB2"></div>
+</div>
+
+<!-- Tercer modal: detalle final -->
+<div class="modal-back m3" id="modalBack3"></div>
+<div class="modal m3" id="modal3">
+  <div class="modal-head">
+    <div><h2 id="modalT3">Detalle</h2><div class="ms" id="modalS3">—</div></div>
+    <button class="modal-close" id="modalX3">✕</button>
+  </div>
+  <div class="modal-body" id="modalB3"></div>
 </div>
 
 <script>
@@ -1734,19 +1747,25 @@ function renderTabla(arr){
   }).join('');
 }
 
-/* ============ MODALES ============ */
+/* ============ MODALES (3 capas) ============ */
 const modal = document.getElementById('modal'), modalBack = document.getElementById('modalBack');
 const modal2 = document.getElementById('modal2'), modalBack2 = document.getElementById('modalBack2');
+const modal3 = document.getElementById('modal3'), modalBack3 = document.getElementById('modalBack3');
 function openModal(){ modal.classList.add('open'); modalBack.classList.add('open'); }
 function closeModal(){ modal.classList.remove('open'); modalBack.classList.remove('open'); }
 function openModal2(){ modal2.classList.add('open'); modalBack2.classList.add('open'); }
 function closeModal2(){ modal2.classList.remove('open'); modalBack2.classList.remove('open'); }
+function openModal3(){ modal3.classList.add('open'); modalBack3.classList.add('open'); }
+function closeModal3(){ modal3.classList.remove('open'); modalBack3.classList.remove('open'); }
 document.getElementById('modalX').addEventListener('click', closeModal);
 document.getElementById('modalX2').addEventListener('click', closeModal2);
+document.getElementById('modalX3').addEventListener('click', closeModal3);
 modalBack.addEventListener('click', closeModal);
 modalBack2.addEventListener('click', closeModal2);
+modalBack3.addEventListener('click', closeModal3);
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
+    if(modal3.classList.contains('open')){ closeModal3(); e.stopImmediatePropagation(); return; }
     if(modal2.classList.contains('open')){ closeModal2(); e.stopImmediatePropagation(); return; }
     closeModal();
   }
@@ -1826,10 +1845,11 @@ function showKpiDrill(kpiKey){
   document.getElementById('modalB').innerHTML = html; openModal();
 }
 
-function showEquipoDetail(eq, useModal2){
-  const titleEl = useModal2 ? 'modalT2' : 'modalT';
-  const subEl   = useModal2 ? 'modalS2' : 'modalS';
-  const bodyEl  = useModal2 ? 'modalB2' : 'modalB';
+function showEquipoDetail(eq, layer){
+  // layer: 1 = modal principal, 2 = sub-modal, 3 = tercer modal
+  layer = layer || 1;
+  const ids = { 1:['modalT','modalS','modalB'], 2:['modalT2','modalS2','modalB2'], 3:['modalT3','modalS3','modalB3'] };
+  const [titleEl, subEl, bodyEl] = ids[layer];
   document.getElementById(titleEl).textContent = `Detalle · ${eq.tag || '(sin TAG)'}`;
   document.getElementById(subEl).textContent = `${eq.tipo} · ${eq.proyecta}`;
   let html = `<div class="modal-kpi"><div class="big">📦</div><div class="l">${esc((eq.tipo||'').toUpperCase())} · CÓDIGO PROYECTA ${esc(eq.proyecta)}</div></div>`;
@@ -1848,7 +1868,9 @@ function showEquipoDetail(eq, useModal2){
   const colors = {good:'#27d29c', warn:'#f7b955', orange:'#ff8c42', bad:'#ff6b6b'};
   html += `<div class="modal-section"><h4>Riesgo de preservación</h4><span class="pill" style="background:rgba(255,255,255,.06);color:${colors[cls]};font-size:13px;padding:4px 12px">${txt} · ${fmtN(eq.dias)} días en almacenamiento</span></div>`;
   document.getElementById(bodyEl).innerHTML = html;
-  if(useModal2) openModal2(); else openModal();
+  if(layer===3) openModal3();
+  else if(layer===2) openModal2();
+  else openModal();
 }
 
 function showPillDrill(pillKey, pillValue){
@@ -1864,20 +1886,20 @@ function showPillDrill(pillKey, pillValue){
     html += `<div class="modal-section" style="text-align:center;color:var(--muted);padding:20px">Sin equipos en este desglose.</div>`;
     document.getElementById('modalB2').innerHTML = html; openModal2(); return;
   }
-  // Desgloses cruzados
+  // Desgloses cruzados (también clickeables → abren modal3 con su desglose)
   function pushB(title, key, max=10){
     if(key===pillKey) return;
     const m = {};
     subset.forEach(e => { const k = e[key] || '—'; m[k] = (m[k]||0)+1; });
     const list = Object.entries(m).sort((a,b)=>b[1]-a[1]);
     if(list.length<=1) return;
-    html += `<div class="modal-section"><h4>${title}</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
-    list.slice(0,max).forEach(([k,n])=>{ html += `<span class="tag-pill" style="cursor:default"><b>${esc(k)}</b> · ${fmtN(n)}</span>`; });
+    html += `<div class="modal-section"><h4>${title} · clic para ver contenido</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    list.slice(0,max).forEach(([k,n])=>{ html += `<span class="tag-pill" data-sub-pillkey="${esc(key)}" data-sub-pillvalue="${esc(k)}"><b>${esc(k)}</b> · ${fmtN(n)}</span>`; });
     html += `</div></div>`;
   }
   pushB('Por tipo','tipo'); pushB('Por proyecta','proyecta'); pushB('Por ubicación','ubicacion'); pushB('Por fabricante','fabricante');
   // Tabla
-  html += `<div class="modal-section"><h4>Listado · clic para ver detalle de un equipo</h4>`;
+  html += `<div class="modal-section"><h4>Listado · clic en una fila para ver detalle del equipo</h4>`;
   html += `<div style="max-height:320px;overflow:auto;border:1px solid var(--border);border-radius:8px"><table><thead><tr><th>TAG</th><th>Descripción</th><th>Proyecta</th><th>Ubicación</th><th class="num">Valor</th><th class="num">Días</th></tr></thead><tbody>`;
   subset.slice(0,200).forEach((e,i)=>{
     html += `<tr class="clickable" data-sub-idx="${i}"><td><b>${esc(e.tag)}</b></td><td>${esc(e.descripcion).slice(0,32)}</td><td>${esc(e.proyecta)}</td><td>${esc(e.ubicacion).slice(0,24)}</td><td class="num">${money(e.valorTotal)}</td><td class="num">${fmtN(e.dias)}</td></tr>`;
@@ -1888,42 +1910,77 @@ function showPillDrill(pillKey, pillValue){
 }
 let __subRows = [];
 
+// Tercer nivel: drill de pill DENTRO del sub-modal -> abre modal3 con su desglose
+function showSubPillDrill(pillKey, pillValue){
+  if(!__subRows.length) return;
+  const subset = __subRows.filter(e => (e[pillKey]||'—') === pillValue);
+  const labels = {tipo:'Tipo', proyecta:'Código Proyecta', ubicacion:'Ubicación', fabricante:'Fabricante'};
+  const fieldLabel = labels[pillKey] || pillKey;
+  document.getElementById('modalT3').textContent = `${fieldLabel}: ${pillValue}`;
+  document.getElementById('modalS3').textContent = `${subset.length} equipos · refinando aún más`;
+  const valor = subset.reduce((s,e)=>s+(e.valorTotal||0),0);
+  let html = `<div class="modal-kpi"><div class="big">${fmtN(subset.length)}</div><div class="l">${esc(fieldLabel.toUpperCase())} = ${esc(pillValue)} · VALOR ${money(valor)}</div></div>`;
+  if(!subset.length){
+    html += `<div class="modal-section" style="text-align:center;color:var(--muted);padding:20px">Sin equipos.</div>`;
+    document.getElementById('modalB3').innerHTML = html; openModal3(); return;
+  }
+  html += `<div class="modal-section"><h4>Equipos · clic en una fila para ver el detalle completo</h4>`;
+  html += `<div style="max-height:340px;overflow:auto;border:1px solid var(--border);border-radius:8px"><table><thead><tr><th>TAG</th><th>Descripción</th><th>Tipo</th><th>Proyecta</th><th>Ubicación</th><th class="num">Valor</th><th class="num">Días</th></tr></thead><tbody>`;
+  subset.slice(0,200).forEach((e,i)=>{
+    html += `<tr class="clickable" data-m3-idx="${i}"><td><b>${esc(e.tag)}</b></td><td>${esc(e.descripcion).slice(0,32)}</td><td>${esc(e.tipo)}</td><td>${esc(e.proyecta)}</td><td>${esc(e.ubicacion).slice(0,24)}</td><td class="num">${money(e.valorTotal)}</td><td class="num">${fmtN(e.dias)}</td></tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+  document.getElementById('modalB3').innerHTML = html; openModal3();
+  __m3Rows = subset;
+}
+let __m3Rows = [];
+
 // Click delegation
 document.addEventListener('click', (ev)=>{
-  // 1) Pill clickeable
+  // 1) Pill dentro del sub-modal (modal2) → abre modal3
+  const subPill = ev.target.closest('.tag-pill[data-sub-pillkey]');
+  if(subPill){
+    showSubPillDrill(subPill.getAttribute('data-sub-pillkey'), subPill.getAttribute('data-sub-pillvalue'));
+    return;
+  }
+  // 2) Fila dentro del modal3 (tercer nivel) → detalle final del equipo en modal3
+  const trM3 = ev.target.closest('tr[data-m3-idx]');
+  if(trM3){
+    const idx = parseInt(trM3.getAttribute('data-m3-idx'),10);
+    if(__m3Rows[idx]) showEquipoDetail(__m3Rows[idx], 3);
+    return;
+  }
+  // 3) Pill dentro del modal principal → abre sub-modal
   const pill = ev.target.closest('.tag-pill[data-pillkey]');
   if(pill){
     showPillDrill(pill.getAttribute('data-pillkey'), pill.getAttribute('data-pillvalue'));
     return;
   }
-  // 2) Fila dentro de sub-modal
+  // 4) Fila dentro de sub-modal → abre modal3 con detalle del equipo
   const trSub = ev.target.closest('tr[data-sub-idx]');
   if(trSub){
     const idx = parseInt(trSub.getAttribute('data-sub-idx'),10);
-    if(__subRows[idx]){
-      // Cerrar sub-modal y mostrar detalle en modal2? Mejor abrir detalle en sub-modal directamente
-      showEquipoDetail(__subRows[idx], true);
-    }
+    if(__subRows[idx]) showEquipoDetail(__subRows[idx], 3);
     return;
   }
-  // 3) Fila dentro del modal principal (KPI drill)
+  // 5) Fila dentro del modal principal (KPI drill) → abre sub-modal con detalle del equipo
   const trPkg = ev.target.closest('tr[data-pkg-idx]');
   if(trPkg){
     const idx = parseInt(trPkg.getAttribute('data-pkg-idx'),10);
-    if(__pkgRows[idx]) showEquipoDetail(__pkgRows[idx], true);
+    if(__pkgRows[idx]) showEquipoDetail(__pkgRows[idx], 2);
     return;
   }
-  // 4) KPI card
+  // 6) KPI card → abre modal principal
   const kpi = ev.target.closest('.kpi[data-kpi]');
   if(kpi){
     showKpiDrill(kpi.getAttribute('data-kpi'));
     return;
   }
-  // 5) Fila de la tabla principal
+  // 7) Fila de la tabla principal → abre modal principal con detalle
   const trMain = ev.target.closest('tr.clickable[data-row-idx]');
   if(trMain){
     const idx = parseInt(trMain.getAttribute('data-row-idx'),10);
-    if(__tblRows[idx]) showEquipoDetail(__tblRows[idx], false);
+    if(__tblRows[idx]) showEquipoDetail(__tblRows[idx], 1);
   }
 });
 
