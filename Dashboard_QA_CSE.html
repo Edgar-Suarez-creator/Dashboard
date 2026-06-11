@@ -87,6 +87,28 @@ tbody tr.clickable:hover{background:rgba(70,211,255,.08)}
 .filter-bar .count{font-size:11px;color:var(--text-2);grid-column:1/-1;padding-top:4px;border-top:1px dashed var(--border)}
 .filter-bar .count b{color:var(--accent);font-variant-numeric:tabular-nums}
 
+/* ===== Multi-select widget ===== */
+.ms{position:relative}
+.ms-btn{background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px;text-align:left;width:100%;min-width:120px;transition:.15s}
+.ms-btn:hover{border-color:rgba(70,211,255,.5)}
+.ms-btn.has-sel{border-color:var(--accent);background:rgba(70,211,255,.08)}
+.ms-btn .ms-chev{flex-shrink:0;opacity:.6;font-size:9px;transition:transform .15s}
+.ms.open .ms-btn .ms-chev{transform:rotate(180deg)}
+.ms-btn .ms-sel{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.ms-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:240px;max-width:380px;background:#0c1428;border:1px solid var(--accent);border-radius:8px;box-shadow:0 12px 32px rgba(0,0,0,.65);z-index:90;display:none;flex-direction:column;max-height:340px}
+.ms.open .ms-panel{display:flex}
+.ms-search{background:#1b264a;color:var(--text);border:none;border-bottom:1px solid var(--border);padding:8px 10px;font-size:12px;font-family:inherit;outline:none}
+.ms-actions{display:flex;gap:6px;padding:6px 8px;border-bottom:1px solid var(--border)}
+.ms-actions button{background:rgba(70,211,255,.08);color:var(--accent);border:1px solid rgba(70,211,255,.25);border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit;flex:1}
+.ms-actions button:hover{background:rgba(70,211,255,.18)}
+.ms-count{font-size:10px;color:var(--accent);padding:5px 10px;font-weight:700;text-align:right;border-bottom:1px solid var(--border)}
+.ms-options{overflow-y:auto;flex:1;padding:4px 0}
+.ms-options label{display:flex;align-items:center;gap:8px;padding:5px 10px;cursor:pointer;font-size:12px;color:var(--text);user-select:none}
+.ms-options label:hover{background:rgba(70,211,255,.06)}
+.ms-options label.hidden{display:none}
+.ms-options input[type="checkbox"]{accent-color:var(--accent);cursor:pointer;flex-shrink:0;margin:0}
+.ms-empty{padding:14px;text-align:center;color:var(--muted);font-size:11px}
+
 /* Grid de tarjetas / charts */
 .grid{display:grid;gap:14px}
 .grid.cols-2{grid-template-columns:repeat(2,1fr)}
@@ -156,10 +178,10 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   <div class="kpis" id="kpiAs"></div>
 
   <div class="filter-bar" data-scope="as">
-    <div class="field"><label>Proyecto</label><select data-dim="proyecto"><option value="">Todos</option></select></div>
-    <div class="field"><label>Disciplina</label><select data-dim="disciplina"><option value="">Todas</option></select></div>
-    <div class="field"><label>Ejecutor</label><select data-dim="ejecutor"><option value="">Todos</option></select></div>
-    <div class="field"><label>Ubicación</label><select data-dim="ubicacion"><option value="">Todas</option></select></div>
+    <div class="field"><label>Proyecto</label><div data-dim="proyecto"></div></div>
+    <div class="field"><label>Disciplina</label><div data-dim="disciplina"></div></div>
+    <div class="field"><label>Ejecutor</label><div data-dim="ejecutor"></div></div>
+    <div class="field"><label>Ubicación</label><div data-dim="ubicacion"></div></div>
     <button class="reset-btn" data-reset>Limpiar</button>
     <div class="count">Mostrando <b id="asCount">—</b> aspectos · <b id="asCountAb">—</b> abiertos · <b id="asCountCer">—</b> cerrados · <b id="asCountHal">—</b> con hallazgo</div>
   </div>
@@ -203,12 +225,12 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   <div class="kpis" id="kpiNc"></div>
 
   <div class="filter-bar" data-scope="nc">
-    <div class="field"><label>Proyecto</label><select data-dim="proyecto"><option value="">Todos</option></select></div>
-    <div class="field"><label>Disciplina</label><select data-dim="disciplina"><option value="">Todas</option></select></div>
-    <div class="field"><label>Tipo de hallazgo</label><select data-dim="tipo"><option value="">Todos</option></select></div>
-    <div class="field"><label>Ejecutor</label><select data-dim="ejecutor"><option value="">Todos</option></select></div>
-    <div class="field"><label>Ubicación</label><select data-dim="ubicacion"><option value="">Todas</option></select></div>
-    <div class="field"><label>Estado hallazgo</label><select data-dim="estado"><option value="">Todos</option></select></div>
+    <div class="field"><label>Proyecto</label><div data-dim="proyecto"></div></div>
+    <div class="field"><label>Disciplina</label><div data-dim="disciplina"></div></div>
+    <div class="field"><label>Tipo de hallazgo</label><div data-dim="tipo"></div></div>
+    <div class="field"><label>Ejecutor</label><div data-dim="ejecutor"></div></div>
+    <div class="field"><label>Ubicación</label><div data-dim="ubicacion"></div></div>
+    <div class="field"><label>Estado hallazgo</label><div data-dim="estado"></div></div>
     <button class="reset-btn" data-reset>Limpiar</button>
     <div class="count">Mostrando <b id="ncCount">—</b> hallazgos</div>
   </div>
@@ -246,11 +268,11 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   <div class="kpis" id="kpiDo"></div>
 
   <div class="filter-bar" data-scope="do">
-    <div class="field"><label>Proyecto</label><select data-dim="proyecto"><option value="">Todos</option></select></div>
-    <div class="field"><label>Aliado</label><select data-dim="aliado"><option value="">Todos</option></select></div>
-    <div class="field"><label>Ejecutor</label><select data-dim="ejecutor"><option value="">Todos</option></select></div>
-    <div class="field"><label>Ubicación</label><select data-dim="ubicacion"><option value="">Todas</option></select></div>
-    <div class="field"><label>Estatus dossier</label><select data-dim="estatus"><option value="">Todos</option></select></div>
+    <div class="field"><label>Proyecto</label><div data-dim="proyecto"></div></div>
+    <div class="field"><label>Aliado</label><div data-dim="aliado"></div></div>
+    <div class="field"><label>Ejecutor</label><div data-dim="ejecutor"></div></div>
+    <div class="field"><label>Ubicación</label><div data-dim="ubicacion"></div></div>
+    <div class="field"><label>Estatus dossier</label><div data-dim="estatus"></div></div>
     <button class="reset-btn" data-reset>Limpiar</button>
     <div class="count">Mostrando <b id="doCount">—</b> dossieres · avance promedio <b id="doAvg">—</b>%</div>
   </div>
@@ -282,11 +304,11 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   <div class="kpis" id="kpiSt"></div>
 
   <div class="filter-bar" data-scope="st">
-    <div class="field"><label>Proyecto</label><select data-dim="proyecto"><option value="">Todos</option></select></div>
-    <div class="field"><label>Disciplina</label><select data-dim="disciplina"><option value="">Todas</option></select></div>
-    <div class="field"><label>Tipo</label><select data-dim="tipo"><option value="">Todos</option></select></div>
-    <div class="field"><label>Ejecutor</label><select data-dim="ejecutor"><option value="">Todos</option></select></div>
-    <div class="field"><label>Localización</label><select data-dim="localizacion"><option value="">Todas</option></select></div>
+    <div class="field"><label>Proyecto</label><div data-dim="proyecto"></div></div>
+    <div class="field"><label>Disciplina</label><div data-dim="disciplina"></div></div>
+    <div class="field"><label>Tipo</label><div data-dim="tipo"></div></div>
+    <div class="field"><label>Ejecutor</label><div data-dim="ejecutor"></div></div>
+    <div class="field"><label>Localización</label><div data-dim="localizacion"></div></div>
     <button class="reset-btn" data-reset>Limpiar</button>
     <div class="count">Mostrando <b id="stCount">—</b> solicitudes técnicas</div>
   </div>
@@ -140273,42 +140295,116 @@ document.addEventListener('keydown', e=>{
 // ============ Filtros ============
 const filterState = { as:{}, nc:{}, do:{}, st:{} };
 
+// Acepta array (multi-select) o string (single) o null/undefined (todos)
+function fmatch(v, f){
+  if(!f) return true;
+  if(Array.isArray(f)) return f.length===0 || f.includes(v);
+  return v === f;
+}
 function applyFilters(rows, f, mapping){
   return rows.filter(r => {
     for(const k in f){
-      if(!f[k]) continue;
+      const fv = f[k];
+      if(!fv || (Array.isArray(fv) && fv.length===0)) continue;
       const field = mapping[k];
-      if(r[field] !== f[k]) return false;
+      if(!fmatch(r[field], fv)) return false;
     }
     return true;
   });
 }
 
+/* === Multi-select widget === */
+function makeMultiSelect(wrapperEl, options, opts){
+  opts = opts || {};
+  const placeholder = opts.placeholder || 'Todos';
+  wrapperEl.classList.add('ms');
+  wrapperEl.innerHTML = `
+    <button type="button" class="ms-btn">
+      <span class="ms-sel">${placeholder}</span>
+      <span class="ms-chev">▼</span>
+    </button>
+    <div class="ms-panel">
+      <input class="ms-search" placeholder="Buscar..." type="text">
+      <div class="ms-actions">
+        <button type="button" data-act="all">Todos</button>
+        <button type="button" data-act="none">Ninguno</button>
+      </div>
+      <div class="ms-count" hidden></div>
+      <div class="ms-options"></div>
+    </div>
+  `;
+  const btn = wrapperEl.querySelector('.ms-btn');
+  const panel = wrapperEl.querySelector('.ms-panel');
+  const selSpan = wrapperEl.querySelector('.ms-sel');
+  const search = wrapperEl.querySelector('.ms-search');
+  const optDiv = wrapperEl.querySelector('.ms-options');
+  const countDiv = wrapperEl.querySelector('.ms-count');
+  function setOptions(list){
+    if(!list.length){ optDiv.innerHTML = '<div class="ms-empty">Sin opciones</div>'; return; }
+    optDiv.innerHTML = list.map(v=>{
+      const e = String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      return `<label><input type="checkbox" value="${e}"><span title="${e}">${e}</span></label>`;
+    }).join('');
+    optDiv.querySelectorAll('input').forEach(i => i.addEventListener('change', onChange));
+  }
+  function onChange(){
+    const checked = [...optDiv.querySelectorAll('input:checked')].map(i=>i.value);
+    wrapperEl._values = checked;
+    if(checked.length===0){ selSpan.textContent = placeholder; btn.classList.remove('has-sel'); countDiv.hidden = true; }
+    else if(checked.length===1){ selSpan.textContent = checked[0]; btn.classList.add('has-sel'); countDiv.hidden = true; }
+    else { selSpan.textContent = checked.length + ' seleccionados'; btn.classList.add('has-sel'); countDiv.hidden = false; countDiv.textContent = checked.length + ' / ' + options.length; }
+    if(opts.onChange) opts.onChange(checked);
+  }
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const wasOpen = wrapperEl.classList.contains('open');
+    document.querySelectorAll('.ms.open').forEach(o => o.classList.remove('open'));
+    if(!wasOpen){ wrapperEl.classList.add('open'); setTimeout(()=>search.focus(), 50); }
+  });
+  panel.addEventListener('click', e => e.stopPropagation());
+  search.addEventListener('input', () => {
+    const q = search.value.toLowerCase();
+    optDiv.querySelectorAll('label').forEach(l => l.classList.toggle('hidden', !l.textContent.toLowerCase().includes(q)));
+  });
+  wrapperEl.querySelector('[data-act="all"]').addEventListener('click', () => {
+    optDiv.querySelectorAll('label:not(.hidden) input').forEach(i => i.checked = true);
+    onChange();
+  });
+  wrapperEl.querySelector('[data-act="none"]').addEventListener('click', () => {
+    optDiv.querySelectorAll('input').forEach(i => i.checked = false);
+    onChange();
+  });
+  setOptions(options);
+  wrapperEl._values = [];
+  return {
+    getValue: () => wrapperEl._values || [],
+    clear: () => { optDiv.querySelectorAll('input').forEach(i => i.checked = false); onChange(); }
+  };
+}
+document.addEventListener('click', () => {
+  document.querySelectorAll('.ms.open').forEach(o => o.classList.remove('open'));
+});
+
+const __msInstances = {}; // {scope: {dim: msInstance}}
 function buildSelectOpts(scope, dims){
   const bar = document.querySelector(`[data-scope="${scope}"]`);
   if(!bar) return;
-  bar.querySelectorAll('select').forEach(sel=>{
-    const dim = sel.getAttribute('data-dim');
+  __msInstances[scope] = {};
+  bar.querySelectorAll('div[data-dim]').forEach(wrap=>{
+    const dim = wrap.getAttribute('data-dim');
     const opts = dims[dim] || [];
-    opts.forEach(v=>{
-      const o = document.createElement('option');
-      o.value = v;
-      o.textContent = v.length>50 ? v.slice(0,50)+'…' : v;
-      o.title = v;
-      sel.appendChild(o);
+    const ms = makeMultiSelect(wrap, opts, {
+      placeholder:'Todos',
+      onChange: (checked) => {
+        if(checked.length === 0) delete filterState[scope][dim];
+        else filterState[scope][dim] = checked;
+        renderSection(scope);
+      }
     });
-  });
-  bar.querySelectorAll('select').forEach(sel=>{
-    sel.addEventListener('change', ()=>{
-      const dim = sel.getAttribute('data-dim');
-      const val = sel.value;
-      if(val) filterState[scope][dim] = val;
-      else delete filterState[scope][dim];
-      renderSection(scope);
-    });
+    __msInstances[scope][dim] = ms;
   });
   bar.querySelector('[data-reset]').addEventListener('click', ()=>{
-    bar.querySelectorAll('select').forEach(s=>s.value='');
+    Object.values(__msInstances[scope]||{}).forEach(ms => ms.clear());
     filterState[scope] = {};
     renderSection(scope);
   });

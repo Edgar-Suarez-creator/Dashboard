@@ -25,6 +25,28 @@ body{margin:0;background:var(--bg);color:var(--text);font:13.5px/1.5 'Inter','Se
 .fg label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-2);font-weight:600}
 .fg select{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:6px 9px;border-radius:7px;font-size:12.5px;min-width:120px}
 .fclear{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#ff8f8f;padding:7px 13px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
+
+/* ===== Multi-select ===== */
+.ms-w{position:relative;min-width:140px}
+.ms-btn{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12.5px;font-family:inherit;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px;width:100%;text-align:left;transition:.15s}
+.ms-btn:hover{border-color:var(--accent)}
+.ms-btn.has-sel{border-color:var(--accent);background:rgba(70,211,255,.08)}
+.ms-btn .ms-chev{flex-shrink:0;opacity:.6;font-size:9px;transition:transform .15s}
+.ms-w.open .ms-btn .ms-chev{transform:rotate(180deg)}
+.ms-btn .ms-sel{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:240px;max-width:380px;background:var(--bg2,#111a30);border:1px solid var(--accent);border-radius:8px;box-shadow:0 12px 32px rgba(0,0,0,.65);z-index:90;display:none;flex-direction:column;max-height:340px}
+.ms-w.open .ms-panel{display:flex}
+.ms-search{background:var(--panel2);color:var(--text);border:none;border-bottom:1px solid var(--border);padding:8px 10px;font-size:12px;font-family:inherit;outline:none}
+.ms-actions{display:flex;gap:6px;padding:6px 8px;border-bottom:1px solid var(--border)}
+.ms-actions button{background:rgba(70,211,255,.08);color:var(--accent);border:1px solid rgba(70,211,255,.25);border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit;flex:1}
+.ms-actions button:hover{background:rgba(70,211,255,.18)}
+.ms-count{font-size:10px;color:var(--accent);padding:5px 10px;font-weight:700;text-align:right;border-bottom:1px solid var(--border)}
+.ms-options{overflow-y:auto;flex:1;padding:4px 0}
+.ms-options label{display:flex;align-items:center;gap:8px;padding:5px 10px;cursor:pointer;font-size:12px;user-select:none}
+.ms-options label:hover{background:rgba(70,211,255,.06)}
+.ms-options label.hidden{display:none}
+.ms-options input[type="checkbox"]{accent-color:var(--accent);cursor:pointer;flex-shrink:0;margin:0}
+.ms-empty{padding:14px;text-align:center;color:var(--muted);font-size:11px}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
 .kpi{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative}
 .kpi .lbl{color:var(--text-2);font-size:10px;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
@@ -102,11 +124,11 @@ tbody tr.clickable:hover td{background:rgba(70,211,255,.08)}
 </div>
 
 <div class="filterbar">
-  <div class="fg"><label>Código Proyecta</label><select id="fProyecta"></select></div>
-  <div class="fg"><label>Tipo de equipo</label><select id="fTipo"></select></div>
-  <div class="fg"><label>Ubicación</label><select id="fUbic"></select></div>
-  <div class="fg"><label>Fabricante</label><select id="fFab"></select></div>
-  <div class="fg"><label>Denominación</label><select id="fDenom"></select></div>
+  <div class="fg"><label>Código Proyecta</label><div id="fProyecta" class="ms-w"></div></div>
+  <div class="fg"><label>Tipo de equipo</label><div id="fTipo" class="ms-w"></div></div>
+  <div class="fg"><label>Ubicación</label><div id="fUbic" class="ms-w"></div></div>
+  <div class="fg"><label>Fabricante</label><div id="fFab" class="ms-w"></div></div>
+  <div class="fg"><label>Denominación</label><div id="fDenom" class="ms-w"></div></div>
   <div class="fg"><label>Aging</label><select id="fAging"><option value="">Todos</option><option value="0-90">0–90 días</option><option value="91-180">91–180 días</option><option value="181-365">181–365 días</option><option value="366-730">1–2 años</option><option value="731-99999">&gt; 2 años</option></select></div>
   <button class="fclear" onclick="resetF()">Limpiar</button>
 </div>
@@ -1590,13 +1612,16 @@ function barH(elId, items, color, fkey, fmt){
   const el=document.getElementById(elId); if(!el)return;
   if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
   const max=Math.max(1,...items.map(i=>i.value));
-  const active=fkey?document.getElementById(fkey).value:'';
+  // active puede ser string (single select tradicional) o array (multi-select)
+  const active = fkey ? (window.__MS && __MS[fkey] ? __MS[fkey].getValue() : document.getElementById(fkey).value) : '';
   const rowH=26, padT=6, labelW=120, W=520, H=items.length*rowH+padT*2;
   let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
   items.forEach((it,i)=>{
     const y=padT+i*rowH, bw=Math.max(1,(W-labelW-90)*it.value/max), col=Array.isArray(color)?color[i%color.length]:color;
     const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';
-    const dim=(active&&active!==it.label)?' opacity="0.32"':'';
+    let isDim = false;
+    if(active){ if(Array.isArray(active)){ if(active.length>0 && !active.includes(it.label)) isDim = true; } else if(active !== it.label) isDim = true; }
+    const dim = isDim ? ' opacity="0.32"' : '';
     s+=`<g${click}${dim}><text x="0" y="${y+rowH/2+4}" fill="#a8b6d4" font-size="11">${esc(it.label).slice(0,20)}</text>`;
     s+=`<rect x="${labelW}" y="${y+4}" width="${bw}" height="${rowH-9}" rx="3" fill="${col}"><title>${esc(it.label)}: ${fmt?fmt(it.value):it.value}</title></rect>`;
     s+=`<text x="${labelW+bw+5}" y="${y+rowH/2+4}" fill="#e8edff" font-size="11" font-weight="700">${fmt?fmt(it.value):it.value}</text></g>`;
@@ -1623,14 +1648,16 @@ function donut(elId, items, colors, fkey){
   items=items.filter(i=>i.value>0);
   if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
   const total=items.reduce((s,i)=>s+i.value,0)||1;
-  const active=fkey?document.getElementById(fkey).value:'';
+  const active = fkey ? (window.__MS && __MS[fkey] ? __MS[fkey].getValue() : document.getElementById(fkey).value) : '';
   const cx=78,cy=84,r=56,circ=2*Math.PI*r; let off=0;
   const H=Math.max(180,items.length*18+20);
   let s=`<svg viewBox="0 0 340 ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
   items.forEach((it,i)=>{
     const len=it.value/total*circ, col=colors[i%colors.length];
     const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';
-    const dim=(active&&active!==it.label)?' opacity="0.3"':'';
+    let isDim = false;
+    if(active){ if(Array.isArray(active)){ if(active.length>0 && !active.includes(it.label)) isDim = true; } else if(active !== it.label) isDim = true; }
+    const dim = isDim ? ' opacity="0.3"' : '';
     s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="22" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"${click}${dim}><title>${esc(it.label)}: ${it.value} (${(it.value/total*100).toFixed(0)}%)</title></circle>`;
     off+=len;
   });
@@ -1663,17 +1690,99 @@ document.getElementById('ftr').textContent='APPLUS+ Colombia · Dashboard de Pre
 
 const SELS={fProyecta:'proyecta',fTipo:'tipo',fUbic:'ubicacion',fFab:'fabricante',fDenom:'denominacion'};
 function uniq(k){return [...new Set(DATA.equipos.map(e=>e[k]))].sort();}
-function fill(id,k,all){const s=document.getElementById(id);s.innerHTML=`<option value="">${all}</option>`+uniq(k).map(v=>`<option>${esc(v)}</option>`).join('');s.addEventListener('change',renderAll);}
-fill('fProyecta','proyecta','Todos');fill('fTipo','tipo','Todos');fill('fUbic','ubicacion','Todas');fill('fFab','fabricante','Todos');fill('fDenom','denominacion','Todas');
+
+/* === Multi-select widget === */
+function makeMultiSelect(wrapperEl, options, opts){
+  opts = opts || {};
+  const placeholder = opts.placeholder || 'Todos';
+  wrapperEl.innerHTML = `
+    <button type="button" class="ms-btn">
+      <span class="ms-sel">${placeholder}</span>
+      <span class="ms-chev">▼</span>
+    </button>
+    <div class="ms-panel">
+      <input class="ms-search" placeholder="Buscar..." type="text">
+      <div class="ms-actions">
+        <button type="button" data-act="all">Todos</button>
+        <button type="button" data-act="none">Ninguno</button>
+      </div>
+      <div class="ms-count" hidden></div>
+      <div class="ms-options"></div>
+    </div>`;
+  const btn = wrapperEl.querySelector('.ms-btn');
+  const panel = wrapperEl.querySelector('.ms-panel');
+  const selSpan = wrapperEl.querySelector('.ms-sel');
+  const search = wrapperEl.querySelector('.ms-search');
+  const optDiv = wrapperEl.querySelector('.ms-options');
+  const countDiv = wrapperEl.querySelector('.ms-count');
+  function setOptions(list){
+    if(!list.length){ optDiv.innerHTML = '<div class="ms-empty">Sin opciones</div>'; return; }
+    optDiv.innerHTML = list.map(v=>{
+      const e = String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      return `<label><input type="checkbox" value="${e}"><span title="${e}">${e}</span></label>`;
+    }).join('');
+    optDiv.querySelectorAll('input').forEach(i => i.addEventListener('change', onChange));
+  }
+  function onChange(){
+    const checked = [...optDiv.querySelectorAll('input:checked')].map(i=>i.value);
+    wrapperEl._values = checked;
+    if(checked.length===0){ selSpan.textContent = placeholder; btn.classList.remove('has-sel'); countDiv.hidden = true; }
+    else if(checked.length===1){ selSpan.textContent = checked[0]; btn.classList.add('has-sel'); countDiv.hidden = true; }
+    else { selSpan.textContent = checked.length + ' seleccionados'; btn.classList.add('has-sel'); countDiv.hidden = false; countDiv.textContent = checked.length + ' / ' + options.length; }
+    if(opts.onChange) opts.onChange(checked);
+  }
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const wasOpen = wrapperEl.classList.contains('open');
+    document.querySelectorAll('.ms-w.open').forEach(o => o.classList.remove('open'));
+    if(!wasOpen){ wrapperEl.classList.add('open'); setTimeout(()=>search.focus(), 50); }
+  });
+  panel.addEventListener('click', e => e.stopPropagation());
+  search.addEventListener('input', () => {
+    const q = search.value.toLowerCase();
+    optDiv.querySelectorAll('label').forEach(l => l.classList.toggle('hidden', !l.textContent.toLowerCase().includes(q)));
+  });
+  wrapperEl.querySelector('[data-act="all"]').addEventListener('click', () => {
+    optDiv.querySelectorAll('label:not(.hidden) input').forEach(i => i.checked = true);
+    onChange();
+  });
+  wrapperEl.querySelector('[data-act="none"]').addEventListener('click', () => {
+    optDiv.querySelectorAll('input').forEach(i => i.checked = false);
+    onChange();
+  });
+  setOptions(options);
+  wrapperEl._values = [];
+  return {
+    getValue: () => wrapperEl._values || [],
+    toggle: (v) => {
+      const inp = [...optDiv.querySelectorAll('input')].find(i => i.value === v);
+      if(inp){ inp.checked = !inp.checked; onChange(); }
+    },
+    clear: () => { optDiv.querySelectorAll('input').forEach(i => i.checked = false); onChange(); }
+  };
+}
+document.addEventListener('click', () => {
+  document.querySelectorAll('.ms-w.open').forEach(o => o.classList.remove('open'));
+});
+
+const __MS = {}; // {fProyecta: msInstance, ...}
+Object.entries(SELS).forEach(([id,k])=>{
+  __MS[id] = makeMultiSelect(document.getElementById(id), uniq(k), { placeholder:'Todos', onChange: renderAll });
+});
 document.getElementById('fAging').addEventListener('change',renderAll);
-function resetF(){['fProyecta','fTipo','fUbic','fFab','fDenom','fAging'].forEach(id=>document.getElementById(id).value='');renderAll();}
+function resetF(){
+  Object.values(__MS).forEach(ms => ms.clear());
+  document.getElementById('fAging').value = '';
+  renderAll();
+}
 
 function filtered(){
-  const f={};Object.entries(SELS).forEach(([id,k])=>f[k]=document.getElementById(id).value);
+  const f = {};
+  Object.entries(SELS).forEach(([id,k])=>{ f[k] = __MS[id].getValue(); });
   const ag=document.getElementById('fAging').value;
   let lo=-1,hi=1e12; if(ag){const p=ag.split('-');lo=+p[0];hi=+p[1];}
   return DATA.equipos.filter(e=>{
-    for(const[k,v] of Object.entries(f)){ if(v&&e[k]!==v)return false; }
+    for(const[k,arr] of Object.entries(f)){ if(arr.length && !arr.includes(e[k])) return false; }
     if(ag&&!(e.dias>=lo&&e.dias<=hi))return false;
     return true;
   });
@@ -1686,7 +1795,9 @@ function riesgo(d){ if(d>730)return['bad','Crítico']; if(d>365)return['orange',
 
 document.addEventListener('click',ev=>{
   const t=ev.target.closest&&ev.target.closest('.clk'); if(!t)return;
-  const fk=t.getAttribute('data-fk'),fv=t.getAttribute('data-fv');const sel=document.getElementById(fk);if(!sel)return;
+  const fk=t.getAttribute('data-fk'),fv=t.getAttribute('data-fv');
+  if(__MS[fk]){ __MS[fk].toggle(fv); return; } // multi-select: toggle valor
+  const sel=document.getElementById(fk);if(!sel)return;
   sel.value=(sel.value===fv)?'':fv; renderAll();
 });
 
