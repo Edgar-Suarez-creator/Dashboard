@@ -66,7 +66,8 @@ body{margin:0;background:var(--bg);color:var(--text);font:13.5px/1.5 'Inter','Se
 .ecp-head::after{content:"";display:block;position:absolute;left:50%;bottom:-14px;width:2px;height:14px;background:rgba(255,215,0,.45);transform:translateX(-50%)}
 .ecp-leaders-label{text-align:center;font-size:9.5px;color:var(--text-2);text-transform:uppercase;letter-spacing:1.5px;margin:18px 0 10px;font-weight:700}
 
-.ecp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px;position:relative}
+.ecp-grid{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;position:relative}
+.ecp-grid > .card{flex:0 1 290px;min-width:240px;max-width:300px}
 .ecp-grid::before{content:"";position:absolute;top:-10px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,rgba(255,215,0,.4),rgba(255,215,0,.4),transparent)}
 .ecp-grid .card{background:linear-gradient(135deg,#1d1b2e,#2d2a1a);border:1.5px solid rgba(255,215,0,.35);position:relative}
 .ecp-grid .card::after{content:"ECOPETROL";position:absolute;top:8px;right:9px;font-size:9.5px;font-weight:800;letter-spacing:1px;color:#FFD700;background:rgba(255,215,0,.1);padding:2px 8px;border-radius:6px;border:1px solid rgba(255,215,0,.3)}
