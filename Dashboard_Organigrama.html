@@ -147,9 +147,9 @@ footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--border);color
 .modal[data-a="ESTACIONES"] .modal-banner::before{background:linear-gradient(135deg,#46d3ff,#1F77B4)}
 .modal-close{position:absolute;top:12px;right:14px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;font-weight:700;z-index:5;transition:.15s;display:flex;align-items:center;justify-content:center;line-height:1}
 .modal-close:hover{background:rgba(255,107,107,.5);transform:rotate(90deg)}
-.modal-photo{position:absolute;left:50%;bottom:-140px;transform:translateX(-50%);width:170px;height:210px;border-radius:16px;border:4px solid #161f38;overflow:hidden;background:#0d1426;z-index:3;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}
-.modal-photo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
-.modal-body{padding:160px 26px 24px;text-align:center;overflow-y:auto}
+.modal-photo{position:absolute;left:50%;bottom:-110px;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;border:4px solid #161f38;overflow:hidden;background:#0d1426;z-index:3;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}
+.modal-photo img{max-width:88%;max-height:88%;width:auto;height:auto;object-fit:contain;display:block}
+.modal-body{padding:128px 26px 24px;text-align:center;overflow-y:auto}
 .modal-name{font-size:20px;font-weight:800;color:var(--text);margin-bottom:5px;letter-spacing:.2px;text-transform:capitalize}
 .modal-espec{font-size:13px;font-weight:600;color:var(--acc);margin-bottom:14px;letter-spacing:.5px}
 .modal[data-a="EXTERIORES"] .modal-espec{color:var(--ext)}
@@ -372,6 +372,22 @@ body.modal-open{overflow:hidden}
         <div class="meta">
           <span class="m">CC ECP</span>
           <span class="m">LÍDE</span>
+          <span class="m turno t-x">T -</span>
+        </div>
+        <div class="ruta">Ecopetrol</div>
+      </div>
+    </div>
+    <div class="card" data-area="ECOPETROL" data-espec="INTEGRADOR MATERIALES" data-cargo="Integrador Gestión de Materiales Caño Sur"
+         data-nombre="EDGAR JAVIER SAUCEDO" data-extra-areas="MATERIALES" data-cc="ECP" data-ruta="Ecopetrol"
+         data-turno="-" data-foto="data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 200 200&quot;><defs><linearGradient id=&quot;g&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;1&quot; y2=&quot;1&quot;><stop offset=&quot;0%&quot; stop-color=&quot;%23FFD700&quot;/><stop offset=&quot;100%&quot; stop-color=&quot;%23B8860B&quot;/></linearGradient></defs><rect width=&quot;200&quot; height=&quot;200&quot; fill=&quot;url(%23g)&quot;/><text x=&quot;100&quot; y=&quot;118&quot; font-family=&quot;Segoe UI,Arial&quot; font-size=&quot;78&quot; font-weight=&quot;700&quot; fill=&quot;white&quot; text-anchor=&quot;middle&quot;>EJ</text></svg>" tabindex="0"
+         onclick="abrirModal(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirModal(this)}">
+      <div class="ph"><img src="data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 200 200&quot;><defs><linearGradient id=&quot;g&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;1&quot; y2=&quot;1&quot;><stop offset=&quot;0%&quot; stop-color=&quot;%23FFD700&quot;/><stop offset=&quot;100%&quot; stop-color=&quot;%23B8860B&quot;/></linearGradient></defs><rect width=&quot;200&quot; height=&quot;200&quot; fill=&quot;url(%23g)&quot;/><text x=&quot;100&quot; y=&quot;118&quot; font-family=&quot;Segoe UI,Arial&quot; font-size=&quot;78&quot; font-weight=&quot;700&quot; fill=&quot;white&quot; text-anchor=&quot;middle&quot;>EJ</text></svg>" alt="EDGAR JAVIER SAUCEDO"></div>
+      <div class="info">
+        <div class="nm">EDGAR JAVIER SAUCEDO</div>
+        <div class="role">Integrador Gestión de Materiales Caño Sur<span class="dot"></span><span class="ar">ECOPETROL</span></div>
+        <div class="meta">
+          <span class="m">CC ECP</span>
+          <span class="m">INT</span>
           <span class="m turno t-x">T -</span>
         </div>
         <div class="ruta">Ecopetrol</div>
