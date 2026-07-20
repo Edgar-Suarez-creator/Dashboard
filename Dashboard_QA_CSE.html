@@ -140575,7 +140575,20 @@ const COLORS = {
 const PALETTE = ['#46d3ff','#a78bfa','#27d29c','#f7b955','#ff6b6b','#5dade2','#bb8fce','#7dcea0','#f5b041','#e74c3c','#85c1e2','#48c9b0','#f8c471','#cd6155'];
 
 const APEX_BASE = {
-  chart:{toolbar:{show:false},foreColor:'#a8b6d4',background:'transparent'},
+  chart:{
+    toolbar:{
+      show:true,
+      offsetX:-4, offsetY:-4,
+      tools:{ download:true, selection:false, zoom:false, zoomin:false, zoomout:false, pan:false, reset:false },
+      export:{
+        csv:{ filename:'Dashboard_QA_CSE_grafica', columnDelimiter:';' },
+        svg:{ filename:'Dashboard_QA_CSE_grafica' },
+        png:{ filename:'Dashboard_QA_CSE_grafica' }
+      }
+    },
+    foreColor:'#a8b6d4',
+    background:'#161F38'
+  },
   grid:{borderColor:'rgba(255,255,255,.05)'},
   tooltip:{theme:'dark'},
   legend:{labels:{colors:'#e8edff'}, fontSize:'11.5px'},
