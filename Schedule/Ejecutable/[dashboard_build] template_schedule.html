@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Schedule Diario · Personal ATIP CSE</title>
+<style>
+:root{
+  --bg:#0a1020;--panel:#141d33;--panel2:#1a2542;--ink:#eaf1ff;--muted:#8ea3c4;--dim:#5e6f8c;--line:rgba(255,255,255,.08);
+  --accent:#46d3ff;--accent2:#a78bfa;--good:#27d29c;--warn:#f7b955;--bad:#ff6b6b;--orange:#ff8c42;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:13.5px/1.5 'Inter','Segoe UI',system-ui,sans-serif}
+.wrap{max-width:1700px;margin:0 auto;padding:22px 26px 80px}
+.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:18px}
+.hero h1{margin:0;font-size:23px;letter-spacing:.3px;background:linear-gradient(90deg,#46d3ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero .sub{color:var(--muted);font-size:12.5px;margin-top:5px}
+.hero-right{text-align:right;flex-shrink:0}
+.hero-right .big{font-size:44px;font-weight:800;color:var(--accent);line-height:1}
+.hero-right .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.cut{color:var(--dim);font-size:11px;margin-top:6px}
+.btn{background:transparent;border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:7px;cursor:pointer;font-size:12px;margin-top:8px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.filterbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin-bottom:18px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
+.fg select{background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:6px 9px;border-radius:7px;font-size:12.5px;min-width:110px}
+.fclear{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#ff8f8f;padding:7px 13px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:12px;padding:14px 15px}
+.kpi .lbl{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.kpi .val{font-size:25px;font-weight:800;margin-top:3px}
+.kpi .sub{font-size:11px;color:var(--muted);margin-top:2px}
+.kpi.good .val{color:var(--good)}.kpi.acc .val{color:var(--accent)}.kpi.v2 .val{color:var(--accent2)}.kpi.warn .val{color:var(--warn)}
+.section-title{margin:24px 0 12px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1.1px;font-weight:700;display:flex;align-items:center;gap:9px}
+.section-title::before{content:"";width:4px;height:14px;background:var(--accent);border-radius:2px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px}
+.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}.span-12{grid-column:span 12}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.card h3{margin:0 0 3px;font-size:13.5px}
+.card .desc{color:var(--muted);font-size:11.5px;margin-bottom:9px}
+.chart{width:100%;overflow-x:auto}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin:6px 0}
+.legend .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+/* GRID SCHEDULE */
+.sched-wrap{max-height:600px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+table.sched{border-collapse:separate;border-spacing:0;font-size:10.5px}
+table.sched th,table.sched td{padding:3px 5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)}
+table.sched thead th{position:sticky;top:0;background:#16203a;z-index:3;font-size:9px;color:var(--muted);text-align:center}
+table.sched .frozen{position:sticky;background:#16203a;z-index:2}
+table.sched .c0{left:0;min-width:150px;text-align:left}
+table.sched .c1{left:150px;min-width:54px}
+table.sched .c2{left:204px;min-width:64px}
+table.sched thead .frozen{z-index:4}
+.cellst{text-align:center;font-weight:700;width:22px;color:#0a1020}
+.mes-sep{border-left:2px solid rgba(255,255,255,.15)!important}
+.empty{padding:30px;text-align:center;color:var(--dim)}
+footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);color:var(--dim);font-size:11px;text-align:center}
+@media(max-width:1300px){.kpis{grid-template-columns:repeat(3,1fr)}[class*=span-]{grid-column:span 12}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div>
+    <h1 id="hT">Schedule Diario · Personal ATIP Caño Sur Este</h1>
+    <div class="sub" id="hS">—</div>
+  </div>
+  <div class="hero-right">
+    <div class="big" id="hPico">—</div>
+    <div class="lbl">Pico de personal en campo</div>
+    <div class="cut" id="hCut">—</div>
+    <button class="btn" onclick="window.print()">⤓ Exportar PDF</button>
+  </div>
+</div>
+
+<div class="filterbar">
+  <div class="fg"><label>Disciplina</label><select id="fDisc"></select></div>
+  <div class="fg"><label>Cargo</label><select id="fCargo"></select></div>
+  <div class="fg"><label>Área</label><select id="fArea"></select></div>
+  <div class="fg"><label>Turno</label><select id="fTurno"></select></div>
+  <div class="fg"><label>Ruta</label><select id="fRuta"></select></div>
+  <div class="fg"><label>Desde</label><select id="fDesde"></select></div>
+  <div class="fg"><label>Hasta</label><select id="fHasta"></select></div>
+  <button class="fclear" onclick="resetF()">Limpiar</button>
+</div>
+
+<div class="kpis" id="kpiBar"></div>
+
+<div class="section-title">Cantidades de Personal · clic en una gráfica para filtrar todo el dashboard</div>
+<div class="grid">
+  <div class="card span-5"><h3>Por Disciplina</h3><div class="desc">Clic en una barra para filtrar · clic de nuevo para quitar</div><div class="chart" id="chDisc"></div></div>
+  <div class="card span-3"><h3>Por Cargo</h3><div class="desc">Clic en un segmento para filtrar</div><div class="chart" id="chCargo"></div></div>
+  <div class="card span-4"><h3>Por Área</h3><div class="desc">Clic en una barra para filtrar</div><div class="chart" id="chArea"></div></div>
+</div>
+
+<div class="section-title">Schedule Interactivo · Rol de Turnos</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="legend" id="schedLeyenda"></div>
+    <div class="desc" id="schedInfo">—</div>
+    <div class="sched-wrap"><table class="sched" id="tblSched"><thead></thead><tbody></tbody></table></div>
+  </div>
+</div>
+
+<footer id="ftr">APPLUS+ · Schedule Diario ATIP</footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const C={accent:'#46d3ff',accent2:'#a78bfa',good:'#27d29c',warn:'#f7b955',bad:'#ff6b6b',orange:'#ff8c42',muted:'#8ea3c4'};
+const PALETTE=['#46d3ff','#a78bfa','#27d29c','#f7b955','#ff6b6b','#ff8c42','#36c5f0','#e879f9','#4ade80','#fbbf24','#fb7185','#22d3ee','#c084fc','#34d399','#f59e0b','#60a5fa'];
+const EN_CAMPO=new Set(['T','E','S']);
+const F=DATA.fechas, ST=DATA.statusInfo;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ================= SVG CHART HELPERS (sin dependencias) ================= */
+function barH(elId, items, color, fkey){
+  const el=document.getElementById(elId); if(!el)return;
+  if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
+  const max=Math.max(1,...items.map(i=>i.value));
+  const active=fkey?document.getElementById(fkey).value:'';
+  const rowH=24, padT=6, labelW=92, W=470, H=items.length*rowH+padT*2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  items.forEach((it,i)=>{
+    const y=padT+i*rowH, bw=Math.max(1,(W-labelW-44)*it.value/max), col=Array.isArray(color)?color[i%color.length]:color;
+    const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';
+    const dim=(active&&active!==it.label)?' opacity="0.32"':'';
+    s+=`<g${click}${dim}><text x="0" y="${y+rowH/2+4}" fill="#8ea3c4" font-size="11">${esc(it.label).slice(0,16)}</text>`;
+    s+=`<rect x="${labelW}" y="${y+3}" width="${bw}" height="${rowH-8}" rx="3" fill="${col}"><title>${esc(it.label)}: ${it.value}${fkey?' — clic para filtrar':''}</title></rect>`;
+    s+=`<text x="${labelW+bw+5}" y="${y+rowH/2+4}" fill="#eaf1ff" font-size="11" font-weight="700">${it.value}</text></g>`;
+  });
+  el.innerHTML=s+'</svg>';
+}
+function donut(elId, items, colors, fkey){
+  const el=document.getElementById(elId); if(!el)return;
+  items=items.filter(i=>i.value>0);
+  if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
+  const total=items.reduce((s,i)=>s+i.value,0)||1;
+  const active=fkey?document.getElementById(fkey).value:'';
+  const cx=78,cy=82,r=56,circ=2*Math.PI*r; let off=0;
+  const legH=items.length*17+10, H=Math.max(176,legH);
+  let s=`<svg viewBox="0 0 330 ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  items.forEach((it,i)=>{
+    const len=it.value/total*circ, col=colors[i%colors.length];
+    const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';
+    const dim=(active&&active!==it.label)?' opacity="0.32"':'';
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="22" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"${click}${dim}><title>${esc(it.label)}: ${it.value} (${(it.value/total*100).toFixed(0)}%)${fkey?' — clic para filtrar':''}</title></circle>`;
+    off+=len;
+  });
+  s+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" fill="#eaf1ff" font-size="22" font-weight="800">${total}</text>`;
+  s+=`<text x="${cx}" y="${cy+15}" text-anchor="middle" fill="#8ea3c4" font-size="10">total</text>`;
+  items.forEach((it,i)=>{const ly=16+i*17;const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';s+=`<g${click}><rect x="158" y="${ly-10}" width="11" height="11" rx="2" fill="${colors[i%colors.length]}"/><text x="175" y="${ly}" fill="#cdd9ee" font-size="11">${esc(it.label)} · ${it.value} (${(it.value/total*100).toFixed(0)}%)</text></g>`;});
+  el.innerHTML=s+'</svg>';
+}
+/* ================= APP ================= */
+document.getElementById('hS').textContent=DATA.meta.subtitulo+' · Fuente: '+DATA.meta.fuente+' · '+DATA.meta.rango.min+' → '+DATA.meta.rango.max;
+document.getElementById('hPico').textContent=DATA.kpis.picoEnCampo;
+document.getElementById('hCut').textContent='Corte: '+DATA.meta.corte;
+document.getElementById('ftr').textContent=`APPLUS+ Colombia · Schedule Diario ATIP CSE · Fuente: ${DATA.meta.fuente} · Corte ${DATA.meta.corte}`;
+
+const SELS={fDisc:'especBase',fCargo:'cargo',fArea:'area',fTurno:'turno',fRuta:'ruta'};
+function uniq(key){return [...new Set(DATA.personas.map(p=>p[key]))].sort();}
+function fill(id,key,all){const s=document.getElementById(id);s.innerHTML=`<option value="">${all}</option>`+uniq(key).map(v=>`<option>${esc(v)}</option>`).join('');s.addEventListener('change',renderAll);}
+fill('fDisc','especBase','Todas');fill('fCargo','cargo','Todos');fill('fArea','area','Todas');fill('fTurno','turno','Todos');fill('fRuta','ruta','Todas');
+const selDesde=document.getElementById('fDesde'),selHasta=document.getElementById('fHasta');
+selDesde.innerHTML=F.map((d,i)=>`<option value="${i}">${d}</option>`).join('');
+selHasta.innerHTML=F.map((d,i)=>`<option value="${i}">${d}</option>`).join('');
+selDesde.value=0; selHasta.value=Math.min(F.length-1,60);
+selDesde.addEventListener('change',renderAll);selHasta.addEventListener('change',renderAll);
+function resetF(){['fDisc','fCargo','fArea','fTurno','fRuta'].forEach(id=>document.getElementById(id).value='');selDesde.value=0;selHasta.value=Math.min(F.length-1,60);renderAll();}
+
+function filtered(){const f={};Object.entries(SELS).forEach(([id,k])=>f[k]=document.getElementById(id).value);return DATA.personas.filter(p=>{for(const[k,v]of Object.entries(f)){if(v&&p[k]!==v)return false;}return true;});}
+function dateRange(){let a=+selDesde.value,b=+selHasta.value;if(a>b)[a,b]=[b,a];return[a,b];}
+function aggItems(arr,key){const m={};arr.forEach(p=>m[p[key]]=(m[p[key]]||0)+1);return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([label,value])=>({label,value}));}
+
+function renderAll(){
+  const arr=filtered();const[a,b]=dateRange();
+  try{renderKPIs(arr,a,b)}catch(e){console.error('KPIs',e)}
+  try{barH('chDisc',aggItems(arr,'especBase'),C.accent,'fDisc')}catch(e){console.error(e)}
+  try{donut('chCargo',aggItems(arr,'cargo'),PALETTE,'fCargo')}catch(e){console.error(e)}
+  try{barH('chArea',aggItems(arr,'area'),C.accent2,'fArea')}catch(e){console.error(e)}
+  try{renderSched(arr,a,b)}catch(e){console.error('Sched',e)}
+}
+
+// Filtrado cruzado: clic en cualquier elemento .clk fija/quita el filtro y re-renderiza todo
+document.addEventListener('click',ev=>{
+  const t=ev.target.closest&&ev.target.closest('.clk'); if(!t)return;
+  const fk=t.getAttribute('data-fk'), fv=t.getAttribute('data-fv');
+  const sel=document.getElementById(fk); if(!sel)return;
+  sel.value=(sel.value===fv)?'':fv;  // toggle
+  renderAll();
+});
+
+function renderKPIs(arr,a,b){
+  let pico=0,picoF=null,suma=0;
+  for(let i=a;i<=b;i++){let c=0;arr.forEach(p=>{if(EN_CAMPO.has(p.dias[i]))c++});suma+=c;if(c>pico){pico=c;picoF=F[i]}}
+  const dias=b-a+1,prom=dias?(suma/dias).toFixed(1):0;
+  const ing=arr.filter(p=>p.cargo==='INGENIERO').length,tec=arr.filter(p=>/TEC/.test(p.cargo)).length;
+  const k=[
+    {lbl:'Personal (filtro)',val:arr.length,sub:`${ing} ing · ${tec} téc`,cls:'acc'},
+    {lbl:'Pico en campo',val:pico,sub:picoF||'—',cls:'good'},
+    {lbl:'Promedio en campo',val:prom,sub:`${dias} días`,cls:'v2'},
+    {lbl:'Disciplinas',val:new Set(arr.map(p=>p.especBase)).size,sub:'especialidades',cls:'warn'},
+    {lbl:'Áreas',val:new Set(arr.map(p=>p.area)).size,sub:'operativas',cls:'acc'},
+    {lbl:'Turnos',val:new Set(arr.map(p=>p.turno)).size,sub:'rotaciones',cls:'v2'},
+  ];
+  document.getElementById('kpiBar').innerHTML=k.map(x=>`<div class="kpi ${x.cls}"><div class="lbl">${x.lbl}</div><div class="val">${x.val}</div><div class="sub">${esc(x.sub)}</div></div>`).join('');
+}
+const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+function renderSched(arr,a,b){
+  document.getElementById('schedLeyenda').innerHTML=Object.entries(ST).map(([k,v])=>`<span><span class="dot" style="background:${v.color}"></span><b>${k}</b> ${v.nombre}</span>`).join('');
+  document.getElementById('schedInfo').textContent=`${arr.length} personas · ${b-a+1} días (${F[a]} → ${F[b]}) · desplázate horizontalmente`;
+  const thead=document.querySelector('#tblSched thead'),tbody=document.querySelector('#tblSched tbody');
+  let h=`<tr><th class="frozen c0">Funcionario</th><th class="frozen c1">Disc.</th><th class="frozen c2">Cargo</th>`,lm=null;
+  for(let i=a;i<=b;i++){const d=new Date(F[i]);const m=d.getUTCMonth();const sep=(m!==lm)?'mes-sep':'';lm=m;h+=`<th class="${sep}">${d.getUTCDate()}<br><span style="color:#5e6f8c">${MESES[m]}</span></th>`;}
+  thead.innerHTML=h+'</tr>';
+  let rows='';
+  arr.forEach(p=>{
+    let tds=`<td class="frozen c0" title="${esc(p.nombre)}">${esc(p.nombre).slice(0,20)}</td><td class="frozen c1">${esc(p.especBase)}</td><td class="frozen c2">${esc(p.cargo).slice(0,8)}</td>`,lm2=null;
+    for(let i=a;i<=b;i++){const s=p.dias[i],info=ST[s],d=new Date(F[i]).getUTCMonth(),sep=(d!==lm2)?'mes-sep':'';lm2=d;tds+=`<td class="cellst ${sep}" style="background:${s&&info?info.color:'transparent'}" title="${F[i]}: ${info?info.nombre:'—'}">${s||''}</td>`;}
+    rows+=`<tr>${tds}</tr>`;
+  });
+  tbody.innerHTML=rows||`<tr><td class="empty" colspan="30">Sin personal para el filtro</td></tr>`;
+}
+
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Asistencias Técnicas · CSE</title>
+<style>
+:root{
+  --bg:#0a0f1e;--bg2:#111a30;--panel:#161f38;--panel2:#1b264a;--text:#e8edff;--text-2:#a8b6d4;--muted:#6b779b;
+  --accent:#46d3ff;--accent2:#a78bfa;--good:#27d29c;--warn:#f7b955;--bad:#ff6b6b;--orange:#ff8c42;
+  --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:13.5px/1.5 'Inter','Segoe UI',system-ui,sans-serif}
+.wrap{max-width:1640px;margin:0 auto;padding:22px 26px 80px}
+.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:18px}
+.hero h1{margin:0;font-size:22px;letter-spacing:.3px;background:linear-gradient(90deg,#46d3ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero .sub{color:var(--text-2);font-size:12.5px;margin-top:5px}
+.hero-right{text-align:right;flex-shrink:0}
+.hero-right .big{font-size:42px;font-weight:800;color:var(--accent);line-height:1}
+.hero-right .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-2)}
+.cut{color:var(--muted);font-size:11px;margin-top:6px}
+.btn{background:transparent;border:1px solid var(--border);color:var(--text-2);padding:6px 12px;border-radius:7px;cursor:pointer;font-size:12px;margin-top:8px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.filterbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:13px 16px;margin-bottom:18px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-2);font-weight:600}
+.fg select{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:6px 9px;border-radius:7px;font-size:12.5px;min-width:130px}
+.fclear{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#ff8f8f;padding:7px 13px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.kpi .lbl{color:var(--text-2);font-size:10px;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.kpi .val{font-size:24px;font-weight:800;margin-top:3px}
+.kpi .sub{font-size:11px;color:var(--text-2);margin-top:2px}
+.kpi.good .val{color:var(--good)}.kpi.warn .val{color:var(--warn)}.kpi.bad .val{color:var(--bad)}.kpi.acc .val{color:var(--accent)}.kpi.v2 .val{color:var(--accent2)}.kpi.orange .val{color:var(--orange)}
+.section-title{margin:22px 0 10px;font-size:13px;color:var(--text-2);text-transform:uppercase;letter-spacing:1.1px;font-weight:700;display:flex;align-items:center;gap:9px}
+.section-title::before{content:"";width:4px;height:14px;background:var(--accent);border-radius:2px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px}
+.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}.span-12{grid-column:span 12}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:15px 17px}
+.card h3{margin:0 0 3px;font-size:13.5px}
+.card .desc{color:var(--text-2);font-size:11.5px;margin-bottom:9px}
+.chart{width:100%;overflow-x:auto}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:11px;color:var(--text-2);margin:6px 0}
+.legend .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+th{color:var(--text-2);font-size:10px;text-transform:uppercase;letter-spacing:.5px;background:rgba(255,255,255,.02);position:sticky;top:0;z-index:2}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:hover td{background:rgba(255,255,255,.025)}
+.tabwrap{max-height:560px;overflow:auto;border:1px solid var(--border);border-radius:8px}
+.pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:10.5px;font-weight:700}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--border);color:var(--muted);font-size:11px;text-align:center}
+/* Cuadrícula diaria */
+#tblCuad th,#tblCuad td{padding:0;border:none}
+#tblCuad th{position:sticky;top:0;background:#16203a;z-index:3;font-size:9px;color:var(--text-2);text-align:center;height:28px;min-width:14px}
+#tblCuad td.lbl{position:sticky;left:0;background:#16203a;z-index:2;min-width:170px;padding:3px 8px;font-size:11px;color:var(--text);font-weight:600;border-right:1px solid var(--border);text-align:left;white-space:nowrap}
+#tblCuad th.lbl{left:0;z-index:4;text-align:left;padding:0 8px;min-width:170px}
+#tblCuad td.cell{width:14px;min-width:14px;height:22px;text-align:center;font-size:8.5px;font-weight:700;color:#0a1020;border-right:1px solid rgba(255,255,255,.04)}
+#tblCuad .mes-sep{border-left:2px solid rgba(255,255,255,.12)!important}
+#tblCuad tbody tr:hover td.lbl{color:var(--accent)}
+@media(max-width:1200px){.kpis{grid-template-columns:repeat(2,1fr)}[class*=span-]{grid-column:span 12}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div><h1 id="hT">Dashboard Asistencias Técnicas · CSE</h1><div class="sub" id="hS">—</div></div>
+  <div class="hero-right"><div class="big" id="hPct">—</div><div class="lbl">Avance global (días)</div><div class="cut" id="hCut">—</div>
+  <button class="btn" onclick="window.print()">⤓ Exportar PDF</button></div>
+</div>
+
+<div class="filterbar">
+  <div class="fg"><label>Administrador</label><select id="fAdmin"></select></div>
+  <div class="fg"><label>Subproyecto</label><select id="fSubproy"></select></div>
+  <div class="fg"><label>Vendor</label><select id="fVendor"></select></div>
+  <div class="fg"><label>Estado</label><select id="fEstado"></select></div>
+  <button class="fclear" onclick="resetF()">Limpiar</button>
+</div>
+
+<div class="kpis" id="kpiBar"></div>
+
+<div class="section-title">Avance global · Estados · Distribución</div>
+<div class="grid">
+  <div class="card span-4"><h3>Por Estado</h3><div class="desc">Servicios por estado · clic para filtrar</div><div class="chart" id="chEstado"></div></div>
+  <div class="card span-4"><h3>Por Subproyecto</h3><div class="desc">Días totales vs ejecutados · clic para filtrar</div><div class="chart" id="chSubproy"></div></div>
+  <div class="card span-4"><h3>Distribución por % Avance</h3><div class="desc">Cantidad de servicios por rango</div><div class="chart" id="chHisto"></div></div>
+</div>
+
+<div class="section-title">Vendors y Administradores</div>
+<div class="grid">
+  <div class="card span-7"><h3>Top Vendors (días totales)</h3><div class="desc">Clic en una barra para filtrar todo el dashboard</div><div class="chart" id="chVendor"></div></div>
+  <div class="card span-5"><h3>Por Administrador</h3><div class="desc">Días gestionados por cada administrador</div><div class="chart" id="chAdmin"></div></div>
+</div>
+
+<div class="section-title">Gantt · Días Programados vs Ejecutados vs Pendientes</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="desc">Cada barra representa la duración del servicio (DT). En verde los días ejecutados (DE), en ámbar los pendientes (DR). Ordenado por % de avance.</div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--good)"></span>Días ejecutados (DE)</span>
+      <span><span class="dot" style="background:var(--warn);opacity:.75"></span>Días pendientes (DR)</span>
+      <span style="margin-left:auto;color:var(--muted)" id="ganttInfo">—</span>
+    </div>
+    <div class="chart" id="chGantt"></div>
+  </div>
+</div>
+
+<div class="section-title">Cuadrícula Diaria · Códigos de Estado</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="filterbar" style="margin-bottom:10px;padding:10px 12px">
+      <div class="fg"><label>Desde</label><select id="fDesde"></select></div>
+      <div class="fg"><label>Hasta</label><select id="fHasta"></select></div>
+      <div class="fg"><label>Vista rápida</label><select id="fVista"><option value="">—</option><option value="3m">Últimos 3 meses</option><option value="6m">Últimos 6 meses</option><option value="ytd">Año actual</option><option value="all">Todo</option></select></div>
+      <div style="margin-left:auto;color:var(--muted);font-size:11.5px" id="cuadInfo">—</div>
+    </div>
+    <div class="legend" id="cuadLeyenda"></div>
+    <div style="overflow:auto;max-height:540px;border:1px solid var(--border);border-radius:8px">
+      <table id="tblCuad" style="font-size:10px;border-collapse:separate;border-spacing:0">
+        <thead></thead><tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">Vigencias próximas (próximos 365 días)</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="desc" id="vigInfo">—</div>
+    <div class="tabwrap" style="max-height:320px"><table id="tblVig">
+      <thead><tr><th>Vendor</th><th>Administrador</th><th>Vigencia</th><th class="num">Faltan</th><th class="num">DT</th><th class="num">DR</th><th class="num">% Avance</th><th>Riesgo</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+</div>
+
+<div class="section-title">Detalle de servicios</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="desc" id="tblInfo">—</div>
+    <div class="tabwrap"><table id="tblSrv">
+      <thead><tr><th>Administrador</th><th>Contrato</th><th>ODS</th><th>Subproyecto</th><th>Vendor</th><th>Alcance</th>
+        <th class="num">DT</th><th class="num">DE</th><th class="num">DR</th><th class="num">% Avance</th><th>Vigencia</th><th>Estado</th><th>Avance</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+</div>
+
+<footer id="ftr">APPLUS+ · Dashboard de Asistencias Técnicas</footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const C={accent:'#46d3ff',accent2:'#a78bfa',good:'#27d29c',warn:'#f7b955',bad:'#ff6b6b',orange:'#ff8c42',muted:'#6b779b'};
+const PALETTE=['#46d3ff','#a78bfa','#27d29c','#f7b955','#ff8c42','#ff6b6b','#36c5f0','#e879f9','#4ade80','#fbbf24','#fb7185','#22d3ee','#c084fc','#34d399','#f59e0b','#60a5fa'];
+const STATE_COLOR={'Finalizado':C.good,'Avanzado':C.accent,'En curso':C.warn,'No iniciado':C.bad};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtN=n=>(n==null||isNaN(n))?'—':new Intl.NumberFormat('es-CO',{maximumFractionDigits:1}).format(n);
+
+/* ===== SVG helpers ===== */
+function barH(elId, items, color, fkey){
+  const el=document.getElementById(elId); if(!el)return;
+  if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
+  const max=Math.max(1,...items.map(i=>i.value));
+  const active=fkey?document.getElementById(fkey).value:'';
+  const rowH=26, padT=6, labelW=160, W=600, H=items.length*rowH+padT*2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  items.forEach((it,i)=>{
+    const y=padT+i*rowH, bw=Math.max(1,(W-labelW-70)*it.value/max), col=Array.isArray(color)?color[i%color.length]:color;
+    const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';
+    const dim=(active&&active!==it.label)?' opacity="0.32"':'';
+    s+=`<g${click}${dim}><text x="0" y="${y+rowH/2+4}" fill="#a8b6d4" font-size="11">${esc(it.label).slice(0,24)}</text>`;
+    s+=`<rect x="${labelW}" y="${y+4}" width="${bw}" height="${rowH-9}" rx="3" fill="${col}"><title>${esc(it.label)}: ${fmtN(it.value)}${it.sub?' · '+esc(it.sub):''}</title></rect>`;
+    s+=`<text x="${labelW+bw+5}" y="${y+rowH/2+4}" fill="#e8edff" font-size="11" font-weight="700">${fmtN(it.value)}</text></g>`;
+  });
+  el.innerHTML=s+'</svg>';
+}
+function barV(elId, items, colorFn){
+  const el=document.getElementById(elId); if(!el)return;
+  if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
+  const max=Math.max(1,...items.map(i=>i.value));
+  const W=Math.max(360,items.length*80), H=260, padB=46, padT=20, plotH=H-padB-padT, bw=(W-20)/items.length;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  items.forEach((it,i)=>{
+    const h=plotH*it.value/max, x=10+i*bw, y=padT+plotH-h, col=colorFn?colorFn(it,i):C.accent;
+    s+=`<rect x="${x+8}" y="${y}" width="${bw-16}" height="${h}" rx="3" fill="${col}"><title>${esc(it.label)}: ${fmtN(it.value)}</title></rect>`;
+    s+=`<text x="${x+bw/2}" y="${y-5}" fill="#e8edff" font-size="12" font-weight="700" text-anchor="middle">${fmtN(it.value)}</text>`;
+    // label puede ocupar 2 líneas
+    const lines=esc(it.label).split(' ');
+    if(lines.length>=2){
+      s+=`<text x="${x+bw/2}" y="${H-padB+15}" fill="#a8b6d4" font-size="10" text-anchor="middle">${lines[0]}</text>`;
+      s+=`<text x="${x+bw/2}" y="${H-padB+28}" fill="#a8b6d4" font-size="10" text-anchor="middle">${lines.slice(1).join(' ').slice(0,12)}</text>`;
+    } else {
+      s+=`<text x="${x+bw/2}" y="${H-padB+18}" fill="#a8b6d4" font-size="10" text-anchor="middle">${esc(it.label).slice(0,12)}</text>`;
+    }
+  });
+  el.innerHTML=s+'</svg>';
+}
+function stackedBar(elId, items, color1, color2, fkey){
+  const el=document.getElementById(elId); if(!el)return;
+  if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
+  const max=Math.max(1,...items.map(i=>i.total));
+  const active=fkey?document.getElementById(fkey).value:'';
+  const rowH=30, padT=6, labelW=160, W=560, H=items.length*rowH+padT*2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  items.forEach((it,i)=>{
+    const y=padT+i*rowH;
+    const wTotal = W-labelW-60;
+    const wDE = wTotal * (it.de/max);
+    const wDR = wTotal * (it.dr/max);
+    const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';
+    const dim=(active&&active!==it.label)?' opacity="0.32"':'';
+    s+=`<g${click}${dim}><text x="0" y="${y+rowH/2+4}" fill="#a8b6d4" font-size="11">${esc(it.label).slice(0,22)}</text>`;
+    s+=`<rect x="${labelW}" y="${y+5}" width="${wDE}" height="${rowH-13}" rx="2" fill="${color1}"><title>${esc(it.label)} · Ejecutados: ${fmtN(it.de)} días</title></rect>`;
+    s+=`<rect x="${labelW+wDE}" y="${y+5}" width="${wDR}" height="${rowH-13}" rx="2" fill="${color2}" opacity="0.7"><title>${esc(it.label)} · Restantes: ${fmtN(it.dr)} días</title></rect>`;
+    s+=`<text x="${labelW+wDE+wDR+5}" y="${y+rowH/2+4}" fill="#e8edff" font-size="11" font-weight="700">${it.pct}%</text></g>`;
+  });
+  el.innerHTML=s+'</svg>'+`<div class="legend"><span><span class="dot" style="background:${color1}"></span>Ejecutados</span><span><span class="dot" style="background:${color2};opacity:.7"></span>Restantes</span></div>`;
+}
+function donut(elId, items, colors, fkey){
+  const el=document.getElementById(elId); if(!el)return;
+  items=items.filter(i=>i.value>0);
+  if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
+  const total=items.reduce((s,i)=>s+i.value,0)||1;
+  const active=fkey?document.getElementById(fkey).value:'';
+  const cx=80,cy=84,r=58,circ=2*Math.PI*r; let off=0;
+  const H=Math.max(180,items.length*19+10);
+  let s=`<svg viewBox="0 0 340 ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  items.forEach((it,i)=>{
+    const len=it.value/total*circ, col=colors[i%colors.length];
+    const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';
+    const dim=(active&&active!==it.label)?' opacity="0.3"':'';
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="22" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"${click}${dim}><title>${esc(it.label)}: ${it.value} (${(it.value/total*100).toFixed(0)}%)</title></circle>`;
+    off+=len;
+  });
+  s+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" fill="#e8edff" font-size="22" font-weight="800">${total}</text>`;
+  s+=`<text x="${cx}" y="${cy+15}" text-anchor="middle" fill="#a8b6d4" font-size="10">servicios</text>`;
+  items.forEach((it,i)=>{const ly=18+i*19;const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';s+=`<g${click}><rect x="170" y="${ly-10}" width="11" height="11" rx="2" fill="${colors[i%colors.length]}"/><text x="187" y="${ly}" fill="#cdd9ee" font-size="11">${esc(it.label)} · ${it.value}</text></g>`;});
+  el.innerHTML=s+'</svg>';
+}
+
+/* ===== App ===== */
+document.getElementById('hS').textContent=DATA.meta.subtitulo+' · Fuente: '+DATA.meta.fuente;
+document.getElementById('hPct').textContent=DATA.kpis.pctGlobal+'%';
+document.getElementById('hCut').textContent='Corte: '+DATA.meta.corte;
+document.getElementById('ftr').textContent='APPLUS+ Colombia · Dashboard Asistencias Técnicas · '+DATA.meta.fuente+' · Corte '+DATA.meta.corte;
+
+const SELS={fAdmin:'admin',fSubproy:'subproy',fVendor:'vendor',fEstado:'estado'};
+function uniq(k){return [...new Set(DATA.servicios.map(s=>s[k]))].sort();}
+function fill(id,k,all){const s=document.getElementById(id);s.innerHTML=`<option value="">${all}</option>`+uniq(k).map(v=>`<option>${esc(v)}</option>`).join('');s.addEventListener('change',renderAll);}
+fill('fAdmin','admin','Todos');fill('fSubproy','subproy','Todos');fill('fVendor','vendor','Todos');fill('fEstado','estado','Todos');
+function resetF(){['fAdmin','fSubproy','fVendor','fEstado'].forEach(id=>document.getElementById(id).value='');renderAll();}
+
+function filtered(){
+  const f={};Object.entries(SELS).forEach(([id,k])=>f[k]=document.getElementById(id).value);
+  return DATA.servicios.filter(s=>{
+    for(const[k,v] of Object.entries(f)){ if(v&&s[k]!==v)return false; }
+    return true;
+  });
+}
+
+document.addEventListener('click',ev=>{
+  const t=ev.target.closest&&ev.target.closest('.clk'); if(!t)return;
+  const fk=t.getAttribute('data-fk'),fv=t.getAttribute('data-fv');const sel=document.getElementById(fk);if(!sel)return;
+  sel.value=(sel.value===fv)?'':fv; renderAll();
+});
+
+function renderAll(){
+  const arr=filtered();
+  try{renderKPIs(arr)}catch(e){console.error(e)}
+  // Estado
+  try{
+    const m={};arr.forEach(s=>m[s.estado]=(m[s.estado]||0)+1);
+    const items=Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([label,value])=>({label,value}));
+    const colors=items.map(it=>STATE_COLOR[it.label]||C.muted);
+    donut('chEstado',items,colors,'fEstado');
+  }catch(e){console.error(e)}
+  // Subproyecto stacked
+  try{
+    const m={};arr.forEach(s=>{const k=s.subproy;const d=m[k]||(m[k]={de:0,dr:0,dt:0,n:0});d.de+=s.de;d.dr+=s.dr;d.dt+=s.dt;d.n++;});
+    const items=Object.entries(m).map(([k,v])=>({label:k,de:v.de,dr:v.dr,total:v.dt,pct:v.dt?Math.round(v.de/v.dt*100):0})).sort((a,b)=>b.total-a.total);
+    stackedBar('chSubproy',items,C.good,C.warn,'fSubproy');
+  }catch(e){console.error(e)}
+  // Histograma
+  try{
+    const buckets=[[0,0,'0%'],[0.01,25,'1-25%'],[25.01,50,'26-50%'],[50.01,75,'51-75%'],[75.01,99.49,'76-99%'],[99.5,200,'100%']];
+    const items=buckets.map(b=>({label:b[2],value:arr.filter(s=>s.ejec>=b[0]&&s.ejec<=b[1]).length}));
+    const cf=(_,i)=>[C.bad,C.bad,C.orange,C.warn,C.accent,C.good][i];
+    barV('chHisto',items,cf);
+  }catch(e){console.error(e)}
+  // Vendor
+  try{
+    const m={};arr.forEach(s=>{const k=s.vendor;const d=m[k]||(m[k]={dt:0,de:0,n:0});d.dt+=s.dt;d.de+=s.de;d.n++;});
+    const items=Object.entries(m).map(([k,v])=>({label:k,value:Math.round(v.dt),sub:`${v.n} servicios · ${v.dt?Math.round(v.de/v.dt*100):0}% avance`})).sort((a,b)=>b.value-a.value);
+    barH('chVendor',items,C.accent,'fVendor');
+  }catch(e){console.error(e)}
+  // Admin
+  try{
+    const m={};arr.forEach(s=>{const k=s.admin;const d=m[k]||(m[k]={dt:0,n:0});d.dt+=s.dt;d.n++;});
+    const items=Object.entries(m).map(([k,v])=>({label:k,value:Math.round(v.dt),sub:`${v.n} servicios`})).sort((a,b)=>b.value-a.value);
+    barH('chAdmin',items,C.accent2,'fAdmin');
+  }catch(e){console.error(e)}
+  // Gantt
+  try{renderGantt(arr)}catch(e){console.error(e)}
+  // Cuadrícula diaria
+  try{renderCuadricula(arr)}catch(e){console.error(e)}
+  // Vigencias
+  try{renderVigencias(arr)}catch(e){console.error(e)}
+  // Tabla
+  try{renderTabla(arr)}catch(e){console.error(e)}
+}
+
+/* ===== Gantt: DT como barra base, DE verde + DR ámbar ===== */
+function renderGantt(arr){
+  const el=document.getElementById('chGantt'); if(!el)return;
+  const items=[...arr].filter(s=>s.dt>0).sort((a,b)=>a.ejec-b.ejec);
+  if(!items.length){el.innerHTML='<div class="empty">Sin servicios para mostrar</div>';return;}
+  const max=Math.max(1,...items.map(s=>s.dt));
+  const rowH=28, padT=8, labelW=240, barAreaW=900, totalW=labelW+barAreaW+90, H=items.length*rowH+padT*2;
+  let s=`<svg viewBox="0 0 ${totalW} ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  // gridlines verticales
+  for(let q=0;q<=10;q++){
+    const gx=labelW+barAreaW*q/10;
+    s+=`<line x1="${gx}" y1="${padT}" x2="${gx}" y2="${H-padT}" stroke="rgba(255,255,255,.05)"/>`;
+    if(q%2===0) s+=`<text x="${gx}" y="${padT-2}" fill="#6b779b" font-size="8.5" text-anchor="middle">${Math.round(max*q/10)}d</text>`;
+  }
+  items.forEach((it,i)=>{
+    const y=padT+i*rowH;
+    const wDE = barAreaW * (it.de/max);
+    const wDR = barAreaW * (it.dr/max);
+    // etiqueta vendor + admin
+    s+=`<text x="0" y="${y+rowH/2-1}" fill="#e8edff" font-size="11" font-weight="700">${esc(it.vendor).slice(0,28)}</text>`;
+    s+=`<text x="0" y="${y+rowH/2+11}" fill="#a8b6d4" font-size="9">${esc(it.admin).slice(0,30)}</text>`;
+    // base (DT) sutil
+    s+=`<rect x="${labelW}" y="${y+5}" width="${barAreaW*it.dt/max}" height="${rowH-12}" rx="3" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.1)" stroke-width="0.5"/>`;
+    // DE verde
+    if(wDE>0) s+=`<rect x="${labelW}" y="${y+5}" width="${wDE}" height="${rowH-12}" rx="3" fill="${C.good}"><title>${esc(it.vendor)} · Ejecutados: ${fmtN(it.de)} de ${fmtN(it.dt)} días</title></rect>`;
+    // DR ámbar
+    if(wDR>0) s+=`<rect x="${labelW+wDE}" y="${y+5}" width="${wDR}" height="${rowH-12}" fill="${C.warn}" opacity="0.78"><title>${esc(it.vendor)} · Pendientes: ${fmtN(it.dr)} de ${fmtN(it.dt)} días</title></rect>`;
+    // % al final
+    const cls = it.ejec>=90?C.good:it.ejec>=50?C.accent:it.ejec>=25?C.warn:C.bad;
+    s+=`<text x="${labelW+barAreaW+5}" y="${y+rowH/2+1}" fill="${cls}" font-size="12" font-weight="800">${it.ejec}%</text>`;
+    s+=`<text x="${labelW+barAreaW+5}" y="${y+rowH/2+13}" fill="#a8b6d4" font-size="9">DT ${fmtN(it.dt)} · DE ${fmtN(it.de)} · DR ${fmtN(it.dr)}</text>`;
+  });
+  s+='</svg>';
+  el.innerHTML=s;
+  document.getElementById('ganttInfo').textContent=`${items.length} servicios · DT máx ${fmtN(max)} días`;
+}
+
+/* ===== Cuadrícula diaria ===== */
+const CODE_MAP = (DATA.meta.leyendaCodigos||[]).reduce((m,c)=>(m[c.code]=c,m),{});
+// poblar selectores de fecha
+(function initCuad(){
+  const rg=DATA.meta.rangoCuadricula||{};
+  if(!rg.min||!rg.max){return;}
+  // generar lista de fechas en el rango (un select por mes para no saturar)
+  const opts=[];
+  let d=new Date(rg.min+'T00:00:00'), end=new Date(rg.max+'T00:00:00');
+  while(d<=end){
+    opts.push(d.toISOString().slice(0,10));
+    d.setDate(d.getDate()+1);
+  }
+  const sd=document.getElementById('fDesde'), sh=document.getElementById('fHasta');
+  // submuestra cada 7 días para no tener 912 opciones — pero conviene listar todas o por mes
+  const mes=[...new Set(opts.map(s=>s.slice(0,7)+'-01'))];
+  sd.innerHTML=mes.map(m=>`<option value="${m}">${m.slice(0,7)}</option>`).join('');
+  sh.innerHTML=mes.map(m=>{const dt=new Date(m+'T00:00:00');dt.setMonth(dt.getMonth()+1);dt.setDate(0);return `<option value="${dt.toISOString().slice(0,10)}">${m.slice(0,7)}</option>`}).join('');
+  // default: año en curso (Ene -> Oct 2026) — vista de planificación completa
+  const yearNow = new Date().getFullYear();
+  const yearStart = mes.find(m=>m.startsWith(yearNow)) || mes[Math.max(0,mes.length-10)];
+  sd.value = yearStart;
+  sh.value = sh.options[mes.length-1].value;
+  sd.addEventListener('change', renderAll);
+  sh.addEventListener('change', renderAll);
+  document.getElementById('fVista').addEventListener('change', e=>{
+    const v=e.target.value;
+    if(!v) return;
+    if(v==='3m'){sd.value=mes[Math.max(0,mes.length-3)];}
+    else if(v==='6m'){sd.value=mes[Math.max(0,mes.length-6)];}
+    else if(v==='ytd'){sd.value=mes.find(m=>m.startsWith(new Date().getFullYear()))||mes[0];}
+    else if(v==='all'){sd.value=mes[0];}
+    sh.value=sh.options[mes.length-1].value;
+    renderAll();
+  });
+  // leyenda
+  document.getElementById('cuadLeyenda').innerHTML=(DATA.meta.leyendaCodigos||[]).map(c=>`<span><span class="dot" style="background:${c.color}"></span><b>${c.code}</b> ${esc(c.label)}</span>`).join('');
+})();
+
+function renderCuadricula(arr){
+  const sd=document.getElementById('fDesde').value, eh=document.getElementById('fHasta').value;
+  if(!sd||!eh){document.querySelector('#tblCuad tbody').innerHTML='';return;}
+  // construir lista de días
+  const days=[]; let d=new Date(sd+'T00:00:00'), end=new Date(eh+'T00:00:00');
+  while(d<=end){days.push(d.toISOString().slice(0,10)); d.setDate(d.getDate()+1);}
+  const MESES_ABR=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  // construir thead: dos filas (mes + día)
+  let mesHTML=`<tr><th class="lbl">Vendor · Admin</th>`;
+  let diaHTML=`<tr><th class="lbl"></th>`;
+  let lastMonth=null, monthSpan=0, monthStart=0;
+  days.forEach((dstr,i)=>{
+    const m=dstr.slice(5,7);
+    const sep=(m!==lastMonth)?'mes-sep':'';
+    if(m!==lastMonth){lastMonth=m;}
+    diaHTML+=`<th class="${sep}">${parseInt(dstr.slice(8,10))}</th>`;
+  });
+  // primer pass: mes con colspan
+  lastMonth=null; let mCount=0;
+  const monthSpans=[];
+  days.forEach(dstr=>{
+    const m=dstr.slice(0,7);
+    if(m!==lastMonth){ if(lastMonth)monthSpans.push({m:lastMonth,n:mCount}); lastMonth=m; mCount=1; }
+    else mCount++;
+  });
+  if(lastMonth)monthSpans.push({m:lastMonth,n:mCount});
+  mesHTML+=monthSpans.map(ms=>{
+    const [y,mm]=ms.m.split('-');
+    return `<th class="mes-sep" colspan="${ms.n}" style="background:#1b264a;color:#46d3ff">${MESES_ABR[parseInt(mm)-1]} ${y.slice(2)}</th>`;
+  }).join('');
+  mesHTML+='</tr>'; diaHTML+='</tr>';
+  document.querySelector('#tblCuad thead').innerHTML=mesHTML+diaHTML;
+  // body
+  let body='';
+  arr.forEach(s=>{
+    body+=`<tr><td class="lbl" title="${esc(s.vendor)} — ${esc(s.admin)}">${esc(s.vendor).slice(0,22)}<br><span style="color:#6b779b;font-weight:400;font-size:9.5px">${esc(s.admin).slice(0,28)}</span></td>`;
+    let lastMonth=null;
+    days.forEach(dstr=>{
+      const m=dstr.slice(5,7), sep=(m!==lastMonth)?'mes-sep':''; if(m!==lastMonth)lastMonth=m;
+      const code=s.daily[dstr];
+      if(code){
+        const info=CODE_MAP[code]||{label:code,color:'#888'};
+        body+=`<td class="cell ${sep}" style="background:${info.color}" title="${dstr} · ${esc(info.label)}">${code==='EC'?'':code.slice(0,1)}</td>`;
+      } else {
+        body+=`<td class="cell ${sep}"></td>`;
+      }
+    });
+    body+='</tr>';
+  });
+  document.querySelector('#tblCuad tbody').innerHTML=body;
+  document.getElementById('cuadInfo').textContent=`${arr.length} servicios · ${days.length} días (${sd} → ${eh})`;
+}
+
+function renderKPIs(arr){
+  const dt=arr.reduce((s,x)=>s+x.dt,0), de=arr.reduce((s,x)=>s+x.de,0), dr=arr.reduce((s,x)=>s+x.dr,0);
+  const pct=dt?Math.round(de/dt*1000)/10:0;
+  document.getElementById('hPct').textContent=pct+'%';
+  const fin=arr.filter(s=>s.estado==='Finalizado').length, ni=arr.filter(s=>s.estado==='No iniciado').length;
+  const hoy=new Date().toISOString().slice(0,10);
+  const vp=DATA.vencenPronto.filter(v=>v.vigencia>=hoy && (new Date(v.vigencia)-new Date(hoy))/86400000<=60);
+  const k=[
+    {lbl:'Servicios (filtro)',val:arr.length,sub:`${new Set(arr.map(s=>s.vendor)).size} vendors · ${new Set(arr.map(s=>s.admin)).size} admins`,cls:'acc'},
+    {lbl:'Días totales (DT)',val:fmtN(Math.round(dt)),sub:'duración contratada',cls:'v2'},
+    {lbl:'Días ejecutados (DE)',val:fmtN(Math.round(de)),sub:`${pct}% del total`,cls:'good'},
+    {lbl:'Días restantes (DR)',val:fmtN(Math.round(dr)),sub:'pendientes de ejecutar',cls:'warn'},
+    {lbl:'Finalizados',val:fin,sub:'servicios al 100%',cls:'good'},
+    {lbl:'No iniciados',val:ni,sub:'0% avance',cls:'bad'},
+    {lbl:'Vigencias < 60 días',val:vp.length,sub:'requieren atención',cls:'orange'},
+    {lbl:'Subproyectos',val:new Set(arr.map(s=>s.subproy)).size,sub:'frentes activos',cls:'acc'},
+  ];
+  document.getElementById('kpiBar').innerHTML=k.map(x=>`<div class="kpi ${x.cls}"><div class="lbl">${x.lbl}</div><div class="val">${x.val}</div><div class="sub">${esc(x.sub)}</div></div>`).join('');
+}
+
+function renderVigencias(arr){
+  const sel=new Set(arr.map(s=>s.vendor+'|'+s.admin));
+  const items=DATA.vencenPronto.filter(v=>sel.has(v.vendor+'|'+v.admin));
+  document.getElementById('vigInfo').textContent=`${items.length} servicios con vigencia en los próximos 365 días`;
+  if(!items.length){document.querySelector('#tblVig tbody').innerHTML='<tr><td colspan="8" class="empty">Sin vigencias próximas en el filtro</td></tr>';return;}
+  document.querySelector('#tblVig tbody').innerHTML=items.map(v=>{
+    const riesgo = v.dias<0?'bad':(v.dias<=30?'bad':(v.dias<=60?'warn':(v.dias<=180?'orange':'good')));
+    const txt = v.dias<0?'Vencido':(v.dias<=30?'Crítico':(v.dias<=60?'Alto':(v.dias<=180?'Medio':'Bajo')));
+    return `<tr><td><b>${esc(v.vendor)}</b></td><td>${esc(v.admin)}</td><td>${v.vigencia}</td>
+      <td class="num">${v.dias} días</td>
+      <td class="num">${fmtN(v.dt)}</td>
+      <td class="num">${fmtN(v.dr)}</td>
+      <td class="num">${v.ejec}%</td>
+      <td><span class="pill" style="background:rgba(255,255,255,.06);color:var(--${riesgo})">${txt}</span></td></tr>`;
+  }).join('');
+}
+
+function estadoPill(e){
+  const map={'Finalizado':'good','Avanzado':'acc','En curso':'warn','No iniciado':'bad'};
+  const c=map[e]||'muted';
+  return `<span class="pill" style="background:rgba(255,255,255,.06);color:var(--${c})">${e}</span>`;
+}
+function avanceBar(p){
+  const c = p>=90?'good':p>=50?'acc':p>=25?'warn':'bad';
+  return `<div style="height:8px;width:90px;background:rgba(255,255,255,.07);border-radius:4px"><div style="height:100%;width:${Math.min(p,100)}%;background:var(--${c});border-radius:4px"></div></div>`;
+}
+function renderTabla(arr){
+  document.getElementById('tblInfo').textContent=`${arr.length} servicios en el filtro · DT ${fmtN(arr.reduce((s,x)=>s+x.dt,0))} · DE ${fmtN(arr.reduce((s,x)=>s+x.de,0))} · DR ${fmtN(arr.reduce((s,x)=>s+x.dr,0))}`;
+  const sorted=[...arr].sort((a,b)=>a.ejec-b.ejec);
+  document.querySelector('#tblSrv tbody').innerHTML=sorted.map(s=>`
+    <tr><td>${esc(s.admin)}</td><td>${esc(s.contrato)}</td><td>${esc(s.ods)}</td>
+      <td>${esc(s.subproy)}</td><td><b>${esc(s.vendor)}</b></td>
+      <td title="${esc(s.alcance)}">${esc(s.alcance).slice(0,38)}…</td>
+      <td class="num">${fmtN(s.dt)}</td><td class="num">${fmtN(s.de)}</td><td class="num">${fmtN(s.dr)}</td>
+      <td class="num"><b>${s.ejec}%</b></td><td>${s.vigencia||'—'}</td><td>${estadoPill(s.estado)}</td><td>${avanceBar(s.ejec)}</td></tr>`).join('');
+}
+
+renderAll();
+</script>
+</body>
+</html>

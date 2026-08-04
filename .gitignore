@@ -1,0 +1,30 @@
+# Personal (no va a repo público)
+WORLDNAC/
+
+# Videos y binarios pesados
+Video_YouTube/
+*.mp4
+*.mp3
+
+# Fuentes de datos grandes (se generan aparte, no viven en repo)
+*.xlsx
+*.xlsm
+*.pbix
+*.xlsb
+*.mpp
+
+# Build artifacts (gradle, node_modules)
+**/.gradle/
+**/node_modules/
+**/build/
+**/target/
+
+# Solo los HTML activos, no historia gigante de backups
+**/Backups/
+**/Superados/
+
+# Shortcuts a OneDrive
+*.lnk
+
+# Temp
+_tmp_*/

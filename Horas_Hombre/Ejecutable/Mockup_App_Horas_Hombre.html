@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Control de Horas Hombre · APPLUS+ ATIP CSE · Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0F1E; --bg2:#161F38; --panel:#1B264A; --panel2:#223060;
+  --text:#E8EDFF; --text-2:#A8B6D4; --muted:#6B779B;
+  --accent:#46D3FF; --accent2:#A78BFA; --good:#27D29C; --warn:#F7B955; --bad:#FF6B6B;
+  --brand:#FFD028; --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',system-ui,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;overflow-x:hidden}
+body{background:radial-gradient(900px 600px at 10% 5%,rgba(70,211,255,.10),transparent 60%),radial-gradient(800px 500px at 90% 95%,rgba(167,139,250,.10),transparent 60%),var(--bg)}
+
+/* Login screen */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--border);border-radius:24px;padding:40px 44px;max-width:440px;width:100%;position:relative;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.5)}
+.login-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--brand),var(--accent),var(--accent2))}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.login-logo svg{width:44px;height:44px}
+.login-logo .brand-name{font-size:22px;font-weight:900;letter-spacing:.5px}
+.login-logo .brand-name .plus{color:var(--brand)}
+.login-title{font-size:24px;font-weight:800;margin-bottom:6px}
+.login-sub{color:var(--text-2);font-size:13px;margin-bottom:26px}
+.input-group{margin-bottom:16px}
+.input-group label{display:block;font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px}
+.input-group input, .input-group select, .input-group textarea{width:100%;background:rgba(10,15,30,.6);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:13px;transition:.2s;font-family:inherit}
+.input-group input:focus, .input-group select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(70,211,255,.15)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;transition:.2s;border:none;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;width:100%}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(70,211,255,.4)}
+.btn-secondary{background:rgba(255,255,255,.05);color:var(--text-2);border:1px solid var(--border)}
+.btn-secondary:hover{background:rgba(255,255,255,.08);color:var(--text)}
+.btn-brand{background:linear-gradient(135deg,var(--brand),#FF8C00);color:#0A0F1E}
+.btn-ghost{background:transparent;color:var(--accent);padding:6px 10px}
+.login-links{display:flex;justify-content:space-between;margin-top:14px;font-size:12px}
+.login-links a{color:var(--accent);text-decoration:none;cursor:pointer;font-weight:600}
+.login-links a:hover{text-decoration:underline}
+
+/* Main app layout */
+.app{display:none;grid-template-columns:240px 1fr;min-height:100vh}
+.app.active{display:grid}
+@media(max-width:768px){.app{grid-template-columns:1fr}.sidebar{position:fixed;left:-260px;top:0;height:100vh;z-index:100;transition:.25s}.sidebar.open{left:0}}
+.sidebar{background:linear-gradient(180deg,var(--bg2),#0e1428);border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column}
+.sidebar .logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;padding:0 8px}
+.sidebar .logo svg{width:36px;height:36px}
+.sidebar .logo .txt{font-size:16px;font-weight:900}
+.sidebar .logo .plus{color:var(--brand)}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;color:var(--text-2);text-decoration:none;cursor:pointer;transition:.15s;margin-bottom:4px;font-size:13px;font-weight:600;border:none;background:transparent;width:100%;text-align:left;font-family:inherit}
+.nav-btn:hover{background:rgba(70,211,255,.08);color:var(--text)}
+.nav-btn.active{background:linear-gradient(90deg,rgba(70,211,255,.15),transparent);color:var(--accent);border-left:3px solid var(--accent);padding-left:11px}
+.nav-btn svg{width:16px;height:16px;flex-shrink:0}
+.sidebar .user-card{margin-top:auto;padding:14px;background:rgba(255,255,255,.03);border-radius:12px;display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:900;color:#0A0F1E;font-size:14px}
+.user-info{flex:1;font-size:12px}
+.user-info .name{font-weight:700;color:var(--text)}
+.user-info .role{color:var(--muted);font-size:11px}
+
+.main{padding:28px 32px;overflow-y:auto;min-height:100vh}
+@media(max-width:768px){.main{padding:16px}}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-header h1{font-size:22px;font-weight:800}
+.page-header .sub{color:var(--text-2);font-size:12.5px;margin-top:2px}
+.page-header .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.hidden{display:none !important}
+
+/* KPI cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.kpi{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;transition:.2s;cursor:pointer}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent-c,var(--accent))}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(70,211,255,.15)}
+.kpi .lbl{font-size:10.5px;color:var(--text-2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px}
+.kpi .val{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums}
+.kpi .delta{font-size:11px;color:var(--good);margin-top:4px;font-weight:600}
+.kpi.warn{--accent-c:var(--warn)} .kpi.warn .val{color:var(--warn)}
+.kpi.good{--accent-c:var(--good)} .kpi.good .val{color:var(--good)}
+.kpi.bad{--accent-c:var(--bad)} .kpi.bad .val{color:var(--bad)}
+.kpi.p{--accent-c:var(--accent2)} .kpi.p .val{color:var(--accent2)}
+
+/* Cards */
+.grid{display:grid;gap:16px}
+.grid.cols-2{grid-template-columns:1fr 1fr}
+.grid.cols-3{grid-template-columns:2fr 1fr 1fr}
+@media(max-width:900px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr}}
+.card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--border);border-radius:14px;padding:20px}
+.card h3{font-size:14px;font-weight:800;margin-bottom:6px;letter-spacing:.3px}
+.card .desc{color:var(--text-2);font-size:11.5px;margin-bottom:14px}
+
+/* SVG chart wrappers */
+.chart{width:100%;height:220px;display:block}
+
+/* Filters bar */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:end}
+.filters .fld{display:flex;flex-direction:column;gap:3px;min-width:140px}
+.filters .fld label{font-size:9px;color:var(--text-2);text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+.filters select, .filters input{background:rgba(10,15,30,.6);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit}
+
+/* Table */
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:rgba(70,211,255,.08);color:var(--accent);text-align:left;padding:10px 12px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px;position:sticky;top:0}
+td{padding:10px 12px;border-top:1px solid var(--border);color:var(--text-2)}
+tr:hover td{background:rgba(70,211,255,.03);color:var(--text)}
+.pill{display:inline-block;padding:3px 9px;border-radius:99px;font-size:10.5px;font-weight:700;letter-spacing:.3px}
+.pill.good{background:rgba(39,210,156,.15);color:var(--good)} .pill.warn{background:rgba(247,185,85,.15);color:var(--warn)} .pill.bad{background:rgba(255,107,107,.15);color:var(--bad)} .pill.accent{background:rgba(70,211,255,.15);color:var(--accent)}
+
+/* Register jornada steps */
+.step-bar{display:flex;gap:6px;margin-bottom:20px;background:rgba(255,255,255,.03);padding:6px;border-radius:12px}
+.step{flex:1;padding:8px 12px;text-align:center;border-radius:8px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:.2s}
+.step.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.step.done{color:var(--good)}
+
+/* Duplicate from yesterday callout */
+.callout{background:linear-gradient(135deg,rgba(255,208,40,.12),rgba(255,140,0,.05));border:1px dashed var(--brand);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:16px;cursor:pointer;transition:.2s}
+.callout:hover{background:linear-gradient(135deg,rgba(255,208,40,.18),rgba(255,140,0,.08))}
+.callout .ico{font-size:22px}
+.callout .txt{flex:1}
+.callout .txt b{color:var(--brand);font-weight:800}
+.callout .txt div{font-size:11.5px;color:var(--text-2);margin-top:2px}
+
+/* Weekly heatmap */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;transition:.2s;padding:6px}
+.day .lbl{font-size:9px;color:var(--muted);text-transform:uppercase}
+.day .n{font-size:16px;font-weight:900;margin-top:2px}
+.day.done{background:linear-gradient(135deg,var(--good),#1FAF7F);color:#fff}
+.day.done .lbl{color:rgba(255,255,255,.7)}
+.day.part{background:linear-gradient(135deg,var(--warn),#D89540);color:#fff}
+.day.part .lbl{color:rgba(255,255,255,.8)}
+.day.empty{background:rgba(255,107,107,.12);border:1px dashed var(--bad);color:var(--bad)}
+.day.future{background:rgba(255,255,255,.03);color:var(--muted);border:1px dashed var(--border)}
+
+/* Timeline mobile-mockup preview */
+.mobile-preview{display:flex;justify-content:center;padding:20px;background:rgba(0,0,0,.2);border-radius:16px;margin:16px 0}
+.phone{width:280px;background:#0A0F1E;border:8px solid #2a2f42;border-radius:32px;padding:14px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.phone-screen{background:linear-gradient(180deg,var(--panel),var(--bg2));border-radius:20px;padding:16px;min-height:400px}
+.phone-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.phone-hdr .h-title{font-size:13px;font-weight:800}
+.phone-hdr .h-menu{color:var(--accent);font-size:16px}
+.phone-item{background:rgba(10,15,30,.6);border-radius:10px;padding:10px 12px;margin-bottom:6px;font-size:11px}
+.phone-item .t{font-weight:700;color:var(--accent);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+.phone-item .d{color:var(--text-2);margin-top:2px;font-size:11px}
+.fab{position:absolute;bottom:14px;right:14px;width:44px;height:44px;background:linear-gradient(135deg,var(--brand),#FF8C00);color:#0A0F1E;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;box-shadow:0 8px 20px rgba(255,208,40,.4)}
+
+/* Mobile menu toggle */
+.mobile-toggle{display:none;position:fixed;top:12px;left:12px;z-index:200;background:var(--accent);color:#0A0F1E;border:none;width:40px;height:40px;border-radius:10px;font-size:18px;cursor:pointer;font-weight:900}
+@media(max-width:768px){.mobile-toggle{display:block}}
+
+.stack-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(70,211,255,.10);color:var(--accent);padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:700;border:1px solid rgba(70,211,255,.25);letter-spacing:.4px}
+
+.mockup-banner{background:linear-gradient(135deg,rgba(255,208,40,.15),rgba(255,140,0,.05));border:1px solid var(--brand);border-radius:12px;padding:12px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:12px}
+.mockup-banner b{color:var(--brand)}
+</style>
+</head><body>
+
+<!-- ================== LOGIN SCREEN ================== -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 64 64"><defs><linearGradient id="g1"><stop offset="0%" stop-color="#46d3ff"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs><rect x="6" y="6" width="52" height="52" rx="12" fill="url(#g1)" opacity=".18"/><rect x="6" y="6" width="52" height="52" rx="12" fill="none" stroke="url(#g1)" stroke-width="1.5"/><path d="M16 42 L26 26 L34 36 L48 18" fill="none" stroke="#ffd028" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="48" cy="18" r="3.5" fill="#ffd028"/><circle cx="34" cy="36" r="2.8" fill="#46d3ff"/><circle cx="26" cy="26" r="2.8" fill="#a78bfa"/></svg>
+      <div class="brand-name">APPLUS<span class="plus">+</span></div>
+    </div>
+    <div class="login-title">Control de Horas Hombre</div>
+    <div class="login-sub">Registra tu jornada del día en menos de 30 segundos</div>
+    <div class="input-group"><label>Usuario o correo</label><input type="text" value="edgar.suarez"></div>
+    <div class="input-group"><label>Contraseña</label><input type="password" value="••••••••"></div>
+    <button class="btn btn-primary" onclick="showApp()">Iniciar sesión</button>
+    <div class="login-links">
+      <a>¿Olvidaste tu contraseña?</a>
+      <a>Crear cuenta nueva</a>
+    </div>
+    <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);color:var(--muted);font-size:10.5px">
+      🔒 Autenticación segura vía Supabase Auth · Datos cifrados
+    </div>
+  </div>
+</div>
+
+<!-- ================== APP LAYOUT ================== -->
+<button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <svg viewBox="0 0 64 64"><rect x="6" y="6" width="52" height="52" rx="12" fill="url(#g1)" opacity=".18"/><rect x="6" y="6" width="52" height="52" rx="12" fill="none" stroke="url(#g1)" stroke-width="1.5"/><path d="M16 42 L26 26 L34 36 L48 18" fill="none" stroke="#ffd028" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="48" cy="18" r="3.5" fill="#ffd028"/><circle cx="34" cy="36" r="2.8" fill="#46d3ff"/><circle cx="26" cy="26" r="2.8" fill="#a78bfa"/></svg>
+      <div class="txt">APPLUS<span class="plus">+</span> HH</div>
+    </div>
+    <button class="nav-btn active" data-page="dashboard" onclick="goPage('dashboard')">📊 Dashboard</button>
+    <button class="nav-btn" data-page="registrar" onclick="goPage('registrar')">✏️ Registrar Jornada</button>
+    <button class="nav-btn" data-page="mis-registros" onclick="goPage('mis-registros')">📅 Mis Registros</button>
+    <button class="nav-btn" data-page="reportes" onclick="goPage('reportes')">📈 Reportes</button>
+    <button class="nav-btn" data-page="aprobacion" onclick="goPage('aprobacion')">✅ Aprobación (Líder)</button>
+    <button class="nav-btn" data-page="perfil" onclick="goPage('perfil')">👤 Mi Perfil</button>
+    <button class="nav-btn" data-page="mobile" onclick="goPage('mobile')">📱 Vista Móvil</button>
+
+    <div class="user-card">
+      <div class="avatar">ES</div>
+      <div class="user-info">
+        <div class="name">Edgar Suárez</div>
+        <div class="role">Ing. Planeación</div>
+      </div>
+    </div>
+    <button class="nav-btn" style="margin-top:8px;color:var(--bad)" onclick="showLogin()">⏻ Salir</button>
+  </aside>
+
+  <main class="main">
+    <div class="mockup-banner">
+      💡 <b>MOCKUP INTERACTIVO</b> — Navega entre pantallas usando la barra lateral. Datos de ejemplo. La versión real usará Supabase + Vercel · PWA instalable en móvil.
+    </div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="page" data-page="dashboard">
+      <div class="page-header">
+        <div><h1>Dashboard</h1><div class="sub">Vista general · Julio 2026</div></div>
+        <div class="actions"><span class="stack-badge">🟢 Sincronizado</span><button class="btn btn-brand" onclick="goPage('registrar')">+ Nueva Jornada</button></div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="lbl">Horas registradas mes</div><div class="val">148h</div><div class="delta">↑ 12h vs semana pasada</div></div>
+        <div class="kpi good"><div class="lbl">Días completos</div><div class="val">18/22</div><div class="delta">82% cumplimiento</div></div>
+        <div class="kpi warn"><div class="lbl">Días pendientes</div><div class="val">3</div><div class="delta" style="color:var(--warn)">Registra hoy</div></div>
+        <div class="kpi p"><div class="lbl">Horas extras mes</div><div class="val">14h</div><div class="delta">8h día · 6h noche</div></div>
+      </div>
+
+      <div class="card">
+        <h3>Mi semana actual</h3>
+        <div class="desc">Semana 29 · Lun 13-jul al Dom 19-jul 2026 · Clic en un día para editar/registrar</div>
+        <div class="week">
+          <div class="day done"><div class="lbl">Lun 13</div><div class="n">8h</div></div>
+          <div class="day done"><div class="lbl">Mar 14</div><div class="n">8h</div></div>
+          <div class="day done"><div class="lbl">Mié 15</div><div class="n">8h</div></div>
+          <div class="day done"><div class="lbl">Jue 16</div><div class="n">8h</div></div>
+          <div class="day part"><div class="lbl">Vie 17</div><div class="n">6h</div></div>
+          <div class="day empty"><div class="lbl">Sáb 18</div><div class="n">—</div></div>
+          <div class="day done"><div class="lbl">Dom 19</div><div class="n">8h</div></div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px" class="grid cols-2">
+        <div class="card">
+          <h3>Horas por HUB</h3>
+          <div class="desc">Distribución del mes</div>
+          <svg class="chart" viewBox="0 0 400 240" preserveAspectRatio="xMidYMid meet">
+            <g transform="translate(120 120)">
+              <path d="M 0,-90 A 90,90 0 0,1 85.6,-27.8 L 0,0 Z" fill="#46D3FF"/>
+              <path d="M 85.6,-27.8 A 90,90 0 0,1 52.9,72.8 L 0,0 Z" fill="#A78BFA"/>
+              <path d="M 52.9,72.8 A 90,90 0 0,1 -52.9,72.8 L 0,0 Z" fill="#27D29C"/>
+              <path d="M -52.9,72.8 A 90,90 0 0,1 -85.6,-27.8 L 0,0 Z" fill="#F7B955"/>
+              <path d="M -85.6,-27.8 A 90,90 0 0,1 0,-90 L 0,0 Z" fill="#FF6B6B"/>
+              <circle r="45" fill="#161F38"/>
+              <text text-anchor="middle" y="-5" font-size="20" font-weight="900" fill="#fff">148h</text>
+              <text text-anchor="middle" y="14" font-size="9" fill="#A8B6D4">TOTAL MES</text>
+            </g>
+            <g font-size="11" fill="#E8EDFF">
+              <g transform="translate(240 40)"><rect width="10" height="10" fill="#46D3FF" rx="2"/><text x="16" y="9" font-weight="700">ANDINA ORIENTE · 48h</text></g>
+              <g transform="translate(240 62)"><rect width="10" height="10" fill="#A78BFA" rx="2"/><text x="16" y="9" font-weight="700">ORINOQUIA · 36h</text></g>
+              <g transform="translate(240 84)"><rect width="10" height="10" fill="#27D29C" rx="2"/><text x="16" y="9" font-weight="700">PIEDEMONTE · 30h</text></g>
+              <g transform="translate(240 106)"><rect width="10" height="10" fill="#F7B955" rx="2"/><text x="16" y="9" font-weight="700">CENTRAL · 20h</text></g>
+              <g transform="translate(240 128)"><rect width="10" height="10" fill="#FF6B6B" rx="2"/><text x="16" y="9" font-weight="700">DOWNSTREAM · 14h</text></g>
+            </g>
+          </svg>
+        </div>
+
+        <div class="card">
+          <h3>Horas por ODS</h3>
+          <div class="desc">Top 6 órdenes de servicio</div>
+          <svg class="chart" viewBox="0 0 400 240" preserveAspectRatio="xMidYMid meet">
+            <g font-size="10" fill="#A8B6D4">
+              <text x="10" y="20" fill="#E8EDFF" font-weight="700">ODS 091</text>
+              <rect x="90" y="10" width="230" height="16" fill="#46D3FF" rx="3"/>
+              <text x="326" y="22" fill="#E8EDFF" font-weight="700">42h</text>
+
+              <text x="10" y="50" fill="#E8EDFF" font-weight="700">ODS 071</text>
+              <rect x="90" y="40" width="180" height="16" fill="#A78BFA" rx="3"/>
+              <text x="276" y="52" fill="#E8EDFF" font-weight="700">32h</text>
+
+              <text x="10" y="80" fill="#E8EDFF" font-weight="700">ODS 021</text>
+              <rect x="90" y="70" width="145" height="16" fill="#27D29C" rx="3"/>
+              <text x="241" y="82" fill="#E8EDFF" font-weight="700">26h</text>
+
+              <text x="10" y="110" fill="#E8EDFF" font-weight="700">ODS 061</text>
+              <rect x="90" y="100" width="115" height="16" fill="#F7B955" rx="3"/>
+              <text x="211" y="112" fill="#E8EDFF" font-weight="700">21h</text>
+
+              <text x="10" y="140" fill="#E8EDFF" font-weight="700">ODS 121</text>
+              <rect x="90" y="130" width="80" height="16" fill="#FF6B6B" rx="3"/>
+              <text x="176" y="142" fill="#E8EDFF" font-weight="700">15h</text>
+
+              <text x="10" y="170" fill="#E8EDFF" font-weight="700">ODS 141</text>
+              <rect x="90" y="160" width="65" height="16" fill="#5DADE2" rx="3"/>
+              <text x="161" y="172" fill="#E8EDFF" font-weight="700">12h</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div style="margin-top:16px" class="grid cols-2">
+        <div class="card">
+          <h3>Horas por Actividad General</h3>
+          <div class="desc">Distribución del mes</div>
+          <svg class="chart" viewBox="0 0 400 240">
+            <g transform="translate(120 120)">
+              <path d="M 0,-90 A 90,90 0 0,1 90,0 L 0,0 Z" fill="#46D3FF"/>
+              <path d="M 90,0 A 90,90 0 0,1 27.8,85.6 L 0,0 Z" fill="#A78BFA"/>
+              <path d="M 27.8,85.6 A 90,90 0 0,1 -52.9,72.8 L 0,0 Z" fill="#27D29C"/>
+              <path d="M -52.9,72.8 A 90,90 0 0,1 -90,0 L 0,0 Z" fill="#F7B955"/>
+              <path d="M -90,0 A 90,90 0 0,1 0,-90 L 0,0 Z" fill="#FF6B6B"/>
+              <circle r="45" fill="#161F38"/>
+            </g>
+            <g font-size="10" fill="#E8EDFF">
+              <g transform="translate(240 30)"><rect width="10" height="10" fill="#46D3FF" rx="2"/><text x="16" y="9" font-weight="700">Comisionamiento 42h</text></g>
+              <g transform="translate(240 52)"><rect width="10" height="10" fill="#A78BFA" rx="2"/><text x="16" y="9" font-weight="700">Planeación 30h</text></g>
+              <g transform="translate(240 74)"><rect width="10" height="10" fill="#27D29C" rx="2"/><text x="16" y="9" font-weight="700">Informes 28h</text></g>
+              <g transform="translate(240 96)"><rect width="10" height="10" fill="#F7B955" rx="2"/><text x="16" y="9" font-weight="700">Reuniones 26h</text></g>
+              <g transform="translate(240 118)"><rect width="10" height="10" fill="#FF6B6B" rx="2"/><text x="16" y="9" font-weight="700">Capacitación 22h</text></g>
+            </g>
+          </svg>
+        </div>
+
+        <div class="card">
+          <h3>Horas por Disciplina</h3>
+          <div class="desc">Personal del equipo</div>
+          <svg class="chart" viewBox="0 0 400 240">
+            <g font-size="10">
+              <g transform="translate(20 15)"><rect width="10" height="10" fill="#46D3FF" rx="2"/><text x="16" y="9" fill="#E8EDFF" font-weight="700">Ing. Planeación</text><text x="360" y="9" fill="#46D3FF" font-weight="700" text-anchor="end">32h</text></g>
+              <g transform="translate(20 40)"><rect width="10" height="10" fill="#A78BFA" rx="2"/><text x="16" y="9" fill="#E8EDFF" font-weight="700">Ing. Electricista</text><text x="360" y="9" fill="#A78BFA" font-weight="700" text-anchor="end">28h</text></g>
+              <g transform="translate(20 65)"><rect width="10" height="10" fill="#27D29C" rx="2"/><text x="16" y="9" fill="#E8EDFF" font-weight="700">Ing. Instrumentación</text><text x="360" y="9" fill="#27D29C" font-weight="700" text-anchor="end">24h</text></g>
+              <g transform="translate(20 90)"><rect width="10" height="10" fill="#F7B955" rx="2"/><text x="16" y="9" fill="#E8EDFF" font-weight="700">Tec. Mec. Rotativo</text><text x="360" y="9" fill="#F7B955" font-weight="700" text-anchor="end">20h</text></g>
+              <g transform="translate(20 115)"><rect width="10" height="10" fill="#FF6B6B" rx="2"/><text x="16" y="9" fill="#E8EDFF" font-weight="700">Ing. Mecánico</text><text x="360" y="9" fill="#FF6B6B" font-weight="700" text-anchor="end">18h</text></g>
+              <g transform="translate(20 140)"><rect width="10" height="10" fill="#5DADE2" rx="2"/><text x="16" y="9" fill="#E8EDFF" font-weight="700">Ing. Certificador</text><text x="360" y="9" fill="#5DADE2" font-weight="700" text-anchor="end">14h</text></g>
+              <g transform="translate(20 165)"><rect width="10" height="10" fill="#BB8FCE" rx="2"/><text x="16" y="9" fill="#E8EDFF" font-weight="700">HSE</text><text x="360" y="9" fill="#BB8FCE" font-weight="700" text-anchor="end">12h</text></g>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== REGISTRAR JORNADA ===== -->
+    <div class="page hidden" data-page="registrar">
+      <div class="page-header">
+        <div><h1>Registrar Jornada</h1><div class="sub">Lunes, 20 de julio de 2026 · Semana 30</div></div>
+      </div>
+
+      <div class="callout" onclick="alert('Perfecto! Cargaría los datos del último registro (HUB, ODS, Proyecto y Cargo)')">
+        <div class="ico">⚡</div>
+        <div class="txt"><b>Duplicar desde ayer</b><div>Precarga HUB, ODS, Proyecto y Cargo del último registro. Terminas en 30 segundos.</div></div>
+        <button class="btn btn-brand">Duplicar</button>
+      </div>
+
+      <div class="step-bar">
+        <div class="step done">1. Contexto</div>
+        <div class="step active">2. Actividad</div>
+        <div class="step">3. Horas + Foto</div>
+        <div class="step">4. Confirmar</div>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Contexto del día</h3>
+          <div class="desc">Automático desde ayer · edita si cambió algo</div>
+          <div class="input-group"><label>HUB</label><select><option>ANDINA ORIENTE</option><option>CENTRAL</option><option>ORINOQUIA</option><option>PIEDEMONTE</option><option>DOWNSTREAM</option><option>CORPORATIVO Y NUEVAS ENERGÍAS</option></select></div>
+          <div class="input-group"><label>Orden de Servicio (ODS)</label><select><option>ODS 091 - Caño Sur Este</option><option>ODS 071</option><option>ODS 081</option></select></div>
+          <div class="input-group"><label>Proyecto / Sub-proyecto</label><select><option>ECU21212 - CSE Módulo 4</option><option>ECU17049 - CSE FAC</option></select></div>
+          <div class="input-group"><label>Cargo / Disciplina</label><input type="text" value="Ingeniero de Planeación" readonly style="background:rgba(70,211,255,.08);color:var(--accent)"></div>
+        </div>
+
+        <div class="card">
+          <h3>Actividad del día</h3>
+          <div class="desc">Elige categoría · describe con voz o texto</div>
+          <div class="input-group"><label>Actividad General</label><select>
+            <option>COMISIONAMIENTO</option><option>PLANEACIÓN</option><option>INFORMES</option><option>PRESERVACIÓN</option><option>CARACTERIZACIÓN</option><option>CATALOGACIÓN Y PLANES MTTO</option><option>CAPACITACIONES Y TALLERES</option><option>REUNIONES Y AUDITORÍAS</option><option>PRUEBAS FAT</option><option>DECOMISIONAMIENTO</option><option>PERSONAL TRANSVERSAL, LOGÍSTICO Y HSE</option><option>TIEMPOS NO PRODUCTIVOS</option>
+          </select></div>
+          <div class="input-group">
+            <label>Descripción (voz + IA Gemini)</label>
+            <textarea rows="4" style="background:rgba(10,15,30,.6);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:13px;font-family:inherit;width:100%;resize:vertical">Actualización del Dashboard QA CSE al corte 2026-07-16 y regeneración del PPTX ejecutivo con la sección de Desempeño de Indicadores.</textarea>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button class="btn btn-secondary" style="padding:6px 10px;font-size:11px">🎤 Dictar</button>
+              <button class="btn btn-secondary" style="padding:6px 10px;font-size:11px">✨ Mejorar con IA</button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Foto (opcional · arrastra o toma)</label>
+            <div style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;color:var(--muted);cursor:pointer">📷 Toca para subir · Se comprime automáticamente</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h3>Horas y turno</h3>
+        <div class="desc">Distribuye hasta 8h normales · extras van aparte</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <div class="input-group"><label>Horas Normales</label><input type="number" value="6" min="0" max="8"></div>
+          <div class="input-group"><label>Turno</label><select><option>AM (6:00 - 12:00)</option><option>PM (12:00 - 18:00)</option></select></div>
+          <div class="input-group"><label>Extras DÍA (hasta 7pm)</label><input type="number" value="0" min="0"></div>
+          <div class="input-group"><label>Extras NOCHE (hasta 6am)</label><input type="number" value="0" min="0"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:12px;color:var(--text-2)">Total del día: <b style="color:var(--accent);font-size:16px">6h</b> normales + <b style="color:var(--warn)">0h</b> extras</div>
+          <div><button class="btn btn-secondary">Guardar borrador</button> <button class="btn btn-primary" style="width:auto">✅ Confirmar Jornada</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MIS REGISTROS ===== -->
+    <div class="page hidden" data-page="mis-registros">
+      <div class="page-header"><div><h1>Mis Registros</h1><div class="sub">Historial completo de tus jornadas</div></div><div class="actions"><button class="btn btn-secondary">📥 Excel</button><button class="btn btn-secondary">📄 PDF</button></div></div>
+
+      <div class="filters">
+        <div class="fld"><label>Mes</label><select><option>Julio 2026</option></select></div>
+        <div class="fld"><label>HUB</label><select><option>Todos</option></select></div>
+        <div class="fld"><label>ODS</label><select><option>Todas</option></select></div>
+        <div class="fld"><label>Estado</label><select><option>Todos</option><option>Aprobados</option><option>Pendientes</option></select></div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Sem</th><th>HUB</th><th>ODS</th><th>Proyecto</th><th>Actividad</th><th>Horas</th><th>Turno</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td><b>19/07/2026</b></td><td>29</td><td>ANDINA ORIENTE</td><td>ODS 091</td><td>ECU21212</td><td>Planeación</td><td><b>8h</b></td><td>AM</td><td><span class="pill good">Aprobado</span></td></tr>
+            <tr><td><b>18/07/2026</b></td><td>29</td><td>ANDINA ORIENTE</td><td>ODS 091</td><td>ECU21212</td><td>Informes</td><td><b>6h</b></td><td>AM</td><td><span class="pill warn">Pendiente</span></td></tr>
+            <tr><td><b>17/07/2026</b></td><td>29</td><td>ANDINA ORIENTE</td><td>ODS 091</td><td>ECU21212</td><td>Comisionamiento</td><td><b>8h</b></td><td>PM</td><td><span class="pill good">Aprobado</span></td></tr>
+            <tr><td><b>16/07/2026</b></td><td>29</td><td>ANDINA ORIENTE</td><td>ODS 071</td><td>ECU17049</td><td>Reuniones</td><td><b>4h</b> + 2h ext día</td><td>AM/PM</td><td><span class="pill good">Aprobado</span></td></tr>
+            <tr><td><b>15/07/2026</b></td><td>29</td><td>ANDINA ORIENTE</td><td>ODS 091</td><td>ECU21212</td><td>Preservación</td><td><b>8h</b></td><td>AM</td><td><span class="pill good">Aprobado</span></td></tr>
+            <tr><td><b>14/07/2026</b></td><td>29</td><td>ORINOQUIA</td><td>ODS 021</td><td>—</td><td>Capacitación</td><td><b>8h</b></td><td>AM</td><td><span class="pill good">Aprobado</span></td></tr>
+            <tr><td><b>13/07/2026</b></td><td>29</td><td>ANDINA ORIENTE</td><td>ODS 091</td><td>ECU21212</td><td>Informes</td><td><b>8h</b> + 3h ext noche</td><td>PM</td><td><span class="pill accent">Extra</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== REPORTES ===== -->
+    <div class="page hidden" data-page="reportes">
+      <div class="page-header"><div><h1>Reportes Ejecutivos</h1><div class="sub">Análisis mensual · Filtros multi-dimensión</div></div><div class="actions"><button class="btn btn-secondary">📥 Excel</button><button class="btn btn-brand">📊 PowerBI</button></div></div>
+
+      <div class="filters">
+        <div class="fld"><label>Año</label><select><option>2026</option></select></div>
+        <div class="fld"><label>Mes</label><select><option>Julio</option></select></div>
+        <div class="fld"><label>HUB</label><select><option>Todos</option><option>ANDINA ORIENTE</option></select></div>
+        <div class="fld"><label>ODS</label><select><option>Todas</option></select></div>
+        <div class="fld"><label>Proyecto</label><select><option>Todos</option></select></div>
+        <div class="fld"><label>Cargo</label><select><option>Todos</option></select></div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="lbl">Total H-H mes</div><div class="val">14,850h</div><div class="delta">↑ 8% vs junio</div></div>
+        <div class="kpi p"><div class="lbl">Costo estimado</div><div class="val">$485M</div><div class="delta">COP · c/tarifa cargo</div></div>
+        <div class="kpi good"><div class="lbl">Personas activas</div><div class="val">78</div><div class="delta">96% del equipo</div></div>
+        <div class="kpi warn"><div class="lbl">Horas extras</div><div class="val">652h</div><div class="delta">4.4% del total</div></div>
+      </div>
+
+      <div class="card">
+        <h3>Detalle de personal · Julio 2026</h3>
+        <div class="desc">Cargos abreviados · clic en una fila para ver desglose</div>
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th>Colaborador</th><th>Cargo</th><th>H Norm</th><th>H Extra Día</th><th>H Extra Noche</th><th>Total H</th><th>Días</th><th>% Cumpl.</th></tr></thead>
+          <tbody>
+            <tr><td><b>Edgar Suárez</b></td><td><span class="pill accent">Ing. Plan.</span></td><td>144</td><td>4</td><td>0</td><td><b>148</b></td><td>18/22</td><td><span class="pill good">82%</span></td></tr>
+            <tr><td>Johnny Salamanca</td><td><span class="pill accent">Ing. Instr.</span></td><td>152</td><td>8</td><td>4</td><td><b>164</b></td><td>20/22</td><td><span class="pill good">91%</span></td></tr>
+            <tr><td>Gilberto Córdoba</td><td><span class="pill accent">Ing. Elec.</span></td><td>144</td><td>0</td><td>0</td><td><b>144</b></td><td>18/22</td><td><span class="pill good">82%</span></td></tr>
+            <tr><td>Anderson Botero</td><td><span class="pill accent">Insp.</span></td><td>168</td><td>16</td><td>8</td><td><b>192</b></td><td>22/22</td><td><span class="pill good">100%</span></td></tr>
+            <tr><td>Shirley Salazar</td><td><span class="pill accent">Ing. Mec.</span></td><td>136</td><td>0</td><td>0</td><td><b>136</b></td><td>17/22</td><td><span class="pill warn">77%</span></td></tr>
+            <tr><td>Alvaro Acevedo</td><td><span class="pill accent">Tec. Mec. Rot.</span></td><td>160</td><td>4</td><td>0</td><td><b>164</b></td><td>20/22</td><td><span class="pill good">91%</span></td></tr>
+            <tr><td>Luis F Caicedo</td><td><span class="pill accent">Ing. Elec.</span></td><td>152</td><td>0</td><td>0</td><td><b>152</b></td><td>19/22</td><td><span class="pill good">86%</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== APROBACIÓN LÍDER ===== -->
+    <div class="page hidden" data-page="aprobacion">
+      <div class="page-header"><div><h1>Aprobación de Horas · Líder</h1><div class="sub">Registros pendientes de aprobar de tu equipo</div></div><div class="actions"><button class="btn btn-primary" style="width:auto">✅ Aprobar todos</button></div></div>
+
+      <div class="kpi-grid">
+        <div class="kpi warn"><div class="lbl">Pendientes de aprobar</div><div class="val">12</div><div class="delta" style="color:var(--warn)">De 5 personas</div></div>
+        <div class="kpi good"><div class="lbl">Aprobados este mes</div><div class="val">248</div><div class="delta">96% al día</div></div>
+        <div class="kpi bad"><div class="lbl">Rechazados / a revisar</div><div class="val">3</div><div class="delta" style="color:var(--bad)">Requieren corrección</div></div>
+        <div class="kpi p"><div class="lbl">Total del equipo</div><div class="val">14</div><div class="delta">Personas bajo tu cargo</div></div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th>Colaborador</th><th>Fecha</th><th>Actividad</th><th>Horas</th><th>ODS</th><th>Estado</th><th>Acción</th></tr></thead>
+          <tbody>
+            <tr><td><b>Anderson Botero</b></td><td>19/07/2026</td><td>Cierre pendientes RSPA T6</td><td>8h + 4h ext</td><td>091</td><td><span class="pill warn">Pendiente</span></td><td><button class="btn btn-primary" style="padding:5px 10px;font-size:11px">✓</button> <button class="btn btn-secondary" style="padding:5px 10px;font-size:11px">✕</button></td></tr>
+            <tr><td><b>Shirley Salazar</b></td><td>19/07/2026</td><td>Revisión placas radiográficas</td><td>8h</td><td>091</td><td><span class="pill warn">Pendiente</span></td><td><button class="btn btn-primary" style="padding:5px 10px;font-size:11px">✓</button> <button class="btn btn-secondary" style="padding:5px 10px;font-size:11px">✕</button></td></tr>
+            <tr><td><b>Alvaro Acevedo</b></td><td>18/07/2026</td><td>Planeación intervención EP1159</td><td>6h</td><td>091</td><td><span class="pill warn">Pendiente</span></td><td><button class="btn btn-primary" style="padding:5px 10px;font-size:11px">✓</button> <button class="btn btn-secondary" style="padding:5px 10px;font-size:11px">✕</button></td></tr>
+            <tr><td><b>Johnny Salamanca</b></td><td>17/07/2026</td><td>SCADA Pozos CASE-0044</td><td>8h + 2h ext día</td><td>091</td><td><span class="pill warn">Pendiente</span></td><td><button class="btn btn-primary" style="padding:5px 10px;font-size:11px">✓</button> <button class="btn btn-secondary" style="padding:5px 10px;font-size:11px">✕</button></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PERFIL ===== -->
+    <div class="page hidden" data-page="perfil">
+      <div class="page-header"><div><h1>Mi Perfil</h1><div class="sub">Datos personales · edita cuando cambien</div></div></div>
+
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Información personal</h3>
+          <div class="input-group"><label>Nombres</label><input type="text" value="Edgar Remigio"></div>
+          <div class="input-group"><label>Apellidos</label><input type="text" value="Suárez Macías"></div>
+          <div class="input-group"><label>Cédula</label><input type="text" value="1120368xxx" readonly></div>
+          <div class="input-group"><label>Correo corporativo</label><input type="email" value="edgar.suarez@applusglobal.com"></div>
+          <div class="input-group"><label>Celular</label><input type="tel" value="+57 3xx xxx xxxx"></div>
+        </div>
+        <div class="card">
+          <h3>Datos laborales</h3>
+          <div class="input-group"><label>Cargo</label><input type="text" value="Ingeniero de Planeación"></div>
+          <div class="input-group"><label>Disciplina</label><select><option selected>Ingeniero de Planeación</option></select></div>
+          <div class="input-group"><label>Rol en la app</label><select><option>Colaborador</option><option selected>Líder de equipo</option><option>Gerente</option></select></div>
+          <div class="input-group"><label>HUB principal</label><select><option selected>ANDINA ORIENTE</option></select></div>
+          <div class="input-group"><label>Fecha ingreso</label><input type="date" value="2024-03-01"></div>
+          <button class="btn btn-primary" style="margin-top:12px">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== VISTA MÓVIL PREVIEW ===== -->
+    <div class="page hidden" data-page="mobile">
+      <div class="page-header"><div><h1>Vista Móvil (PWA)</h1><div class="sub">Cómo se ve la app instalada en el celular</div></div></div>
+
+      <div class="callout"><div class="ico">📱</div><div class="txt"><b>PWA (Progressive Web App)</b><div>El operario abre la URL desde su celular, la instala como app en su pantalla de inicio. Funciona offline, sincroniza cuando recupera señal. Sin tienda de apps.</div></div></div>
+
+      <div class="grid cols-3">
+        <div class="card">
+          <h3>Inicio rápido</h3>
+          <div class="mobile-preview">
+            <div class="phone" style="position:relative">
+              <div class="phone-screen">
+                <div class="phone-hdr"><div class="h-title">Hoy · Lun 20 jul</div><div class="h-menu">☰</div></div>
+                <div style="text-align:center;margin:14px 0"><div style="font-size:32px;font-weight:900;color:#46D3FF">0h</div><div style="color:#A8B6D4;font-size:11px">de 8h del día</div></div>
+                <div class="phone-item"><div class="t">Ayer</div><div class="d">Planeación · 8h · ODS 091</div></div>
+                <div class="phone-item"><div class="t">Anteayer</div><div class="d">Informes · 6h · ODS 091</div></div>
+              </div>
+              <div class="fab">+</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Registro rápido</h3>
+          <div class="mobile-preview">
+            <div class="phone" style="position:relative">
+              <div class="phone-screen">
+                <div class="phone-hdr"><div class="h-title">Nueva jornada</div><div class="h-menu">✕</div></div>
+                <div class="phone-item"><div class="t">Contexto (desde ayer)</div><div class="d" style="color:#27D29C">✓ ANDINA · ODS 091 · ECU21212</div></div>
+                <div class="phone-item"><div class="t">Actividad</div><div class="d">Comisionamiento ▾</div></div>
+                <div class="phone-item"><div class="t">🎤 Descripción por voz</div><div class="d" style="color:#46D3FF">Toca para dictar...</div></div>
+                <div class="phone-item"><div class="t">Horas</div><div class="d">8h normales · AM</div></div>
+                <button style="width:100%;background:linear-gradient(135deg,#46D3FF,#A78BFA);color:#fff;border:none;padding:10px;border-radius:10px;font-weight:700;font-size:12px;margin-top:8px">✓ Registrar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Notificación</h3>
+          <div class="mobile-preview">
+            <div class="phone" style="position:relative">
+              <div class="phone-screen" style="background:linear-gradient(180deg,#000,#0A0F1E);padding:60px 12px 12px">
+                <div style="background:rgba(30,30,50,.9);border-radius:14px;padding:14px;color:#fff;font-size:11px;backdrop-filter:blur(10px)">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="width:20px;height:20px;background:#FFD028;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#000">A+</div><b>APPLUS+ HH</b> <span style="color:#888;font-size:9px">ahora</span></div>
+                  <b>⏰ Recuerda registrar tu jornada</b><div style="color:#ccc;font-size:11px;margin-top:4px">Aún no has registrado el día de hoy. Toca aquí para registrar en 30 segundos.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function showApp(){ document.getElementById('login-screen').style.display='none'; document.getElementById('app').classList.add('active'); }
+function showLogin(){ document.getElementById('login-screen').style.display='flex'; document.getElementById('app').classList.remove('active'); }
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  document.querySelector('.page[data-page="'+id+'"]').classList.remove('hidden');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.nav-btn[data-page="'+id+'"]').classList.add('active');
+  if(window.innerWidth<=768) document.getElementById('sidebar').classList.remove('open');
+  window.scrollTo(0,0);
+}
+</script>
+</body></html>

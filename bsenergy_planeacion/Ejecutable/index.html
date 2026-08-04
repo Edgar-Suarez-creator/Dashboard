@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planeación & Gestión Integral · BSEnergy</title>
+<style>
+  :root{
+    --navy:#050B18; --navy-2:#0A1628; --navy-3:#0F1F35; --navy-4:#152A47;
+    --amber:#F59E0B; --amber-2:#FBBF24; --amber-3:#FCD34D; --amber-dim:#B45309;
+    --cyan:#06B6D4; --cyan-2:#22D3EE; --cyan-3:#67E8F9; --cyan-dim:#0891B2;
+    --emerald:#10B981; --rose:#F43F5E;
+    --text:#F1F5F9; --text-dim:#94A3B8; --text-muted:#64748B;
+    --panel:rgba(15,31,53,0.6); --panel-2:rgba(21,42,71,0.9); --panel-3:rgba(30,50,80,0.95);
+    --border:rgba(148,163,184,0.12); --border-strong:rgba(148,163,184,0.28);
+    --glow-amber:0 0 60px rgba(245,158,11,0.35);
+    --glow-cyan:0 0 60px rgba(6,182,212,0.35);
+    --shadow-lg:0 25px 50px -12px rgba(0,0,0,0.5);
+    --shadow-xl:0 35px 80px -20px rgba(0,0,0,0.7);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    background:var(--navy);color:var(--text);line-height:1.65;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .container{max-width:1320px;margin:0 auto;padding:0 24px}
+  ::selection{background:var(--amber);color:var(--navy)}
+
+  /* ===== NAV ===== */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(5,11,24,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;max-width:1320px;margin:0 auto}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:0.3px}
+  .logo-mark{width:38px;height:38px;background:linear-gradient(135deg,var(--amber),var(--cyan));border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(245,158,11,0.25)}
+  .logo-mark svg{width:22px;height:22px}
+  .nav-links{display:flex;gap:32px;list-style:none}
+  .nav-links a{color:var(--text-dim);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.2s;position:relative}
+  .nav-links a:hover{color:var(--amber-2)}
+  .nav-links a::after{content:'';position:absolute;bottom:-6px;left:0;right:0;height:2px;background:var(--amber);transform:scaleX(0);transition:transform 0.3s}
+  .nav-links a:hover::after{transform:scaleX(1)}
+  .nav-cta{background:linear-gradient(135deg,var(--amber),var(--amber-2));color:var(--navy);padding:11px 22px;border-radius:9px;font-weight:700;font-size:13px;text-decoration:none;transition:all 0.3s;letter-spacing:0.3px}
+  .nav-cta:hover{transform:translateY(-2px);box-shadow:var(--glow-amber)}
+
+  /* ===== HERO ===== */
+  .hero{position:relative;padding:150px 0 100px;overflow:hidden;min-height:100vh;display:flex;align-items:center}
+  .hero-bg{position:absolute;inset:0;z-index:0;opacity:0.7}
+  .hero-particles{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.4}
+  .hero-inner{position:relative;z-index:2;display:grid;grid-template-columns:1.15fr 1fr;gap:64px;align-items:center;width:100%}
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(6,182,212,0.12));border:1px solid rgba(245,158,11,0.3);border-radius:100px;color:var(--amber-2);font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px}
+  .hero-eyebrow .dot{width:8px;height:8px;background:var(--amber);border-radius:50%;box-shadow:0 0 12px var(--amber);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.2)}}
+  .hero h1{font-size:62px;font-weight:800;line-height:1.02;letter-spacing:-1.8px;margin-bottom:24px}
+  .hero h1 .grad{background:linear-gradient(135deg,var(--amber),var(--cyan-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block}
+  .hero p{font-size:19px;color:var(--text-dim);margin-bottom:36px;max-width:580px;line-height:1.7}
+  .hero-cta{display:flex;gap:16px;flex-wrap:wrap}
+  .btn-primary{background:linear-gradient(135deg,var(--amber),var(--amber-2));color:var(--navy);padding:17px 32px;border-radius:11px;font-weight:700;text-decoration:none;font-size:15px;transition:all 0.3s;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;font-family:inherit}
+  .btn-primary:hover{transform:translateY(-3px);box-shadow:var(--glow-amber)}
+  .btn-secondary{background:rgba(6,182,212,0.05);color:var(--text);padding:17px 32px;border-radius:11px;font-weight:600;text-decoration:none;font-size:15px;border:1px solid var(--border-strong);transition:all 0.3s;display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit}
+  .btn-secondary:hover{border-color:var(--cyan);color:var(--cyan-2);background:rgba(6,182,212,0.1)}
+  .hero-metrics{margin-top:64px;display:grid;grid-template-columns:repeat(3,1fr);gap:32px;max-width:560px}
+  .metric-val{font-size:38px;font-weight:800;background:linear-gradient(135deg,var(--amber),var(--cyan-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px;line-height:1}
+  .metric-lbl{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-top:6px}
+
+  /* HERO SVG animations */
+  .hero-visual{position:relative;height:560px}
+  .hero-svg{width:100%;height:100%;filter:drop-shadow(0 25px 70px rgba(6,182,212,0.2))}
+  .refinery-stack{animation:smokeRise 4s ease-in-out infinite}
+  @keyframes smokeRise{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  .refinery-flame{animation:flicker 1.2s ease-in-out infinite;transform-origin:bottom center}
+  @keyframes flicker{0%,100%{opacity:0.9;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.15) scaleX(0.95)}}
+  .data-orb{animation:orbit 8s ease-in-out infinite}
+  @keyframes orbit{0%,100%{transform:translate(0,0)}25%{transform:translate(10px,-8px)}50%{transform:translate(0,-15px)}75%{transform:translate(-10px,-8px)}}
+  .kpi-bar{animation:kpiFill 3s ease-out}
+  @keyframes kpiFill{from{width:0}}
+
+  /* ===== TRUSTED BY ===== */
+  .trusted{background:var(--navy);padding:60px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .trusted-label{text-align:center;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:32px}
+  .trusted-logos{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:56px;opacity:0.65}
+  .trusted-logo{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-weight:700;letter-spacing:1px;font-size:16px;transition:all 0.3s}
+  .trusted-logo:hover{color:var(--amber-2);opacity:1}
+  .trusted-logo svg{width:28px;height:28px}
+
+  /* ===== SECTIONS ===== */
+  section{padding:100px 0;position:relative}
+  .section-eyebrow{display:inline-block;color:var(--cyan-2);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:16px;padding:6px 14px;background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);border-radius:100px}
+  .section-title{font-size:48px;font-weight:800;line-height:1.1;letter-spacing:-1.2px;margin-bottom:20px;max-width:820px}
+  .section-title .grad{background:linear-gradient(135deg,var(--amber),var(--cyan-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .section-lead{font-size:18px;color:var(--text-dim);max-width:720px;margin-bottom:56px;line-height:1.7}
+
+  /* ===== SERVICES ===== */
+  .services{background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%)}
+  .services-cats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px}
+  .cat-pill{padding:10px 20px;background:var(--panel);border:1px solid var(--border-strong);border-radius:100px;color:var(--text-dim);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.3s;font-family:inherit}
+  .cat-pill:hover{border-color:var(--amber);color:var(--amber-2)}
+  .cat-pill.active{background:linear-gradient(135deg,var(--amber),var(--amber-2));color:var(--navy);border-color:var(--amber);box-shadow:0 4px 16px rgba(245,158,11,0.25)}
+  .services-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .service{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:26px;transition:all 0.4s;position:relative;overflow:hidden;cursor:pointer}
+  .service::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:0;transition:opacity 0.3s}
+  .service::after{content:'';position:absolute;top:-50%;right:-50%;width:200px;height:200px;background:radial-gradient(circle,rgba(245,158,11,0.08) 0%,transparent 60%);opacity:0;transition:opacity 0.4s}
+  .service:hover{transform:translateY(-8px);border-color:rgba(245,158,11,0.3);box-shadow:0 25px 50px rgba(0,0,0,0.4)}
+  .service:hover::before,.service:hover::after{opacity:1}
+  .service-icon{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(6,182,212,0.15));display:flex;align-items:center;justify-content:center;margin-bottom:18px;border:1px solid rgba(245,158,11,0.2);position:relative;z-index:2}
+  .service-icon svg{width:26px;height:26px;color:var(--amber-2)}
+  .service h3{font-size:17px;font-weight:700;margin-bottom:10px;letter-spacing:-0.3px;position:relative;z-index:2}
+  .service p{color:var(--text-dim);font-size:13px;line-height:1.6;margin-bottom:14px;position:relative;z-index:2}
+  .service-tags{display:flex;flex-wrap:wrap;gap:6px;position:relative;z-index:2}
+  .tag{font-size:10.5px;padding:3px 9px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);color:var(--cyan-2);border-radius:100px;font-weight:600;letter-spacing:0.3px}
+  .service-link{display:inline-flex;align-items:center;gap:6px;color:var(--amber-2);font-size:12px;font-weight:600;margin-top:12px;text-decoration:none;position:relative;z-index:2}
+  .service-link svg{width:12px;height:12px;transition:transform 0.2s}
+  .service:hover .service-link svg{transform:translateX(4px)}
+
+  /* ===== INTERACTIVE DASHBOARDS ===== */
+  .dashboards{background:var(--navy);position:relative;overflow:hidden}
+  .dashboards::before{content:'';position:absolute;top:20%;left:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(245,158,11,0.06),transparent 60%);pointer-events:none}
+  .dashboards::after{content:'';position:absolute;bottom:20%;right:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(6,182,212,0.06),transparent 60%);pointer-events:none}
+  .dashboards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
+  .dashboard-card{background:var(--panel-2);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all 0.4s;cursor:pointer;position:relative}
+  .dashboard-card:hover{transform:translateY(-6px);border-color:var(--cyan);box-shadow:var(--shadow-xl)}
+  .dashboard-preview{height:280px;background:linear-gradient(135deg,var(--navy-3),var(--navy-2));position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+  .dashboard-preview svg{position:absolute;inset:0;width:100%;height:100%}
+  .dashboard-play-btn{position:absolute;top:16px;right:16px;background:linear-gradient(135deg,var(--amber),var(--amber-2));color:var(--navy);padding:8px 16px;border-radius:100px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:inline-flex;align-items:center;gap:6px;z-index:3;box-shadow:0 4px 12px rgba(245,158,11,0.3)}
+  .dashboard-play-btn svg{width:14px;height:14px}
+  .dashboard-body{padding:28px}
+  .dashboard-badge{font-size:11px;color:var(--cyan-2);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .dashboard-body h3{font-size:22px;font-weight:800;margin-bottom:12px;line-height:1.25;letter-spacing:-0.3px}
+  .dashboard-body p{color:var(--text-dim);font-size:14px;line-height:1.6;margin-bottom:18px}
+  .dashboard-features{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .dashboard-features .tag{background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.25);color:var(--amber-2)}
+
+  /* ===== MODAL ===== */
+  .modal-overlay{position:fixed;inset:0;background:rgba(5,11,24,0.85);backdrop-filter:blur(12px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity 0.3s}
+  .modal-overlay.active{display:flex;opacity:1}
+  .modal{background:linear-gradient(135deg,var(--navy-2) 0%,var(--navy-3) 100%);border:1px solid var(--border-strong);border-radius:20px;max-width:900px;width:100%;max-height:90vh;overflow-y:auto;position:relative;box-shadow:var(--shadow-xl);transform:scale(0.95);transition:transform 0.3s}
+  .modal-overlay.active .modal{transform:scale(1)}
+  .modal-close{position:absolute;top:20px;right:20px;width:40px;height:40px;background:rgba(148,163,184,0.1);border:1px solid var(--border-strong);border-radius:50%;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;font-family:inherit;font-size:20px}
+  .modal-close:hover{background:var(--rose);border-color:var(--rose);color:#fff;transform:rotate(90deg)}
+  .modal-header{padding:40px 40px 20px;border-bottom:1px solid var(--border)}
+  .modal-header .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(245,158,11,0.12);border:1px solid var(--amber);color:var(--amber-2);border-radius:100px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+  .modal-header h2{font-size:32px;font-weight:800;line-height:1.15;letter-spacing:-0.8px;margin-bottom:12px}
+  .modal-header p{color:var(--text-dim);font-size:15px;line-height:1.7}
+  .modal-body{padding:32px 40px}
+  .modal-preview{background:var(--navy);border-radius:14px;padding:16px;margin-bottom:32px;border:1px solid var(--border)}
+  .modal-preview svg{width:100%;height:auto;display:block;border-radius:8px}
+  .modal-section{margin-bottom:28px}
+  .modal-section h4{font-size:14px;color:var(--amber-2);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .modal-section h4::before{content:'';width:24px;height:2px;background:var(--amber)}
+  .modal-features{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .modal-feature{padding:14px 16px;background:rgba(15,31,53,0.6);border:1px solid var(--border);border-radius:10px;display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--text-dim);line-height:1.5}
+  .modal-feature svg{width:20px;height:20px;color:var(--emerald);flex-shrink:0;margin-top:2px}
+  .modal-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px;background:rgba(15,31,53,0.4);border:1px solid var(--border);border-radius:12px;margin-bottom:24px}
+  .modal-stat-val{font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--amber),var(--cyan-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+  .modal-stat-lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-top:4px}
+  .modal-cta{display:flex;gap:12px;padding:24px 40px 40px;border-top:1px solid var(--border);flex-wrap:wrap}
+
+  /* ===== PORTFOLIO ===== */
+  .portfolio{background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%)}
+  .portfolio-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
+  .case{background:var(--panel-2);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all 0.4s;cursor:pointer;display:flex;flex-direction:column}
+  .case:hover{transform:translateY(-6px);border-color:var(--cyan);box-shadow:var(--shadow-xl)}
+  .case-visual{height:200px;position:relative;background:linear-gradient(135deg,var(--navy-3) 0%,var(--navy-2) 100%);overflow:hidden;border-bottom:1px solid var(--border)}
+  .case-visual svg{position:absolute;inset:0;width:100%;height:100%}
+  .case-badge{position:absolute;top:16px;right:16px;background:rgba(245,158,11,0.15);border:1px solid var(--amber);color:var(--amber-2);padding:6px 12px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;z-index:2}
+  .case-body{padding:28px;flex:1;display:flex;flex-direction:column}
+  .case-sector{font-size:12px;color:var(--cyan-2);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
+  .case h3{font-size:22px;font-weight:800;margin-bottom:12px;line-height:1.25;letter-spacing:-0.3px}
+  .case-desc{color:var(--text-dim);font-size:14px;flex:1;margin-bottom:20px;line-height:1.6}
+  .case-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding-top:20px;border-top:1px solid var(--border)}
+  .stat-val{font-size:20px;font-weight:800;color:var(--amber-2)}
+  .stat-lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+  /* ===== TESTIMONIALS ===== */
+  .testimonials{background:var(--navy)}
+  .testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .testimonial{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:32px;position:relative}
+  .testimonial::before{content:'"';position:absolute;top:16px;right:24px;font-size:80px;color:var(--amber);opacity:0.15;font-family:Georgia,serif;line-height:1}
+  .testimonial-quote{font-size:15px;color:var(--text);line-height:1.7;margin-bottom:24px;font-style:italic;position:relative;z-index:1}
+  .testimonial-author{display:flex;align-items:center;gap:14px;padding-top:20px;border-top:1px solid var(--border)}
+  .avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--cyan));display:flex;align-items:center;justify-content:center;color:var(--navy);font-weight:800;font-size:16px;flex-shrink:0}
+  .author-name{font-weight:700;font-size:14px;color:var(--text)}
+  .author-role{font-size:12px;color:var(--text-muted);margin-top:2px}
+
+  /* ===== IMPACT ===== */
+  .impact{background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%)}
+  .impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+  .impact-card{text-align:center;padding:40px 24px;background:var(--panel);border:1px solid var(--border);border-radius:16px;position:relative;overflow:hidden;transition:transform 0.3s}
+  .impact-card:hover{transform:translateY(-4px);border-color:var(--amber)}
+  .impact-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top,rgba(245,158,11,0.08),transparent 60%);pointer-events:none}
+  .impact-val{font-size:58px;font-weight:800;background:linear-gradient(135deg,var(--amber),var(--cyan-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;letter-spacing:-2px}
+  .impact-lbl{font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-top:12px}
+  .impact-desc{color:var(--text-muted);font-size:13px;margin-top:8px}
+
+  /* ===== TECH ===== */
+  .tech{background:var(--navy)}
+  .tech-badges{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+  .tech-badge{background:var(--panel);border:1px solid var(--border);padding:12px 20px;border-radius:12px;font-size:13px;color:var(--text);font-weight:600;display:flex;align-items:center;gap:10px;transition:all 0.2s}
+  .tech-badge:hover{border-color:var(--cyan);color:var(--cyan-2);transform:translateY(-2px)}
+  .tech-badge svg{width:20px;height:20px;color:var(--amber-2)}
+
+  /* ===== CTA ===== */
+  .cta{background:linear-gradient(135deg,var(--navy-2) 0%,var(--navy-3) 100%);position:relative;overflow:hidden}
+  .cta::before{content:'';position:absolute;top:-50%;left:-10%;right:-10%;bottom:-50%;background:radial-gradient(circle,rgba(245,158,11,0.08) 0%,transparent 50%);animation:rotateSlow 40s linear infinite}
+  @keyframes rotateSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  .cta-inner{position:relative;z-index:2;text-align:center;max-width:820px;margin:0 auto}
+  .cta h2{font-size:56px;font-weight:800;line-height:1.05;letter-spacing:-1.5px;margin-bottom:20px}
+  .cta p{font-size:19px;color:var(--text-dim);margin-bottom:40px;line-height:1.7}
+  .cta-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+
+  /* ===== FOOTER ===== */
+  footer{background:var(--navy);border-top:1px solid var(--border);padding:60px 0 30px}
+  .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:40px}
+  .footer-brand p{color:var(--text-muted);margin-top:16px;font-size:14px;max-width:320px;line-height:1.6}
+  .footer h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--amber-2);margin-bottom:16px}
+  .footer ul{list-style:none}
+  .footer li{margin-bottom:10px}
+  .footer a{color:var(--text-dim);text-decoration:none;font-size:14px;transition:color 0.2s}
+  .footer a:hover{color:var(--text)}
+  .footer-bottom{padding-top:30px;border-top:1px solid var(--border);display:flex;justify-content:space-between;color:var(--text-muted);font-size:13px}
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width:1200px){
+    .services-grid{grid-template-columns:repeat(3,1fr)}
+  }
+  @media (max-width:1024px){
+    .hero-inner{grid-template-columns:1fr;text-align:center}
+    .hero h1{font-size:44px}
+    .hero-visual{max-height:400px;order:-1}
+    .services-grid{grid-template-columns:repeat(2,1fr)}
+    .dashboards-grid,.portfolio-grid{grid-template-columns:1fr}
+    .impact-grid,.testimonials-grid{grid-template-columns:repeat(2,1fr)}
+    .modal-features{grid-template-columns:1fr}
+    .modal-stats{grid-template-columns:repeat(2,1fr)}
+    .footer-grid{grid-template-columns:1fr 1fr}
+    .section-title{font-size:32px}
+    .nav-links{display:none}
+    .hero-metrics{margin:32px auto 0}
+    .hero-cta{justify-content:center}
+  }
+  @media (max-width:640px){
+    .services-grid,.impact-grid,.testimonials-grid{grid-template-columns:1fr}
+    .hero h1{font-size:34px}
+    .cta h2{font-size:32px}
+    .section-title{font-size:26px}
+    .hero-metrics{grid-template-columns:1fr 1fr;gap:20px}
+    .modal-header{padding:30px 24px 16px}
+    .modal-body{padding:24px}
+    .modal-cta{padding:20px 24px 30px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0A1628" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2 L4 8 L4 20 L20 20 L20 8 Z"/><path d="M12 2 L12 20"/><path d="M8 12 L16 12"/>
+        </svg>
+      </div>
+      <span>BSEnergy · <span style="color:var(--amber-2)">Planeación</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#dashboards">Dashboards</a></li>
+      <li><a href="#portafolio">Portafolio</a></li>
+      <li><a href="#testimonios">Testimonios</a></li>
+      <li><a href="#tecnologia">Tecnología</a></li>
+    </ul>
+    <a href="#contacto" class="nav-cta">Solicitar demo →</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <svg class="hero-bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#050B18"/><stop offset="60%" stop-color="#0A1628"/><stop offset="100%" stop-color="#050B18"/>
+      </linearGradient>
+      <linearGradient id="glowAmber" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#F59E0B" stop-opacity="0"/><stop offset="100%" stop-color="#F59E0B" stop-opacity="0.4"/>
+      </linearGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#bgGrad)"/>
+    <g opacity="0.32" fill="#152A47">
+      <rect x="0" y="620" width="1600" height="280"/>
+      <rect x="100" y="500" width="60" height="120"/><rect x="180" y="450" width="40" height="170"/><rect x="240" y="480" width="80" height="140"/>
+      <circle cx="280" cy="470" r="30"/><rect x="360" y="510" width="50" height="110"/><rect x="440" y="440" width="70" height="180"/>
+      <rect x="540" y="470" width="45" height="150"/><rect x="620" y="420" width="55" height="200"/><circle cx="647" cy="410" r="25"/>
+      <rect x="720" y="460" width="90" height="160"/><rect x="850" y="440" width="60" height="180"/><rect x="950" y="470" width="80" height="150"/>
+      <circle cx="990" cy="455" r="28"/><rect x="1080" y="500" width="60" height="120"/><rect x="1170" y="460" width="55" height="160"/>
+      <rect x="1260" y="480" width="70" height="140"/><rect x="1370" y="510" width="45" height="110"/><rect x="1450" y="470" width="60" height="150"/>
+    </g>
+    <ellipse cx="800" cy="720" rx="900" ry="80" fill="url(#glowAmber)" opacity="0.4"/>
+    <g stroke="#F59E0B" stroke-width="1" opacity="0.15" fill="none">
+      <path d="M0,700 L1600,700"/><path d="M0,720 L1600,720"/>
+    </g>
+    <g fill="#FBBF24">
+      <circle cx="145" cy="605" r="1.5"/><circle cx="270" cy="580" r="1.5"/><circle cx="450" cy="600" r="1.5"/>
+      <circle cx="640" cy="580" r="1.5"/><circle cx="880" cy="590" r="1.5"/><circle cx="1050" cy="605" r="1.5"/>
+      <circle cx="1290" cy="600" r="1.5"/><circle cx="1470" cy="590" r="1.5"/>
+    </g>
+  </svg>
+
+  <!-- Partículas de red -->
+  <svg class="hero-particles" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+    <g stroke="#22D3EE" stroke-width="0.5" fill="none" opacity="0.4">
+      <line x1="200" y1="200" x2="400" y2="300"/><line x1="400" y1="300" x2="600" y2="200"/>
+      <line x1="600" y1="200" x2="800" y2="350"/><line x1="800" y1="350" x2="1000" y2="250"/>
+      <line x1="1000" y1="250" x2="1200" y2="300"/><line x1="200" y1="200" x2="600" y2="200"/>
+    </g>
+    <g fill="#22D3EE">
+      <circle cx="200" cy="200" r="3"/><circle cx="400" cy="300" r="3"/><circle cx="600" cy="200" r="3"/>
+      <circle cx="800" cy="350" r="3"/><circle cx="1000" cy="250" r="3"/><circle cx="1200" cy="300" r="3"/>
+    </g>
+  </svg>
+
+  <div class="container hero-inner">
+    <div class="hero-text">
+      <div class="hero-eyebrow"><span class="dot"></span> Servicios Energéticos · Colombia · LATAM · Global</div>
+      <h1>Planeación & Aseguramiento Integral de <span class="grad">Proyectos Energéticos</span></h1>
+      <p>Consultoría estratégica en gestión de proyectos, contratos multi-vendor, control de costos y automatización de reportes. Soluciones probadas para operadores de Oil & Gas, refinerías y midstream que necesitan trazabilidad total y velocidad de decisión.</p>
+      <div class="hero-cta">
+        <a href="#dashboards" class="btn-primary">
+          Ver dashboards en vivo
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#contacto" class="btn-secondary">
+          Hablar con un experto
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </a>
+      </div>
+      <div class="hero-metrics">
+        <div><div class="metric-val">$1.8B</div><div class="metric-lbl">COP gestionados</div></div>
+        <div><div class="metric-val">14</div><div class="metric-lbl">Servicios especializados</div></div>
+        <div><div class="metric-val">99.2%</div><div class="metric-lbl">Precisión reportes</div></div>
+      </div>
+    </div>
+
+    <!-- Refinería SVG -->
+    <div class="hero-visual">
+      <svg class="hero-svg" viewBox="0 0 600 520">
+        <defs>
+          <linearGradient id="tank1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22D3EE"/><stop offset="100%" stop-color="#0891B2"/></linearGradient>
+          <linearGradient id="tank2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#B45309"/></linearGradient>
+          <linearGradient id="flameGrad" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#F59E0B"/><stop offset="50%" stop-color="#FBBF24"/><stop offset="100%" stop-color="#FFF" stop-opacity="0"/></linearGradient>
+          <linearGradient id="smokeGrad" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#94A3B8" stop-opacity="0.5"/><stop offset="100%" stop-color="#94A3B8" stop-opacity="0"/></linearGradient>
+        </defs>
+        <rect x="0" y="440" width="600" height="80" fill="#152A47"/>
+        <rect x="0" y="437" width="600" height="3" fill="#F59E0B" opacity="0.4"/>
+
+        <g class="refinery-stack">
+          <rect x="80" y="80" width="80" height="360" fill="url(#tank1)" rx="4"/>
+          <rect x="70" y="75" width="100" height="12" fill="#0891B2" rx="2"/>
+          <rect x="60" y="130" width="120" height="6" fill="#0F1F35"/><rect x="60" y="200" width="120" height="6" fill="#0F1F35"/>
+          <rect x="60" y="270" width="120" height="6" fill="#0F1F35"/><rect x="60" y="340" width="120" height="6" fill="#0F1F35"/>
+          <line x1="180" y1="80" x2="180" y2="440" stroke="#F59E0B" stroke-width="1.5" opacity="0.6"/>
+          <g stroke="#F59E0B" stroke-width="1" opacity="0.5">
+            <line x1="176" y1="100" x2="184" y2="100"/><line x1="176" y1="140" x2="184" y2="140"/>
+            <line x1="176" y1="180" x2="184" y2="180"/><line x1="176" y1="220" x2="184" y2="220"/>
+            <line x1="176" y1="260" x2="184" y2="260"/><line x1="176" y1="300" x2="184" y2="300"/>
+            <line x1="176" y1="340" x2="184" y2="340"/><line x1="176" y1="380" x2="184" y2="380"/>
+          </g>
+          <circle cx="120" cy="75" r="8" fill="#F59E0B"/><circle cx="120" cy="75" r="4" fill="#FBBF24"/>
+        </g>
+
+        <g>
+          <rect x="260" y="150" width="20" height="290" fill="#152A47" stroke="#F59E0B" stroke-width="1"/>
+          <rect x="256" y="145" width="28" height="8" fill="#F59E0B"/>
+          <g class="refinery-flame">
+            <path d="M263,145 Q255,110 268,80 Q272,105 278,90 Q280,115 275,145 Z" fill="url(#flameGrad)"/>
+            <path d="M266,145 Q262,120 270,100 Q274,115 272,145 Z" fill="#FBBF24" opacity="0.7"/>
+          </g>
+          <ellipse cx="270" cy="60" rx="15" ry="20" fill="url(#smokeGrad)" opacity="0.4"/>
+          <ellipse cx="278" cy="35" rx="18" ry="25" fill="url(#smokeGrad)" opacity="0.3"/>
+        </g>
+
+        <g>
+          <ellipse cx="380" cy="260" rx="60" ry="12" fill="#F59E0B"/>
+          <rect x="320" y="260" width="120" height="180" fill="url(#tank2)"/>
+          <ellipse cx="380" cy="440" rx="60" ry="12" fill="#B45309"/>
+          <rect x="320" y="290" width="120" height="4" fill="#0F1F35" opacity="0.4"/>
+          <rect x="320" y="360" width="120" height="4" fill="#0F1F35" opacity="0.4"/>
+          <text x="380" y="360" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="14" font-weight="bold" opacity="0.7">TK-101</text>
+          <rect x="308" y="380" width="14" height="10" fill="#22D3EE"/>
+          <circle cx="315" cy="385" r="4" fill="#0A1628"/>
+        </g>
+
+        <g>
+          <rect x="470" y="180" width="55" height="260" fill="url(#tank1)" rx="3"/>
+          <rect x="463" y="175" width="70" height="10" fill="#0891B2" rx="2"/>
+          <rect x="455" y="220" width="85" height="4" fill="#0F1F35"/><rect x="455" y="280" width="85" height="4" fill="#0F1F35"/>
+          <rect x="455" y="340" width="85" height="4" fill="#0F1F35"/><rect x="455" y="400" width="85" height="4" fill="#0F1F35"/>
+        </g>
+
+        <g fill="none" stroke="#F59E0B" stroke-width="4" stroke-linecap="round" opacity="0.85">
+          <path d="M160,410 L320,410"/><path d="M160,410 L160,420 Q160,425 165,425"/>
+          <path d="M440,410 L470,410"/><path d="M240,150 Q290,140 340,150" stroke-width="3"/>
+          <path d="M340,150 Q345,155 345,165 L345,260"/>
+        </g>
+        <g fill="#22D3EE" stroke="#0F1F35" stroke-width="1.5">
+          <circle cx="160" cy="410" r="7"/><circle cx="320" cy="410" r="7"/>
+          <circle cx="440" cy="410" r="7"/><circle cx="470" cy="410" r="7"/>
+        </g>
+
+        <g transform="translate(400,50)">
+          <rect x="0" y="0" width="170" height="90" rx="10" fill="#0F1F35" stroke="#22D3EE" stroke-width="1.5" opacity="0.95"/>
+          <rect x="0" y="0" width="170" height="20" rx="10 10 0 0" fill="#22D3EE" opacity="0.15"/>
+          <text x="10" y="14" fill="#22D3EE" font-family="Arial" font-size="10" font-weight="bold">SCADA · MONITOR</text>
+          <text x="10" y="38" fill="#94A3B8" font-family="Arial" font-size="8">Prod. Diaria</text>
+          <rect x="10" y="42" width="150" height="6" rx="3" fill="#152A47"/>
+          <rect x="10" y="42" width="120" height="6" rx="3" fill="#F59E0B" class="kpi-bar"/>
+          <text x="10" y="62" fill="#94A3B8" font-family="Arial" font-size="8">Eficiencia</text>
+          <rect x="10" y="66" width="150" height="6" rx="3" fill="#152A47"/>
+          <rect x="10" y="66" width="135" height="6" rx="3" fill="#22D3EE" class="kpi-bar"/>
+          <text x="10" y="83" fill="#22D3EE" font-family="Arial" font-size="8" font-weight="bold">✓ Sistema operativo</text>
+        </g>
+
+        <g opacity="0.6">
+          <circle cx="220" cy="200" r="3" fill="#22D3EE" class="data-orb"/>
+          <circle cx="350" cy="120" r="3" fill="#F59E0B" class="data-orb" style="animation-delay:1s"/>
+          <circle cx="500" cy="230" r="3" fill="#22D3EE" class="data-orb" style="animation-delay:2s"/>
+          <circle cx="120" cy="180" r="3" fill="#F59E0B" class="data-orb" style="animation-delay:0.5s"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRUSTED BY ============ -->
+<section class="trusted">
+  <div class="container">
+    <p class="trusted-label">Con experiencia comprobada en operaciones de</p>
+    <div class="trusted-logos">
+      <div class="trusted-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2 L4 8 L4 20 L20 20 L20 8 Z"/><path d="M8 12 L16 12"/></svg>
+        UPSTREAM
+      </div>
+      <div class="trusted-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 8 L6 4 M18 8 L18 4"/></svg>
+        MIDSTREAM
+      </div>
+      <div class="trusted-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 20 L21 20 M6 20 L6 10 L18 10 L18 20"/><circle cx="12" cy="6" r="3"/></svg>
+        REFINACIÓN
+      </div>
+      <div class="trusted-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3 L12 21 M3 12 L21 12"/></svg>
+        EPC PROJECTS
+      </div>
+      <div class="trusted-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2 L2 8 L12 14 L22 8 Z M2 16 L12 22 L22 16"/></svg>
+        E&P OPERATIONS
+      </div>
+      <div class="trusted-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2 L15 8 L21 9 L17 13 L18 20 L12 17 L6 20 L7 13 L3 9 L9 8 Z"/></svg>
+        ENERGY RENEWABLES
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVICES ============ -->
+<section id="servicios" class="services">
+  <div class="container">
+    <div class="section-eyebrow">Portafolio de servicios</div>
+    <h2 class="section-title">14 servicios especializados para <span class="grad">proyectos energéticos</span> de misión crítica.</h2>
+    <p class="section-lead">Desde la planeación estratégica hasta la facturación final. Cubrimos el ciclo completo con estándares corporativos y automatización avanzada.</p>
+
+    <div class="services-cats">
+      <button class="cat-pill active" data-cat="all">Todos · 14</button>
+      <button class="cat-pill" data-cat="planeacion">Planeación</button>
+      <button class="cat-pill" data-cat="costos">Control de costos</button>
+      <button class="cat-pill" data-cat="ing">Ingeniería</button>
+      <button class="cat-pill" data-cat="contratos">Gestión Contractual</button>
+      <button class="cat-pill" data-cat="reporting">Reporting & BI</button>
+    </div>
+
+    <div class="services-grid" id="servicesGrid">
+      <div class="service" data-cat="planeacion" data-modal="cronograma">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <h3>Cronogramas Maestros</h3>
+        <p>Cronogramas anuales con vistas semanales, mensuales, KPIs de cumplimiento, presupuesto y evidencias automatizadas.</p>
+        <div class="service-tags"><span class="tag">MS Project</span><span class="tag">Gantt</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="planeacion" data-modal="schedule">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6 L21 6 M8 12 L21 12 M8 18 L21 18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg></div>
+        <h3>Schedule Detallado</h3>
+        <p>Programación integrada L4-L5 en Primavera/MS Project con hitos, ruta crítica, curvas S y análisis what-if.</p>
+        <div class="service-tags"><span class="tag">Primavera P6</span><span class="tag">Ruta crítica</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="planeacion" data-modal="planvendor">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11H3v10h6M15 11h6v10h-6M15 3H9v18h6z"/></svg></div>
+        <h3>Plan de Vendor</h3>
+        <p>Master vendor plan con hitos por proveedor, entregables, fechas de FAT/SAT y ruta contractual integrada.</p>
+        <div class="service-tags"><span class="tag">Multi-vendor</span><span class="tag">Milestones</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="costos" data-modal="presupuestos">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2 L12 22 M17 5 L7 5 C5.9 5 5 5.9 5 7 C5 8.1 5.9 9 7 9 L17 9 C18.1 9 19 9.9 19 11 C19 12.1 18.1 13 17 13 L7 13 M5 17 L19 17"/></svg></div>
+        <h3>Presupuestos & Estimados</h3>
+        <p>Elaboración de presupuestos base y de control, con desglose por WBS y matriz de sensibilidad de costos.</p>
+        <div class="service-tags"><span class="tag">WBS</span><span class="tag">Class 3-5</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="costos" data-modal="apu">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 10 L16 10 M8 14 L12 14"/><circle cx="16" cy="14" r="2"/></svg></div>
+        <h3>Análisis de Precios Unitarios (APU)</h3>
+        <p>Estructuración de APUs con mano de obra, equipo, materiales, transporte, indirectos y utilidad conforme normativa.</p>
+        <div class="service-tags"><span class="tag">A.P.U.</span><span class="tag">Insumos</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="costos" data-modal="facturacion">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <h3>Facturación & Actas</h3>
+        <p>Consolidación de actas de recibo, cortes mensuales, facturación con soportes técnicos y verificación de cuentas por pagar.</p>
+        <div class="service-tags"><span class="tag">Actas</span><span class="tag">GAB-F-080</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="ing" data-modal="memorias">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4 L20 4 L20 20 L4 20 Z"/><path d="M8 8 L16 8 M8 12 L16 12 M8 16 L12 16"/></svg></div>
+        <h3>Memorias de Cálculo</h3>
+        <p>Memorias técnicas para instalaciones eléctricas, mecánicas, instrumentación y control con firma de profesional matriculado.</p>
+        <div class="service-tags"><span class="tag">RETIE</span><span class="tag">API/ASME</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="ing" data-modal="preservacion">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2 C12 2 6 8 6 14 C6 17.3 8.7 20 12 20 C15.3 20 18 17.3 18 14 C18 8 12 2 12 2 Z"/></svg></div>
+        <h3>Preservación de Equipos</h3>
+        <p>Planes de preservación para equipos on-site y en bodega. Registros trimestrales de tableros, generadores, VFDs y skids.</p>
+        <div class="service-tags"><span class="tag">Bodega</span><span class="tag">On-site</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="ing" data-modal="horashombre">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h3>Horas Hombre & Productividad</h3>
+        <p>Tracking de HH ejecutadas vs. planeadas, curvas de productividad, cierre de ODS y análisis de sobretiempos.</p>
+        <div class="service-tags"><span class="tag">HH</span><span class="tag">Productividad</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="contratos" data-modal="gestioncontractual">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13 L11 15 L15 11"/></svg></div>
+        <h3>Gestión Contractual Multi-Vendor</h3>
+        <p>Consolidación de modificaciones, balances de días vs. facturación, análisis de disputas y proyecciones de faltantes.</p>
+        <div class="service-tags"><span class="tag">Contract Analytics</span><span class="tag">Auditoría</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="contratos" data-modal="memorandos">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <h3>Memorandos & Modificaciones</h3>
+        <p>Redacción de memorandos, modificaciones de ODS, soportes contractuales y justificaciones de ampliación de plazo/valor.</p>
+        <div class="service-tags"><span class="tag">DocuSign</span><span class="tag">Compliance</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="reporting" data-modal="reportes">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>Reportes Diarios Automatizados</h3>
+        <p>Consolidación de reportes WhatsApp/Teams en documentos ejecutivos con clasificación NLP por área y trazabilidad.</p>
+        <div class="service-tags"><span class="tag">NLP</span><span class="tag">Excel</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="reporting" data-modal="dashboards">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div>
+        <h3>Dashboards Ejecutivos</h3>
+        <p>Cuadros de mando interactivos para vendors, contratos, avances por skid con drilldown y KPIs financieros.</p>
+        <div class="service-tags"><span class="tag">HTML/JS</span><span class="tag">Power BI</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+
+      <div class="service" data-cat="reporting" data-modal="organigrama">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Organigramas Interactivos</h3>
+        <p>Visualización dinámica de equipos con filtros por área, especialidad y turno. Fotos y KPIs por persona.</p>
+        <div class="service-tags"><span class="tag">HR Analytics</span><span class="tag">Offline</span></div>
+        <a href="#" class="service-link">Ver detalle <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INTERACTIVE DASHBOARDS ============ -->
+<section id="dashboards" class="dashboards">
+  <div class="container">
+    <div class="section-eyebrow">Dashboards en vivo</div>
+    <h2 class="section-title">Explora nuestros <span class="grad">dashboards interactivos</span>. Click para vista completa.</h2>
+    <p class="section-lead">Muestras funcionales de los productos que entregamos. Cada dashboard incluye drilldown, filtros dinámicos y actualización diaria automatizada.</p>
+
+    <div class="dashboards-grid">
+      <div class="dashboard-card" data-modal="dash-vendors">
+        <div class="dashboard-preview">
+          <div class="dashboard-play-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Abrir demo
+          </div>
+          <svg viewBox="0 0 500 280">
+            <rect width="500" height="280" fill="#0F1F35"/>
+            <rect x="0" y="0" width="500" height="40" fill="#0A1628"/>
+            <text x="20" y="24" fill="#F59E0B" font-family="Arial" font-size="13" font-weight="bold">DASHBOARD VENDORS · MULTI-CONTRATO</text>
+            <circle cx="470" cy="20" r="6" fill="#10B981"/>
+            <text x="450" y="24" fill="#10B981" font-family="Arial" font-size="9" text-anchor="end">LIVE</text>
+            <g transform="translate(20,55)">
+              <rect x="0" y="0" width="105" height="60" rx="6" fill="#152A47" stroke="#22D3EE" stroke-width="1"/>
+              <text x="10" y="18" fill="#94A3B8" font-family="Arial" font-size="8">VALOR TOTAL</text>
+              <text x="10" y="38" fill="#F59E0B" font-family="Arial" font-size="18" font-weight="bold">$1.87B</text>
+              <text x="10" y="52" fill="#22D3EE" font-family="Arial" font-size="7">+8.4% vs. inicial</text>
+
+              <rect x="115" y="0" width="105" height="60" rx="6" fill="#152A47" stroke="#22D3EE" stroke-width="1"/>
+              <text x="125" y="18" fill="#94A3B8" font-family="Arial" font-size="8">VENDORS ACTIVOS</text>
+              <text x="125" y="38" fill="#22D3EE" font-family="Arial" font-size="18" font-weight="bold">6</text>
+              <text x="125" y="52" fill="#94A3B8" font-family="Arial" font-size="7">de 12 en ejecución</text>
+
+              <rect x="230" y="0" width="105" height="60" rx="6" fill="#152A47" stroke="#22D3EE" stroke-width="1"/>
+              <text x="240" y="18" fill="#94A3B8" font-family="Arial" font-size="8">MODIFICACIONES</text>
+              <text x="240" y="38" fill="#FBBF24" font-family="Arial" font-size="18" font-weight="bold">30+</text>
+              <text x="240" y="52" fill="#94A3B8" font-family="Arial" font-size="7">28 firmadas · 2 pend.</text>
+
+              <rect x="345" y="0" width="105" height="60" rx="6" fill="#152A47" stroke="#22D3EE" stroke-width="1"/>
+              <text x="355" y="18" fill="#94A3B8" font-family="Arial" font-size="8">AVANCE PROMEDIO</text>
+              <text x="355" y="38" fill="#10B981" font-family="Arial" font-size="18" font-weight="bold">87.3%</text>
+              <text x="355" y="52" fill="#94A3B8" font-family="Arial" font-size="7">EN EJECUCIÓN</text>
+            </g>
+            <!-- Chart -->
+            <g transform="translate(20,135)">
+              <text x="0" y="0" fill="#22D3EE" font-family="Arial" font-size="10" font-weight="bold">HISTÓRICO DE MODIFICACIONES</text>
+              <rect x="0" y="10" width="60" height="80" fill="#152A47"/>
+              <rect x="0" y="60" width="60" height="30" fill="#22D3EE"/>
+              <text x="30" y="105" fill="#94A3B8" font-family="Arial" font-size="7" text-anchor="middle">M1</text>
+
+              <rect x="70" y="10" width="60" height="80" fill="#152A47"/>
+              <rect x="70" y="35" width="60" height="55" fill="#22D3EE"/>
+              <text x="100" y="105" fill="#94A3B8" font-family="Arial" font-size="7" text-anchor="middle">M2</text>
+
+              <rect x="140" y="10" width="60" height="80" fill="#152A47"/>
+              <rect x="140" y="20" width="60" height="70" fill="#22D3EE"/>
+              <text x="170" y="105" fill="#94A3B8" font-family="Arial" font-size="7" text-anchor="middle">M3</text>
+
+              <rect x="210" y="10" width="60" height="80" fill="#152A47"/>
+              <rect x="210" y="15" width="60" height="75" fill="#F59E0B"/>
+              <text x="240" y="105" fill="#F59E0B" font-family="Arial" font-size="7" text-anchor="middle" font-weight="bold">M4 (Actual)</text>
+
+              <rect x="280" y="10" width="60" height="80" fill="#152A47" stroke="#F59E0B" stroke-dasharray="3,2"/>
+              <rect x="280" y="10" width="60" height="80" fill="#F59E0B" opacity="0.3"/>
+              <text x="310" y="105" fill="#FBBF24" font-family="Arial" font-size="7" text-anchor="middle">M5 (Prop.)</text>
+
+              <!-- Trend line -->
+              <polyline points="30,72 100,50 170,42 240,25 310,12" fill="none" stroke="#FBBF24" stroke-width="2"/>
+              <g fill="#FBBF24"><circle cx="30" cy="72" r="3"/><circle cx="100" cy="50" r="3"/><circle cx="170" cy="42" r="3"/><circle cx="240" cy="25" r="3"/><circle cx="310" cy="12" r="3"/></g>
+            </g>
+            <!-- KPI vendors -->
+            <g transform="translate(360,135)">
+              <text x="0" y="0" fill="#22D3EE" font-family="Arial" font-size="10" font-weight="bold">TOP VENDORS</text>
+              <text x="0" y="20" fill="#F1F5F9" font-family="Arial" font-size="8">SLA Vendor A</text>
+              <rect x="0" y="24" width="120" height="4" rx="2" fill="#152A47"/>
+              <rect x="0" y="24" width="105" height="4" rx="2" fill="#F59E0B"/>
+              <text x="0" y="42" fill="#F1F5F9" font-family="Arial" font-size="8">SCH Vendor B</text>
+              <rect x="0" y="46" width="120" height="4" rx="2" fill="#152A47"/>
+              <rect x="0" y="46" width="98" height="4" rx="2" fill="#22D3EE"/>
+              <text x="0" y="64" fill="#F1F5F9" font-family="Arial" font-size="8">HIT Vendor C</text>
+              <rect x="0" y="68" width="120" height="4" rx="2" fill="#152A47"/>
+              <rect x="0" y="68" width="60" height="4" rx="2" fill="#F59E0B"/>
+              <text x="0" y="86" fill="#F1F5F9" font-family="Arial" font-size="8">Vendor D</text>
+              <rect x="0" y="90" width="120" height="4" rx="2" fill="#152A47"/>
+              <rect x="0" y="90" width="45" height="4" rx="2" fill="#22D3EE"/>
+            </g>
+          </svg>
+        </div>
+        <div class="dashboard-body">
+          <div class="dashboard-badge">
+            <span style="width:8px;height:8px;background:var(--emerald);border-radius:50%;display:inline-block"></span>
+            Vendors · Multi-contrato
+          </div>
+          <h3>Dashboard Ejecutivo Multi-Vendor</h3>
+          <p>Consolidación de 6 vendors críticos con drilldown por WOS-T / SKID, historial de modificaciones, valor inicial vs. actual y avance en tiempo real.</p>
+          <div class="dashboard-features">
+            <span class="tag">$1.87B COP</span><span class="tag">30+ Mods</span><span class="tag">Drilldown</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card" data-modal="dash-schedule">
+        <div class="dashboard-preview">
+          <div class="dashboard-play-btn"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>Abrir demo</div>
+          <svg viewBox="0 0 500 280">
+            <rect width="500" height="280" fill="#0F1F35"/>
+            <rect x="0" y="0" width="500" height="40" fill="#0A1628"/>
+            <text x="20" y="24" fill="#F59E0B" font-family="Arial" font-size="13" font-weight="bold">SCHEDULE MASTER · GANTT VIEW</text>
+            <text x="480" y="24" fill="#94A3B8" font-family="Arial" font-size="9" text-anchor="end">Q3-Q4 2026</text>
+            <!-- Gantt -->
+            <g transform="translate(20,55)">
+              <g fill="#94A3B8" font-family="Arial" font-size="8">
+                <text x="0" y="8">JUL</text><text x="70" y="8">AGO</text><text x="140" y="8">SEP</text>
+                <text x="210" y="8">OCT</text><text x="280" y="8">NOV</text><text x="350" y="8">DIC</text>
+              </g>
+              <line x1="0" y1="14" x2="420" y2="14" stroke="#22D3EE" opacity="0.3"/>
+              <!-- Rows -->
+              <g transform="translate(0,20)">
+                <text x="-15" y="10" fill="#F1F5F9" font-family="Arial" font-size="8">Ingeniería</text>
+                <rect x="0" y="0" width="140" height="14" rx="3" fill="#22D3EE"/>
+              </g>
+              <g transform="translate(0,40)">
+                <text x="-15" y="10" fill="#F1F5F9" font-family="Arial" font-size="8">Procura</text>
+                <rect x="70" y="0" width="140" height="14" rx="3" fill="#F59E0B"/>
+              </g>
+              <g transform="translate(0,60)">
+                <text x="-15" y="10" fill="#F1F5F9" font-family="Arial" font-size="8">Fabricación</text>
+                <rect x="140" y="0" width="140" height="14" rx="3" fill="#B45309"/>
+              </g>
+              <g transform="translate(0,80)">
+                <text x="-15" y="10" fill="#F1F5F9" font-family="Arial" font-size="8">Instalación</text>
+                <rect x="210" y="0" width="140" height="14" rx="3" fill="#22D3EE" opacity="0.7"/>
+              </g>
+              <g transform="translate(0,100)">
+                <text x="-15" y="10" fill="#F1F5F9" font-family="Arial" font-size="8">Comisionamiento</text>
+                <rect x="280" y="0" width="105" height="14" rx="3" fill="#10B981"/>
+              </g>
+              <g transform="translate(0,120)">
+                <text x="-15" y="10" fill="#F1F5F9" font-family="Arial" font-size="8">Cierre</text>
+                <rect x="350" y="0" width="70" height="14" rx="3" fill="#F59E0B" opacity="0.7"/>
+              </g>
+              <!-- Milestones -->
+              <g>
+                <polygon points="140,-5 145,3 135,3" fill="#F59E0B"/>
+                <polygon points="210,-5 215,3 205,3" fill="#F59E0B"/>
+                <polygon points="280,-5 285,3 275,3" fill="#F59E0B"/>
+                <polygon points="350,-5 355,3 345,3" fill="#F59E0B"/>
+              </g>
+              <!-- Today line -->
+              <line x1="90" y1="0" x2="90" y2="145" stroke="#F43F5E" stroke-width="2" stroke-dasharray="3,3"/>
+              <text x="94" y="145" fill="#F43F5E" font-family="Arial" font-size="8" font-weight="bold">HOY</text>
+            </g>
+            <!-- Metrics bottom -->
+            <g transform="translate(20,220)">
+              <rect x="0" y="0" width="145" height="45" rx="6" fill="#152A47"/>
+              <text x="10" y="15" fill="#94A3B8" font-family="Arial" font-size="8">SPI</text>
+              <text x="10" y="35" fill="#10B981" font-family="Arial" font-size="17" font-weight="bold">0.98</text>
+              <text x="80" y="30" fill="#10B981" font-family="Arial" font-size="8">On track</text>
+
+              <rect x="155" y="0" width="145" height="45" rx="6" fill="#152A47"/>
+              <text x="165" y="15" fill="#94A3B8" font-family="Arial" font-size="8">CPI</text>
+              <text x="165" y="35" fill="#F59E0B" font-family="Arial" font-size="17" font-weight="bold">1.02</text>
+              <text x="235" y="30" fill="#F59E0B" font-family="Arial" font-size="8">Bajo pto.</text>
+
+              <rect x="310" y="0" width="150" height="45" rx="6" fill="#152A47"/>
+              <text x="320" y="15" fill="#94A3B8" font-family="Arial" font-size="8">RUTA CRÍTICA</text>
+              <text x="320" y="35" fill="#22D3EE" font-family="Arial" font-size="17" font-weight="bold">18 días</text>
+              <text x="405" y="30" fill="#F43F5E" font-family="Arial" font-size="8">Riesgo</text>
+            </g>
+          </svg>
+        </div>
+        <div class="dashboard-body">
+          <div class="dashboard-badge"><span style="width:8px;height:8px;background:var(--cyan);border-radius:50%;display:inline-block"></span>Schedule · Planning</div>
+          <h3>Schedule Master con SPI/CPI</h3>
+          <p>Gantt integrado L4 con ruta crítica, hitos por fase, curvas de valor ganado (EVM) y línea de progreso en tiempo real.</p>
+          <div class="dashboard-features">
+            <span class="tag">EVM</span><span class="tag">Ruta crítica</span><span class="tag">SPI/CPI</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card" data-modal="dash-costos">
+        <div class="dashboard-preview">
+          <div class="dashboard-play-btn"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>Abrir demo</div>
+          <svg viewBox="0 0 500 280">
+            <rect width="500" height="280" fill="#0F1F35"/>
+            <rect x="0" y="0" width="500" height="40" fill="#0A1628"/>
+            <text x="20" y="24" fill="#F59E0B" font-family="Arial" font-size="13" font-weight="bold">CONTROL DE COSTOS · APU + PPTO</text>
+            <!-- Donut chart -->
+            <g transform="translate(80,140)">
+              <circle cx="0" cy="0" r="55" fill="none" stroke="#152A47" stroke-width="20"/>
+              <circle cx="0" cy="0" r="55" fill="none" stroke="#F59E0B" stroke-width="20" stroke-dasharray="200 346" transform="rotate(-90)"/>
+              <circle cx="0" cy="0" r="55" fill="none" stroke="#22D3EE" stroke-width="20" stroke-dasharray="90 346" stroke-dashoffset="-200" transform="rotate(-90)"/>
+              <circle cx="0" cy="0" r="55" fill="none" stroke="#10B981" stroke-width="20" stroke-dasharray="56 346" stroke-dashoffset="-290" transform="rotate(-90)"/>
+              <text x="0" y="0" text-anchor="middle" fill="#F1F5F9" font-family="Arial" font-size="18" font-weight="bold">$1.87B</text>
+              <text x="0" y="16" text-anchor="middle" fill="#94A3B8" font-family="Arial" font-size="9">COP total</text>
+            </g>
+            <g transform="translate(180,90)">
+              <rect x="0" y="0" width="10" height="10" fill="#F59E0B"/><text x="18" y="9" fill="#F1F5F9" font-family="Arial" font-size="10">Servicios técnicos · 58%</text>
+              <rect x="0" y="20" width="10" height="10" fill="#22D3EE"/><text x="18" y="29" fill="#F1F5F9" font-family="Arial" font-size="10">Materiales · 26%</text>
+              <rect x="0" y="40" width="10" height="10" fill="#10B981"/><text x="18" y="49" fill="#F1F5F9" font-family="Arial" font-size="10">Ingeniería · 16%</text>
+            </g>
+            <!-- Budget vs actual -->
+            <g transform="translate(180,160)">
+              <text x="0" y="0" fill="#22D3EE" font-family="Arial" font-size="10" font-weight="bold">PLAN vs. EJECUTADO</text>
+              <text x="0" y="20" fill="#94A3B8" font-family="Arial" font-size="8">Planeado</text>
+              <rect x="70" y="14" width="200" height="8" rx="4" fill="#152A47"/>
+              <rect x="70" y="14" width="200" height="8" rx="4" fill="#22D3EE"/>
+              <text x="275" y="21" fill="#22D3EE" font-family="Arial" font-size="9" font-weight="bold">$1.87B</text>
+              <text x="0" y="40" fill="#94A3B8" font-family="Arial" font-size="8">Ejecutado</text>
+              <rect x="70" y="34" width="200" height="8" rx="4" fill="#152A47"/>
+              <rect x="70" y="34" width="175" height="8" rx="4" fill="#F59E0B"/>
+              <text x="275" y="41" fill="#F59E0B" font-family="Arial" font-size="9" font-weight="bold">$1.64B</text>
+              <text x="0" y="60" fill="#94A3B8" font-family="Arial" font-size="8">Ahorro</text>
+              <rect x="70" y="54" width="200" height="8" rx="4" fill="#152A47"/>
+              <rect x="70" y="54" width="30" height="8" rx="4" fill="#10B981"/>
+              <text x="275" y="61" fill="#10B981" font-family="Arial" font-size="9" font-weight="bold">$230M</text>
+            </g>
+            <!-- Right table APU -->
+            <g transform="translate(20,240)">
+              <text x="0" y="0" fill="#22D3EE" font-family="Arial" font-size="10" font-weight="bold">APUs REGISTRADOS: 47 items</text>
+            </g>
+          </svg>
+        </div>
+        <div class="dashboard-body">
+          <div class="dashboard-badge"><span style="width:8px;height:8px;background:var(--amber);border-radius:50%;display:inline-block"></span>Costos · Presupuesto</div>
+          <h3>Control de Costos, APU y Presupuestos</h3>
+          <p>Consolidación de presupuestos por WBS, APUs por ítem, plan vs. ejecutado, curvas de EVM y proyección hasta cierre.</p>
+          <div class="dashboard-features">
+            <span class="tag">47 APUs</span><span class="tag">EVM</span><span class="tag">Cash flow</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card" data-modal="dash-hh">
+        <div class="dashboard-preview">
+          <div class="dashboard-play-btn"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>Abrir demo</div>
+          <svg viewBox="0 0 500 280">
+            <rect width="500" height="280" fill="#0F1F35"/>
+            <rect x="0" y="0" width="500" height="40" fill="#0A1628"/>
+            <text x="20" y="24" fill="#F59E0B" font-family="Arial" font-size="13" font-weight="bold">HORAS HOMBRE · PRODUCTIVIDAD</text>
+            <!-- KPI top -->
+            <g transform="translate(20,55)">
+              <rect x="0" y="0" width="145" height="55" rx="6" fill="#152A47" stroke="#F59E0B" stroke-width="1"/>
+              <text x="10" y="18" fill="#94A3B8" font-family="Arial" font-size="8">HH EJECUTADAS</text>
+              <text x="10" y="42" fill="#F59E0B" font-family="Arial" font-size="20" font-weight="bold">12,480</text>
+
+              <rect x="155" y="0" width="145" height="55" rx="6" fill="#152A47" stroke="#22D3EE" stroke-width="1"/>
+              <text x="165" y="18" fill="#94A3B8" font-family="Arial" font-size="8">HH PLANEADAS</text>
+              <text x="165" y="42" fill="#22D3EE" font-family="Arial" font-size="20" font-weight="bold">13,200</text>
+
+              <rect x="310" y="0" width="150" height="55" rx="6" fill="#152A47" stroke="#10B981" stroke-width="1"/>
+              <text x="320" y="18" fill="#94A3B8" font-family="Arial" font-size="8">PRODUCTIVIDAD</text>
+              <text x="320" y="42" fill="#10B981" font-family="Arial" font-size="20" font-weight="bold">94.5%</text>
+            </g>
+            <!-- Curve -->
+            <g transform="translate(20,130)">
+              <text x="0" y="0" fill="#22D3EE" font-family="Arial" font-size="10" font-weight="bold">CURVA DE HH ACUMULADA</text>
+              <line x1="0" y1="90" x2="440" y2="90" stroke="#94A3B8" opacity="0.3"/>
+              <line x1="0" y1="10" x2="0" y2="90" stroke="#94A3B8" opacity="0.3"/>
+              <!-- Planeado -->
+              <path d="M0,85 Q100,75 150,55 T300,25 T440,10" fill="none" stroke="#22D3EE" stroke-width="2" stroke-dasharray="4,3"/>
+              <!-- Ejecutado -->
+              <path d="M0,85 Q100,80 150,60 T280,30 T400,20" fill="none" stroke="#F59E0B" stroke-width="2.5"/>
+              <!-- Puntos -->
+              <g fill="#F59E0B"><circle cx="0" cy="85" r="3"/><circle cx="80" cy="78" r="3"/><circle cx="160" cy="60" r="3"/><circle cx="240" cy="42" r="3"/><circle cx="320" cy="28" r="3"/><circle cx="400" cy="20" r="3"/></g>
+              <!-- Legend -->
+              <g transform="translate(320,-5)">
+                <line x1="0" y1="0" x2="15" y2="0" stroke="#22D3EE" stroke-dasharray="3,2"/>
+                <text x="18" y="3" fill="#22D3EE" font-family="Arial" font-size="8">Planeado</text>
+                <line x1="70" y1="0" x2="85" y2="0" stroke="#F59E0B" stroke-width="2"/>
+                <text x="88" y="3" fill="#F59E0B" font-family="Arial" font-size="8">Ejecutado</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="dashboard-body">
+          <div class="dashboard-badge"><span style="width:8px;height:8px;background:var(--emerald);border-radius:50%;display:inline-block"></span>Ingeniería · HH</div>
+          <h3>Horas Hombre & Productividad</h3>
+          <p>Tracking de HH por rol, curva acumulada plan vs. real, alertas de sobretiempo y análisis por especialidad.</p>
+          <div class="dashboard-features">
+            <span class="tag">12.4K HH</span><span class="tag">94.5% prod</span><span class="tag">Alertas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PORTFOLIO ============ -->
+<section id="portafolio" class="portfolio">
+  <div class="container">
+    <div class="section-eyebrow">Casos de éxito</div>
+    <h2 class="section-title">Proyectos que han <span class="grad">ahorrado millones</span> a nuestros clientes.</h2>
+    <p class="section-lead">Ejemplos reales anonimizados de intervenciones donde nuestra planeación evitó sobrecostos, aceleró cierres y aseguró trazabilidad completa.</p>
+
+    <div class="portfolio-grid">
+      <div class="case" data-modal="case-disputa">
+        <div class="case-visual">
+          <svg viewBox="0 0 400 200">
+            <defs><linearGradient id="cs1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F59E0B" stop-opacity="0.3"/><stop offset="100%" stop-color="#0891B2" stop-opacity="0.2"/></linearGradient></defs>
+            <rect width="400" height="200" fill="url(#cs1)"/>
+            <g stroke="#F59E0B" stroke-width="3" fill="none" opacity="0.8">
+              <path d="M0,100 L120,100 L120,60 L280,60 L280,140 L400,140"/>
+              <path d="M0,150 L200,150 L200,170 L400,170"/>
+              <path d="M60,0 L60,200"/><path d="M340,0 L340,200"/>
+            </g>
+            <g fill="#22D3EE" stroke="#0A1628" stroke-width="2">
+              <circle cx="120" cy="60" r="8"/><circle cx="280" cy="60" r="8"/>
+              <circle cx="200" cy="150" r="8"/><circle cx="60" cy="100" r="8"/>
+            </g>
+            <g transform="translate(310,80)">
+              <ellipse cx="30" cy="0" rx="30" ry="6" fill="#F59E0B"/>
+              <rect x="0" y="0" width="60" height="80" fill="#F59E0B" opacity="0.7"/>
+              <ellipse cx="30" cy="80" rx="30" ry="6" fill="#B45309"/>
+              <text x="30" y="45" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="10" font-weight="bold">SKID-A</text>
+            </g>
+          </svg>
+          <div class="case-badge">Contract Management</div>
+        </div>
+        <div class="case-body">
+          <div class="case-sector">Oil & Gas · Upstream</div>
+          <h3>Análisis de disputa de días facturables en contrato de $1.87B COP</h3>
+          <p class="case-desc">Análisis multi-escenario para disputa entre operador y vendor de skids contenerizados, identificando $286 M de faltante potencial y sustentando modificación contractual.</p>
+          <div class="case-stats">
+            <div><div class="stat-val">$286M</div><div class="stat-lbl">Riesgo mitigado</div></div>
+            <div><div class="stat-val">5</div><div class="stat-lbl">Modificaciones ODS</div></div>
+            <div><div class="stat-val">21 días</div><div class="stat-lbl">Time-to-decision</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="case" data-modal="case-reportes">
+        <div class="case-visual">
+          <svg viewBox="0 0 400 200">
+            <defs><linearGradient id="cs2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22D3EE" stop-opacity="0.25"/><stop offset="100%" stop-color="#F59E0B" stop-opacity="0.2"/></linearGradient></defs>
+            <rect width="400" height="200" fill="url(#cs2)"/>
+            <g fill="#22D3EE" opacity="0.85"><rect x="20" y="30" width="130" height="30" rx="14"/></g>
+            <g fill="#F59E0B" opacity="0.85"><rect x="250" y="70" width="130" height="30" rx="14"/><rect x="20" y="115" width="130" height="30" rx="14"/><rect x="250" y="155" width="130" height="30" rx="14"/></g>
+            <g stroke="#F59E0B" stroke-width="2" fill="none" stroke-linecap="round"><path d="M180,100 L220,100"/><path d="M215,95 L220,100 L215,105"/></g>
+            <g transform="translate(340,20)">
+              <rect x="0" y="0" width="50" height="60" rx="4" fill="#0F1F35" stroke="#22D3EE" stroke-width="1.5"/>
+              <line x1="10" y1="15" x2="40" y2="15" stroke="#22D3EE" stroke-width="1"/>
+              <line x1="10" y1="25" x2="40" y2="25" stroke="#94A3B8" stroke-width="1"/>
+              <line x1="10" y1="35" x2="40" y2="35" stroke="#94A3B8" stroke-width="1"/>
+              <text x="25" y="55" text-anchor="middle" fill="#22D3EE" font-family="Arial" font-size="6" font-weight="bold">XLSX</text>
+            </g>
+          </svg>
+          <div class="case-badge">Automation</div>
+        </div>
+        <div class="case-body">
+          <div class="case-sector">Aseguramiento Técnico · Reporting</div>
+          <h3>Consolidación diaria de reportes WhatsApp → Excel ejecutivo</h3>
+          <p class="case-desc">Automatización de la generación diaria de reportes ejecutivos consolidando 15-25 mensajes de campo con clasificación NLP y formato corporativo predefinido.</p>
+          <div class="case-stats">
+            <div><div class="stat-val">120+</div><div class="stat-lbl">Reportes/mes</div></div>
+            <div><div class="stat-val">2h → 3min</div><div class="stat-lbl">Tiempo ahorrado</div></div>
+            <div><div class="stat-val">98%</div><div class="stat-lbl">Precisión clasif.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="case" data-modal="case-dashboard">
+        <div class="case-visual">
+          <svg viewBox="0 0 400 200">
+            <defs><linearGradient id="cs3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F59E0B" stop-opacity="0.25"/><stop offset="100%" stop-color="#22D3EE" stop-opacity="0.2"/></linearGradient></defs>
+            <rect width="400" height="200" fill="url(#cs3)"/>
+            <g><rect x="30" y="140" width="30" height="40" fill="#22D3EE"/><rect x="70" y="110" width="30" height="70" fill="#F59E0B"/><rect x="110" y="80" width="30" height="100" fill="#22D3EE"/><rect x="150" y="120" width="30" height="60" fill="#F59E0B"/><rect x="190" y="90" width="30" height="90" fill="#22D3EE"/><rect x="230" y="70" width="30" height="110" fill="#F59E0B"/><rect x="270" y="100" width="30" height="80" fill="#22D3EE"/><rect x="310" y="130" width="30" height="50" fill="#F59E0B"/><rect x="350" y="105" width="30" height="75" fill="#22D3EE"/></g>
+            <polyline points="45,150 85,130 125,105 165,120 205,100 245,85 285,110 325,140 365,115" fill="none" stroke="#FBBF24" stroke-width="2.5"/>
+            <text x="30" y="30" fill="#22D3EE" font-family="Arial" font-size="12" font-weight="bold">AVANCE VS PLAN · WOS-T</text>
+          </svg>
+          <div class="case-badge">Executive Dashboard</div>
+        </div>
+        <div class="case-body">
+          <div class="case-sector">Business Intelligence · Vendors</div>
+          <h3>Dashboard multi-vendor con 30+ modificaciones contractuales</h3>
+          <p class="case-desc">Tablero interactivo consolidando 6 vendors críticos con drilldown por skid, avance diario, balance histórico y gráficas comparativas.</p>
+          <div class="case-stats">
+            <div><div class="stat-val">6</div><div class="stat-lbl">Vendors integrados</div></div>
+            <div><div class="stat-val">10</div><div class="stat-lbl">Skids monitoreados</div></div>
+            <div><div class="stat-val">87%</div><div class="stat-lbl">Avance visible</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="case" data-modal="case-organigrama">
+        <div class="case-visual">
+          <svg viewBox="0 0 400 200">
+            <defs><linearGradient id="cs4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22D3EE" stop-opacity="0.25"/><stop offset="100%" stop-color="#F59E0B" stop-opacity="0.2"/></linearGradient></defs>
+            <rect width="400" height="200" fill="url(#cs4)"/>
+            <g stroke="#94A3B8" stroke-width="1" fill="none" opacity="0.6">
+              <line x1="200" y1="45" x2="100" y2="90"/><line x1="200" y1="45" x2="200" y2="90"/><line x1="200" y1="45" x2="300" y2="90"/>
+              <line x1="100" y1="120" x2="60" y2="160"/><line x1="100" y1="120" x2="140" y2="160"/>
+              <line x1="300" y1="120" x2="260" y2="160"/><line x1="300" y1="120" x2="340" y2="160"/>
+            </g>
+            <g fill="#F59E0B"><circle cx="200" cy="35" r="18"/></g>
+            <g fill="#22D3EE"><circle cx="100" cy="105" r="14"/><circle cx="200" cy="105" r="14"/><circle cx="300" cy="105" r="14"/></g>
+            <g fill="#0891B2"><circle cx="60" cy="170" r="10"/><circle cx="140" cy="170" r="10"/><circle cx="260" cy="170" r="10"/><circle cx="340" cy="170" r="10"/></g>
+            <text x="200" y="40" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="10" font-weight="bold">CEO</text>
+          </svg>
+          <div class="case-badge">Team Visualization</div>
+        </div>
+        <div class="case-body">
+          <div class="case-sector">HR / Organization</div>
+          <h3>Organigrama interactivo para equipo técnico de 80+ personas</h3>
+          <p class="case-desc">Dashboard HTML autocontenido con tarjetas por integrante (foto, cédula, área, especialidad, ruta), filtros dinámicos y agrupación visual.</p>
+          <div class="case-stats">
+            <div><div class="stat-val">80+</div><div class="stat-lbl">Miembros</div></div>
+            <div><div class="stat-val">12</div><div class="stat-lbl">Equipos técnicos</div></div>
+            <div><div class="stat-val">0</div><div class="stat-lbl">Dependencias CDN</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section id="testimonios" class="testimonials">
+  <div class="container">
+    <div class="section-eyebrow">Testimonios · Confianza</div>
+    <h2 class="section-title">Lo que dicen nuestros <span class="grad">socios estratégicos</span>.</h2>
+    <p class="section-lead">Feedback anonimizado de líderes técnicos y contractuales que han implementado nuestros servicios en sus operaciones.</p>
+
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <p class="testimonial-quote">"El análisis de la disputa contractual nos ahorró $286 M en un contrato de casi $2B COP. La forma como estructuraron los escenarios y sustentaron la posición técnica fue impecable."</p>
+        <div class="testimonial-author">
+          <div class="avatar">M</div>
+          <div><div class="author-name">M. Contreras</div><div class="author-role">Prof. Gestión Contractual · Operador Nacional</div></div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial-quote">"Pasamos de 2 horas diarias armando el reporte de campo a 3 minutos. La clasificación automática por área es sorprendentemente precisa y el formato queda listo para ejecutivos."</p>
+        <div class="testimonial-author">
+          <div class="avatar">R</div>
+          <div><div class="author-name">R. Villamil</div><div class="author-role">Líder ATIP · Proyectos Upstream</div></div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial-quote">"Los dashboards de vendors son de nivel corporativo. Nunca antes tuvimos visibilidad tan clara del avance por skid, modificaciones y proyecciones. Cambio la forma de tomar decisiones."</p>
+        <div class="testimonial-author">
+          <div class="avatar">L</div>
+          <div><div class="author-name">L. Ospina</div><div class="author-role">Ing. Aseguramiento · EPC Midstream</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ IMPACTO ============ -->
+<section id="impacto" class="impact">
+  <div class="container">
+    <div class="section-eyebrow">Impacto medible</div>
+    <h2 class="section-title">Números que <span class="grad">respaldan</span> nuestra propuesta de valor.</h2>
+    <p class="section-lead">Resultados agregados de las intervenciones de planeación y aseguramiento contractual en operaciones críticas durante los últimos 24 meses.</p>
+    <div class="impact-grid">
+      <div class="impact-card"><div class="impact-val">$1.8B</div><div class="impact-lbl">COP en contratos</div><div class="impact-desc">Bajo gestión activa multi-vendor</div></div>
+      <div class="impact-card"><div class="impact-val">99.2%</div><div class="impact-lbl">Precisión reportes</div><div class="impact-desc">Clasificación automatizada</div></div>
+      <div class="impact-card"><div class="impact-val">40h</div><div class="impact-lbl">Ahorro semanal</div><div class="impact-desc">En consolidación por cliente</div></div>
+      <div class="impact-card"><div class="impact-val">15+</div><div class="impact-lbl">Vendors integrados</div><div class="impact-desc">Con drilldown en dashboards</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TECH ============ -->
+<section id="tecnologia" class="tech">
+  <div class="container">
+    <div class="section-eyebrow">Stack tecnológico</div>
+    <h2 class="section-title">Tecnología <span class="grad">robusta y portable</span>.</h2>
+    <p class="section-lead">Priorizamos herramientas ampliamente disponibles en la industria energética, con soluciones offline-first cuando la conectividad es crítica.</p>
+    <div class="tech-badges">
+      <div class="tech-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M2 12h20"/></svg>Python · pandas · openpyxl</div>
+      <div class="tech-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Microsoft Excel Advanced</div>
+      <div class="tech-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>MS Project · Primavera P6</div>
+      <div class="tech-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>HTML/CSS/JS autocontenido</div>
+      <div class="tech-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Power BI · Tableau</div>
+      <div class="tech-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>DocuSign · Adobe Sign</div>
+      <div class="tech-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/></svg>SVG Offline Native</div>
+      <div class="tech-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg>Windows / OneDrive / SharePoint</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section id="contacto" class="cta">
+  <div class="container cta-inner">
+    <h2>¿Listo para <span style="background:linear-gradient(135deg,var(--amber),var(--cyan-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">optimizar</span> tus operaciones?</h2>
+    <p>Hablemos sobre cómo la planeación estructurada puede ahorrar millones y acelerar cierres en tus proyectos energéticos. Cobertura nacional e internacional.</p>
+    <div class="cta-buttons">
+      <a href="mailto:contacto@bsenergy.co" class="btn-primary">
+        Escribir a nuestro equipo
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </a>
+      <a href="#portafolio" class="btn-secondary">
+        Descargar case studies
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0A1628" stroke-width="2.5" stroke-linecap="round"><path d="M12 2 L4 8 L4 20 L20 20 L20 8 Z"/><path d="M12 2 L12 20"/><path d="M8 12 L16 12"/></svg>
+          </div>
+          <span>BSEnergy · <span style="color:var(--amber-2)">Planeación</span></span>
+        </div>
+        <p>Consultoría en planeación, aseguramiento técnico y gestión contractual para operadores energéticos. Colombia · LATAM · Global.</p>
+      </div>
+      <div class="footer">
+        <h5>Servicios</h5>
+        <ul>
+          <li><a href="#servicios">Cronogramas & Schedule</a></li>
+          <li><a href="#servicios">Presupuestos & APU</a></li>
+          <li><a href="#servicios">Memorias & Preservación</a></li>
+          <li><a href="#servicios">Dashboards ejecutivos</a></li>
+        </ul>
+      </div>
+      <div class="footer">
+        <h5>Sectores</h5>
+        <ul>
+          <li><a href="#">Oil & Gas Upstream</a></li>
+          <li><a href="#">Midstream · Transporte</a></li>
+          <li><a href="#">Refinación</a></li>
+          <li><a href="#">Energía renovable</a></li>
+        </ul>
+      </div>
+      <div class="footer">
+        <h5>Contacto</h5>
+        <ul>
+          <li><a href="mailto:contacto@bsenergy.co">contacto@bsenergy.co</a></li>
+          <li><a href="tel:+571000000">+57 (1) 000-0000</a></li>
+          <li><a href="https://www.bsenergy.co">www.bsenergy.co</a></li>
+          <li><a href="#">Bogotá · Colombia</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 BSEnergy · Todos los derechos reservados</div>
+      <div>Diseñado con foco en performance offline</div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose" aria-label="Cerrar">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+  // ============ MODAL DATA ============
+  const modalData = {
+    'cronograma': {
+      badge: 'Planeación', title: 'Cronogramas Maestros Anuales',
+      desc: 'Diseño e implementación de cronogramas anuales con vistas semanales, mensuales, KPIs de cumplimiento, presupuesto y evidencias automatizadas. Distribución inteligente de actividades HSE / Bienestar / SST según frecuencias sugeridas.',
+      preview: 'gantt',
+      features: [
+        'Cronograma anual con 113+ actividades distribuidas por frecuencia',
+        'Vistas semanal (L-V), mensual (calendario) y timeline maestro',
+        'KPIs de cumplimiento con drilldown por área y persona',
+        'Presupuesto por actividad con control de diferencias',
+        'Registro de evidencias pre-cargado (fotos, asistentes)',
+        'Exportación PDF ejecutiva y Excel operativo'
+      ],
+      stats: [['113+','Actividades'],['6','Meses'],['4','Áreas'],['100%','Trazabilidad']]
+    },
+    'schedule': {
+      badge: 'Planeación', title: 'Schedule Detallado L4-L5',
+      desc: 'Programación integrada en Primavera P6 / MS Project con hitos por fase, ruta crítica, curvas S y análisis what-if. Incluye baseline management y control de cambios.',
+      preview: 'gantt',
+      features: [
+        'Baseline + control de cambios con snapshots por hito',
+        'Ruta crítica con análisis de holguras y flotantes',
+        'Curvas S de planeado, real y earned value',
+        'Integración con Plan de Vendor y hitos contractuales',
+        'Reportes ejecutivos por fase (Ingeniería · Procura · Fab · Comm)',
+        'Análisis what-if con simulación de retrasos'
+      ],
+      stats: [['L4','Nivel'],['SPI','0.98'],['CPI','1.02'],['P6','Compatible']]
+    },
+    'planvendor': {
+      badge: 'Planeación', title: 'Plan Maestro de Vendor',
+      desc: 'Consolidación de milestones por proveedor: entregables, FAT, SAT, envío a sitio, instalación y aceptación. Sincronizado con el schedule L4 y la ruta contractual.',
+      preview: 'gantt',
+      features: [
+        'Master vendor plan con 10+ hitos por proveedor',
+        'Alertas de retrasos y desviaciones vs. baseline',
+        'Integración con dashboards de gestión contractual',
+        'FAT / SAT tracker con documentos firmados',
+        'Reportes de estatus semanal para comité de proyecto',
+        'Análisis de vendors críticos con dependencias'
+      ],
+      stats: [['15+','Vendors'],['80%','Cumplimiento'],['SLA','Track'],['ODS','Link']]
+    },
+    'presupuestos': {
+      badge: 'Control de Costos', title: 'Presupuestos & Estimados',
+      desc: 'Elaboración de presupuestos base (Class 5) y de control (Class 3) con desglose por WBS, matriz de sensibilidad, contingencias y análisis de riesgo integrado.',
+      preview: 'donut',
+      features: [
+        'Estructura WBS a 4-5 niveles con codificación de cuentas',
+        'Análisis Monte Carlo para contingencias (P50, P80, P90)',
+        'Desglose por servicios técnicos, materiales, ingeniería',
+        'Comparativo múltiples ofertas por ítem',
+        'Curvas de desembolso mensual con proyección',
+        'Reservas de gestión y contingencia separadas'
+      ],
+      stats: [['$1.87B','Total'],['12%','Contingencia'],['P80','Nivel'],['4','Niveles WBS']]
+    },
+    'apu': {
+      badge: 'Control de Costos', title: 'Análisis de Precios Unitarios (APU)',
+      desc: 'Estructuración de APUs con mano de obra directa/indirecta, equipo, materiales, transporte, indirectos, administración, imprevistos y utilidad conforme normativa colombiana.',
+      preview: 'donut',
+      features: [
+        'APUs conforme circular 300-000004 y normativa vigente',
+        'Componentes: MO, Equipo, Materiales, Transporte, Indirectos',
+        'Aplicación de A.I.U. por proyecto',
+        'Base de datos con 200+ ítems históricos',
+        'Actualización por índices de precios (DANE)',
+        'Exportación a formatos Ecopetrol, ISA, EPM'
+      ],
+      stats: [['200+','Ítems base'],['15%','A.I.U típico'],['47','APUs proyecto'],['DANE','Índices']]
+    },
+    'facturacion': {
+      badge: 'Control de Costos', title: 'Facturación & Actas de Recibo',
+      desc: 'Consolidación de actas de recibo (GAB-F-080), cortes mensuales, facturación con soportes técnicos, verificación de cuentas por pagar y balance final (GAB-F-083).',
+      preview: 'table',
+      features: [
+        'Actas GAB-F-080 firmadas digitalmente',
+        'Cortes mensuales con soporte técnico y fotográfico',
+        'Balance parcial y final con conciliación de días',
+        'Facturas electrónicas conforme Decreto 2242/2015',
+        'Verificación de retenciones y cesiones',
+        'Trámite de anticipos y amortizaciones'
+      ],
+      stats: [['30d','Ciclo pago'],['GAB-F-080','Formato'],['100%','Trazabilidad'],['DIAN','Compliant']]
+    },
+    'memorias': {
+      badge: 'Ingeniería', title: 'Memorias de Cálculo',
+      desc: 'Memorias técnicas para instalaciones eléctricas de baja/media tensión, mecánicas, instrumentación y control con firma de profesional matriculado conforme RETIE, ASME, API.',
+      preview: 'doc',
+      features: [
+        'Memorias eléctricas MT/BT conforme RETIE',
+        'Cálculos mecánicos ASME BPVC / B31.3',
+        'Memorias de instrumentación ISA 5.1 / IEC 61511',
+        'Verificación por profesional matriculado',
+        'Cálculos de cargas, cortocircuito, corrientes falla',
+        'Análisis de arc-flash y coordinación de protecciones'
+      ],
+      stats: [['RETIE','MT/BT'],['ASME','B31.3'],['ISA','5.1'],['80+','Proyectos']]
+    },
+    'preservacion': {
+      badge: 'Ingeniería', title: 'Preservación de Equipos',
+      desc: 'Planes de preservación para equipos on-site y en bodega. Registros trimestrales de tableros SCP/CCP, generadores, VFDs, skids y transformadores.',
+      preview: 'doc',
+      features: [
+        'Planes de preservación por tipo de equipo',
+        'Registros trimestrales con fotografías',
+        'Preservación crítica de tableros energizados/desenergizados',
+        'Monitoreo de bombas de servicios auxiliares',
+        'Registro de aceites, insumos y consumibles',
+        'Alertas de vencimiento de preservación'
+      ],
+      stats: [['Q4','Frecuencia'],['500+','Equipos'],['3Q','Corte']]
+    },
+    'horashombre': {
+      badge: 'Ingeniería', title: 'Horas Hombre & Productividad',
+      desc: 'Tracking de HH ejecutadas vs. planeadas, curvas de productividad, cierre de ODS, análisis de sobretiempos y curva Learning.',
+      preview: 'curve',
+      features: [
+        'HH por rol (Ing. Sr, Sr, Jr, Técnicos)',
+        'Curva acumulada plan vs. real por semana',
+        'Alertas de sobretiempo (>10% desviación)',
+        'Análisis por especialidad (eléctrica, mecánica, I&C)',
+        'Learning curve para tareas repetitivas',
+        'Reportes de eficiencia por cluster/skid'
+      ],
+      stats: [['12,480','HH ejec.'],['94.5%','Prod.'],['<10%','Desv.'],['6','Roles']]
+    },
+    'gestioncontractual': {
+      badge: 'Gestión Contractual', title: 'Gestión Contractual Multi-Vendor',
+      desc: 'Consolidación de modificaciones, balances de días vs. facturación, análisis de disputas y proyecciones de faltantes/adiciones para portafolios de 15+ contratos concurrentes.',
+      preview: 'dashboard',
+      features: [
+        'Historial completo de modificaciones por ODS',
+        'Balance de días contratados vs. ejecutados vs. facturados',
+        'Análisis de disputas con evidencia técnica',
+        'Proyecciones de faltantes/adiciones por escenario',
+        'Riesgo por vendor y por tipo de servicio',
+        'Alertas de vencimiento de plazos ODS'
+      ],
+      stats: [['15+','Contratos'],['$1.8B','COP'],['30+','Mods'],['5','Vendors']]
+    },
+    'memorandos': {
+      badge: 'Gestión Contractual', title: 'Memorandos & Modificaciones',
+      desc: 'Redacción técnica de memorandos, modificaciones de ODS, soportes contractuales y justificaciones de ampliación de plazo/valor conforme guías de gobierno corporativo (GAB-G-001).',
+      preview: 'doc',
+      features: [
+        'Memorandos conforme GAB-G-001 v18',
+        'Modificaciones ODS con soporte Excel de valor',
+        'Justificaciones técnicas de ampliación de plazo',
+        'Análisis de fuerza mayor con evidencia',
+        'DocuSign integration para firmas',
+        'Historial de versiones y control de cambios'
+      ],
+      stats: [['GAB-G-001','Guía'],['DocuSign','Firmas'],['5','Mods típicas']]
+    },
+    'reportes': {
+      badge: 'Reporting', title: 'Reportes Diarios Automatizados',
+      desc: 'Consolidación de reportes WhatsApp / Teams / Email en documentos ejecutivos con clasificación NLP por área (Facilidades, Exteriores, Coordinación) y trazabilidad completa.',
+      preview: 'doc',
+      features: [
+        'Parseo automático de mensajes WhatsApp/Teams',
+        'Clasificación NLP por área (>98% precisión)',
+        'Excel corporativo con formato ejecutivo',
+        'Filtrado de coordinación vs. reportes técnicos',
+        'Extracción de KPIs (avance %, días ejec.)',
+        'Distribución automática por email'
+      ],
+      stats: [['120+','Reportes/mes'],['98%','Precisión'],['3min','vs 2h antes']]
+    },
+    'dashboards': {
+      badge: 'Reporting', title: 'Dashboards Ejecutivos',
+      desc: 'Cuadros de mando interactivos para vendors, contratos, avances por WOS-T / SKID / Cluster con drilldown por modificación, indicadores financieros y de plazo.',
+      preview: 'dashboard',
+      features: [
+        'Filtros dinámicos (vendor, área, cluster, fase)',
+        'Drilldown de KPI a nivel de skid o WOST',
+        'Historial de mods con visualización cronológica',
+        'Comparativo plan vs. real por período',
+        'Alertas visuales (verde/ámbar/rojo)',
+        'Exportación PDF y Excel para reuniones'
+      ],
+      stats: [['6','Vendors'],['30+','KPIs'],['Live','Data']]
+    },
+    'organigrama': {
+      badge: 'Reporting', title: 'Organigramas Interactivos',
+      desc: 'Visualización dinámica de equipos con filtros por área, especialidad, ruta y turno. Tarjetas ricas con fotos, contactos y KPIs por persona en HTML autocontenido.',
+      preview: 'org',
+      features: [
+        'Tarjetas por persona (foto, cédula, área, especialidad)',
+        'Filtros por equipo (Materiales, Exteriores, IDA, etc.)',
+        'Agrupación visual por equipo con contadores',
+        'Vista mini + vista completa (drilldown)',
+        'HTML autocontenido (sin dependencias externas)',
+        'Búsqueda por nombre en tiempo real'
+      ],
+      stats: [['80+','Personas'],['12','Equipos'],['0','CDN deps']]
+    },
+    // Dashboards
+    'dash-vendors': {
+      badge: 'Dashboard · Live', title: 'Dashboard Ejecutivo Multi-Vendor',
+      desc: 'Consolidación en tiempo real de 6 vendors críticos con drilldown por WOS-T / SKID, historial completo de modificaciones, valor inicial vs. actual y avance en tiempo real.',
+      preview: 'dashboard',
+      features: [
+        '6 vendors integrados con datos actualizables',
+        'Historial de modificaciones cronológico',
+        'Balance por WOS-T con estado (Ejec./Disputa/Riesgo)',
+        'Gantt de vigencias por vendor',
+        'Gantt diario con marcas E/P/F/S/R',
+        'Cálculo automático de avance ponderado',
+        'Alertas de vencimiento de ODS',
+        'Filtro por período (semana, mes, trimestre)'
+      ],
+      stats: [['$1.87B','Valor'],['6','Vendors'],['30+','Mods'],['87%','Avance']]
+    },
+    'dash-schedule': {
+      badge: 'Dashboard · Live', title: 'Schedule Master con SPI/CPI',
+      desc: 'Gantt integrado L4 con ruta crítica, hitos por fase, curvas de valor ganado (EVM) y línea de progreso en tiempo real. Integración con Primavera P6.',
+      preview: 'gantt',
+      features: [
+        'Gantt L4 con 200+ actividades',
+        'Ruta crítica destacada en rojo',
+        'Curvas S de planeado, real y earned value',
+        'SPI (Schedule Performance Index) por fase',
+        'CPI (Cost Performance Index) integrado',
+        'Milestones marcados y trazables',
+        'Análisis what-if con proyección',
+        'Baseline management con snapshots'
+      ],
+      stats: [['SPI','0.98'],['CPI','1.02'],['18d','Ruta crítica'],['L4','Nivel']]
+    },
+    'dash-costos': {
+      badge: 'Dashboard · Live', title: 'Control de Costos, APU y Presupuestos',
+      desc: 'Consolidación de presupuestos por WBS, APUs por ítem, plan vs. ejecutado, curvas de EVM y proyección hasta cierre del proyecto.',
+      preview: 'donut',
+      features: [
+        'Presupuesto total con desglose por WBS',
+        '47 APUs registrados con desagregación',
+        'Plan vs. ejecutado con ahorro/sobrecosto',
+        'Cash flow mensual proyectado',
+        'Contingencias por escenario (P50, P80)',
+        'Reservas de gestión separadas',
+        'Comparativo entre múltiples ofertas',
+        'Actualización DANE de índices'
+      ],
+      stats: [['$1.87B','Ppto'],['47','APUs'],['$230M','Ahorro'],['P80','Contingencia']]
+    },
+    'dash-hh': {
+      badge: 'Dashboard · Live', title: 'Horas Hombre & Productividad',
+      desc: 'Tracking de HH por rol, curva acumulada plan vs. real, alertas de sobretiempo, análisis por especialidad y curva Learning para tareas repetitivas.',
+      preview: 'curve',
+      features: [
+        'HH ejecutadas vs. planeadas por rol',
+        'Curva acumulada semanal con proyección',
+        'Alertas automáticas de sobretiempo',
+        'Análisis por especialidad (eléctrica, mecánica, I&C)',
+        'Learning curve para tareas repetitivas',
+        'Eficiencia por cluster/skid',
+        'Reportes de productividad para RRHH',
+        'Integración con sistema de nómina'
+      ],
+      stats: [['12,480','HH ejec.'],['13,200','HH plan'],['94.5%','Prod.'],['6','Roles']]
+    },
+    // Cases
+    'case-disputa': {
+      badge: 'Caso de éxito · Contract', title: 'Análisis de disputa de días facturables · $1.87B COP',
+      desc: 'Contrato multi-modificación con disputa activa entre operador y vendor sobre criterio de días facturables por skid. El vendor argumentaba 42 días vs. 20-22 según contrato. Diseñamos análisis multi-escenario que identificó $286 M de faltante potencial y sustentó formalmente la posición contractual.',
+      preview: 'dashboard',
+      features: [
+        'Análisis de 5 modificaciones ODS históricas',
+        'Balance de días contratados vs. pretendidos por vendor',
+        'Comparativo económico por 4 escenarios',
+        'Sustento técnico con normativa RETIE',
+        'Proyección de faltante en escenario pesimista',
+        'Recomendaciones estratégicas para trámite'
+      ],
+      stats: [['$286M','Riesgo mitigado'],['5','Modificaciones'],['21d','Time-to-decision'],['4','Escenarios']]
+    },
+    'case-reportes': {
+      badge: 'Caso de éxito · Automation', title: 'Consolidación diaria WhatsApp → Excel ejecutivo',
+      desc: 'Cliente ejecutivo requería reporte diario consolidado de 15-25 mensajes de campo enviados por WhatsApp durante el día. Automatizamos parseo, clasificación NLP y generación de Excel corporativo con formato exacto de referencia.',
+      preview: 'doc',
+      features: [
+        'Parseo de mensajes WhatsApp con multi-formato',
+        'Clasificación por área con >98% precisión',
+        'Filtrado de coordinación y saludos',
+        'Extracción de ubicación, actividades día/mañana, requerimientos',
+        'Formato Excel corporativo (colores, fuentes, anchos exactos)',
+        'Distribución automática por email a las 18:00'
+      ],
+      stats: [['120+','Reportes/mes'],['2h → 3min','Ahorro'],['98%','Precisión'],['15-25','Msgs/día']]
+    },
+    'case-dashboard': {
+      badge: 'Caso de éxito · BI', title: 'Dashboard multi-vendor con 30+ modificaciones',
+      desc: 'Diseñamos tablero interactivo consolidando 6 vendors críticos con drilldown por WOS-T, avance diario, balance histórico de modificaciones y gráficas comparativas de valor inicial vs. actual.',
+      preview: 'dashboard',
+      features: [
+        '6 vendors integrados (SLA, SCH, HIT, WEG, SIE, VAR)',
+        '30+ modificaciones registradas cronológicamente',
+        'Gantt de vigencias con vencimientos coloreados',
+        'Gantt diario 12 meses con marcas E/P/F/S/R',
+        'Filtros dinámicos por vendor y período',
+        'Dropdown con lista de validación restaurable'
+      ],
+      stats: [['6','Vendors'],['10','Skids'],['87%','Avance'],['0','CDN deps']]
+    },
+    'case-organigrama': {
+      badge: 'Caso de éxito · HR', title: 'Organigrama interactivo · 80+ personas',
+      desc: 'Dashboard HTML autocontenido para equipo técnico distribuido con tarjetas ricas por integrante, filtros por área/especialidad/turno, agrupación visual por equipo de trabajo.',
+      preview: 'org',
+      features: [
+        'Tarjetas mini + completa (drilldown)',
+        'Filtros por área (Materiales, Exteriores, IDA, etc.)',
+        '12 equipos técnicos organizados con contadores',
+        'Fotos embebidas en base64 (offline-first)',
+        'Búsqueda por nombre en tiempo real',
+        'HTML autocontenido de 21+ MB con todo embebido'
+      ],
+      stats: [['80+','Personas'],['12','Equipos'],['21MB','Autocontenido'],['0','Dependencias']]
+    }
+  };
+
+  // ============ PREVIEW SVGs ============
+  function getPreviewSVG(type){
+    const svgs = {
+      dashboard: `<svg viewBox="0 0 800 400" style="width:100%;height:auto;background:#0F1F35;border-radius:8px">
+        <rect x="0" y="0" width="800" height="50" fill="#0A1628"/>
+        <text x="20" y="30" fill="#F59E0B" font-family="Arial" font-size="16" font-weight="bold">DASHBOARD VENDORS · CW233230 / ODS 9996257</text>
+        <circle cx="770" cy="25" r="6" fill="#10B981"/><text x="750" y="30" fill="#10B981" font-family="Arial" font-size="10" text-anchor="end">LIVE</text>
+        <g transform="translate(20,70)">
+          <rect x="0" y="0" width="180" height="80" rx="8" fill="#152A47" stroke="#22D3EE"/>
+          <text x="15" y="22" fill="#94A3B8" font-family="Arial" font-size="10">VALOR TOTAL ODS</text>
+          <text x="15" y="55" fill="#F59E0B" font-family="Arial" font-size="26" font-weight="bold">$1.87B</text>
+          <text x="15" y="72" fill="#22D3EE" font-family="Arial" font-size="10">+8.4% vs. inicial</text>
+
+          <rect x="200" y="0" width="180" height="80" rx="8" fill="#152A47" stroke="#22D3EE"/>
+          <text x="215" y="22" fill="#94A3B8" font-family="Arial" font-size="10">VENDORS ACTIVOS</text>
+          <text x="215" y="55" fill="#22D3EE" font-family="Arial" font-size="26" font-weight="bold">6</text>
+
+          <rect x="400" y="0" width="180" height="80" rx="8" fill="#152A47" stroke="#22D3EE"/>
+          <text x="415" y="22" fill="#94A3B8" font-family="Arial" font-size="10">MODIFICACIONES</text>
+          <text x="415" y="55" fill="#FBBF24" font-family="Arial" font-size="26" font-weight="bold">30+</text>
+
+          <rect x="600" y="0" width="180" height="80" rx="8" fill="#152A47" stroke="#22D3EE"/>
+          <text x="615" y="22" fill="#94A3B8" font-family="Arial" font-size="10">AVANCE PROMEDIO</text>
+          <text x="615" y="55" fill="#10B981" font-family="Arial" font-size="26" font-weight="bold">87.3%</text>
+        </g>
+        <g transform="translate(20,180)">
+          <text x="0" y="0" fill="#22D3EE" font-family="Arial" font-size="12" font-weight="bold">HISTÓRICO DE MODIFICACIONES POR VENDOR</text>
+          <g><rect x="0" y="20" width="80" height="120" fill="#152A47"/><rect x="0" y="90" width="80" height="50" fill="#22D3EE"/><text x="40" y="160" fill="#94A3B8" font-family="Arial" font-size="10" text-anchor="middle">M1</text></g>
+          <g><rect x="100" y="20" width="80" height="120" fill="#152A47"/><rect x="100" y="55" width="80" height="85" fill="#22D3EE"/><text x="140" y="160" fill="#94A3B8" font-family="Arial" font-size="10" text-anchor="middle">M2</text></g>
+          <g><rect x="200" y="20" width="80" height="120" fill="#152A47"/><rect x="200" y="35" width="80" height="105" fill="#22D3EE"/><text x="240" y="160" fill="#94A3B8" font-family="Arial" font-size="10" text-anchor="middle">M3</text></g>
+          <g><rect x="300" y="20" width="80" height="120" fill="#152A47"/><rect x="300" y="25" width="80" height="115" fill="#F59E0B"/><text x="340" y="160" fill="#F59E0B" font-family="Arial" font-size="10" text-anchor="middle" font-weight="bold">M4</text></g>
+          <g><rect x="400" y="20" width="80" height="120" fill="#152A47" stroke="#F59E0B" stroke-dasharray="4,2"/><rect x="400" y="20" width="80" height="120" fill="#F59E0B" opacity="0.3"/><text x="440" y="160" fill="#FBBF24" font-family="Arial" font-size="10" text-anchor="middle">M5</text></g>
+          <polyline points="40,100 140,80 240,60 340,35 440,25" fill="none" stroke="#FBBF24" stroke-width="3"/>
+          <g fill="#FBBF24"><circle cx="40" cy="100" r="4"/><circle cx="140" cy="80" r="4"/><circle cx="240" cy="60" r="4"/><circle cx="340" cy="35" r="4"/><circle cx="440" cy="25" r="4"/></g>
+        </g>
+        <g transform="translate(560,180)">
+          <text x="0" y="0" fill="#22D3EE" font-family="Arial" font-size="12" font-weight="bold">TOP VENDORS</text>
+          <text x="0" y="25" fill="#F1F5F9" font-family="Arial" font-size="10">SLA Vendor A</text>
+          <rect x="0" y="30" width="220" height="8" rx="4" fill="#152A47"/><rect x="0" y="30" width="195" height="8" rx="4" fill="#F59E0B"/>
+          <text x="0" y="55" fill="#F1F5F9" font-family="Arial" font-size="10">SCH Vendor B</text>
+          <rect x="0" y="60" width="220" height="8" rx="4" fill="#152A47"/><rect x="0" y="60" width="178" height="8" rx="4" fill="#22D3EE"/>
+          <text x="0" y="85" fill="#F1F5F9" font-family="Arial" font-size="10">HIT Vendor C</text>
+          <rect x="0" y="90" width="220" height="8" rx="4" fill="#152A47"/><rect x="0" y="90" width="110" height="8" rx="4" fill="#F59E0B"/>
+          <text x="0" y="115" fill="#F1F5F9" font-family="Arial" font-size="10">WEG Vendor D</text>
+          <rect x="0" y="120" width="220" height="8" rx="4" fill="#152A47"/><rect x="0" y="120" width="85" height="8" rx="4" fill="#22D3EE"/>
+        </g>
+      </svg>`,
+      gantt: `<svg viewBox="0 0 800 400" style="width:100%;height:auto;background:#0F1F35;border-radius:8px">
+        <rect x="0" y="0" width="800" height="50" fill="#0A1628"/>
+        <text x="20" y="30" fill="#F59E0B" font-family="Arial" font-size="16" font-weight="bold">SCHEDULE MASTER · GANTT L4</text>
+        <g transform="translate(30,75)">
+          <g fill="#94A3B8" font-family="Arial" font-size="11">
+            <text x="0" y="0">JUL</text><text x="105" y="0">AGO</text><text x="210" y="0">SEP</text>
+            <text x="315" y="0">OCT</text><text x="420" y="0">NOV</text><text x="525" y="0">DIC</text><text x="630" y="0">ENE</text>
+          </g>
+          <line x1="0" y1="12" x2="720" y2="12" stroke="#22D3EE" opacity="0.3"/>
+          <g transform="translate(0,25)"><text x="-140" y="12" fill="#F1F5F9" font-family="Arial" font-size="11">Ingeniería básica</text><rect x="0" y="0" width="200" height="18" rx="4" fill="#22D3EE"/></g>
+          <g transform="translate(0,55)"><text x="-140" y="12" fill="#F1F5F9" font-family="Arial" font-size="11">Ingeniería detalle</text><rect x="105" y="0" width="200" height="18" rx="4" fill="#22D3EE" opacity="0.8"/></g>
+          <g transform="translate(0,85)"><text x="-140" y="12" fill="#F1F5F9" font-family="Arial" font-size="11">Procura equipos</text><rect x="105" y="0" width="200" height="18" rx="4" fill="#F59E0B"/></g>
+          <g transform="translate(0,115)"><text x="-140" y="12" fill="#F1F5F9" font-family="Arial" font-size="11">Fabricación</text><rect x="210" y="0" width="200" height="18" rx="4" fill="#B45309"/></g>
+          <g transform="translate(0,145)"><text x="-140" y="12" fill="#F1F5F9" font-family="Arial" font-size="11">Instalación mecánica</text><rect x="315" y="0" width="200" height="18" rx="4" fill="#22D3EE" opacity="0.7"/></g>
+          <g transform="translate(0,175)"><text x="-140" y="12" fill="#F1F5F9" font-family="Arial" font-size="11">Precomisionamiento</text><rect x="420" y="0" width="150" height="18" rx="4" fill="#10B981"/></g>
+          <g transform="translate(0,205)"><text x="-140" y="12" fill="#F1F5F9" font-family="Arial" font-size="11">Comisionamiento</text><rect x="525" y="0" width="120" height="18" rx="4" fill="#10B981"/></g>
+          <g transform="translate(0,235)"><text x="-140" y="12" fill="#F1F5F9" font-family="Arial" font-size="11">Puesta en marcha</text><rect x="600" y="0" width="80" height="18" rx="4" fill="#F59E0B" opacity="0.8"/></g>
+          <g>
+            <polygon points="210,-5 218,5 202,5" fill="#F59E0B"/><polygon points="315,-5 323,5 307,5" fill="#F59E0B"/>
+            <polygon points="420,-5 428,5 412,5" fill="#F59E0B"/><polygon points="525,-5 533,5 517,5" fill="#F59E0B"/>
+            <polygon points="600,-5 608,5 592,5" fill="#F59E0B"/><polygon points="680,-5 688,5 672,5" fill="#F59E0B"/>
+          </g>
+          <line x1="150" y1="0" x2="150" y2="260" stroke="#F43F5E" stroke-width="2" stroke-dasharray="4,3"/>
+          <text x="155" y="260" fill="#F43F5E" font-family="Arial" font-size="10" font-weight="bold">HOY</text>
+        </g>
+        <g transform="translate(30,340)">
+          <rect x="0" y="0" width="200" height="45" rx="6" fill="#152A47"/>
+          <text x="15" y="18" fill="#94A3B8" font-family="Arial" font-size="10">SPI · SCHEDULE PERF.</text>
+          <text x="15" y="38" fill="#10B981" font-family="Arial" font-size="18" font-weight="bold">0.98 On Track</text>
+          <rect x="220" y="0" width="200" height="45" rx="6" fill="#152A47"/>
+          <text x="235" y="18" fill="#94A3B8" font-family="Arial" font-size="10">CPI · COST PERF.</text>
+          <text x="235" y="38" fill="#F59E0B" font-family="Arial" font-size="18" font-weight="bold">1.02 Bajo pto.</text>
+          <rect x="440" y="0" width="240" height="45" rx="6" fill="#152A47"/>
+          <text x="455" y="18" fill="#94A3B8" font-family="Arial" font-size="10">RUTA CRÍTICA · SLACK</text>
+          <text x="455" y="38" fill="#F43F5E" font-family="Arial" font-size="18" font-weight="bold">18 días · RIESGO</text>
+        </g>
+      </svg>`,
+      donut: `<svg viewBox="0 0 800 400" style="width:100%;height:auto;background:#0F1F35;border-radius:8px">
+        <rect x="0" y="0" width="800" height="50" fill="#0A1628"/>
+        <text x="20" y="30" fill="#F59E0B" font-family="Arial" font-size="16" font-weight="bold">CONTROL DE COSTOS · APU + PPTO</text>
+        <g transform="translate(200,220)">
+          <circle cx="0" cy="0" r="100" fill="none" stroke="#152A47" stroke-width="40"/>
+          <circle cx="0" cy="0" r="100" fill="none" stroke="#F59E0B" stroke-width="40" stroke-dasharray="364 628" transform="rotate(-90)"/>
+          <circle cx="0" cy="0" r="100" fill="none" stroke="#22D3EE" stroke-width="40" stroke-dasharray="163 628" stroke-dashoffset="-364" transform="rotate(-90)"/>
+          <circle cx="0" cy="0" r="100" fill="none" stroke="#10B981" stroke-width="40" stroke-dasharray="101 628" stroke-dashoffset="-527" transform="rotate(-90)"/>
+          <text x="0" y="0" text-anchor="middle" fill="#F1F5F9" font-family="Arial" font-size="30" font-weight="bold">$1.87B</text>
+          <text x="0" y="25" text-anchor="middle" fill="#94A3B8" font-family="Arial" font-size="13">COP total</text>
+        </g>
+        <g transform="translate(380,130)">
+          <rect x="0" y="0" width="14" height="14" fill="#F59E0B"/><text x="24" y="12" fill="#F1F5F9" font-family="Arial" font-size="13">Servicios técnicos · 58%</text>
+          <rect x="0" y="30" width="14" height="14" fill="#22D3EE"/><text x="24" y="42" fill="#F1F5F9" font-family="Arial" font-size="13">Materiales · 26%</text>
+          <rect x="0" y="60" width="14" height="14" fill="#10B981"/><text x="24" y="72" fill="#F1F5F9" font-family="Arial" font-size="13">Ingeniería · 16%</text>
+        </g>
+        <g transform="translate(380,240)">
+          <text x="0" y="0" fill="#22D3EE" font-family="Arial" font-size="13" font-weight="bold">PLAN vs. EJECUTADO</text>
+          <text x="0" y="25" fill="#94A3B8" font-family="Arial" font-size="11">Planeado</text>
+          <rect x="90" y="16" width="290" height="12" rx="6" fill="#152A47"/><rect x="90" y="16" width="290" height="12" rx="6" fill="#22D3EE"/>
+          <text x="385" y="26" fill="#22D3EE" font-family="Arial" font-size="11" font-weight="bold">$1.87B</text>
+          <text x="0" y="50" fill="#94A3B8" font-family="Arial" font-size="11">Ejecutado</text>
+          <rect x="90" y="41" width="290" height="12" rx="6" fill="#152A47"/><rect x="90" y="41" width="254" height="12" rx="6" fill="#F59E0B"/>
+          <text x="385" y="51" fill="#F59E0B" font-family="Arial" font-size="11" font-weight="bold">$1.64B</text>
+          <text x="0" y="75" fill="#94A3B8" font-family="Arial" font-size="11">Ahorro</text>
+          <rect x="90" y="66" width="290" height="12" rx="6" fill="#152A47"/><rect x="90" y="66" width="44" height="12" rx="6" fill="#10B981"/>
+          <text x="385" y="76" fill="#10B981" font-family="Arial" font-size="11" font-weight="bold">$230M</text>
+        </g>
+        <g transform="translate(30,360)">
+          <text x="0" y="0" fill="#22D3EE" font-family="Arial" font-size="12" font-weight="bold">APUs REGISTRADOS: 47 items · Contingencia P80 aplicada · Actualización DANE mensual</text>
+        </g>
+      </svg>`,
+      curve: `<svg viewBox="0 0 800 400" style="width:100%;height:auto;background:#0F1F35;border-radius:8px">
+        <rect x="0" y="0" width="800" height="50" fill="#0A1628"/>
+        <text x="20" y="30" fill="#F59E0B" font-family="Arial" font-size="16" font-weight="bold">HORAS HOMBRE · CURVA ACUMULADA</text>
+        <g transform="translate(50,110)">
+          <line x1="0" y1="200" x2="700" y2="200" stroke="#94A3B8" opacity="0.3"/>
+          <line x1="0" y1="150" x2="700" y2="150" stroke="#94A3B8" opacity="0.15"/>
+          <line x1="0" y1="100" x2="700" y2="100" stroke="#94A3B8" opacity="0.15"/>
+          <line x1="0" y1="50" x2="700" y2="50" stroke="#94A3B8" opacity="0.15"/>
+          <line x1="0" y1="0" x2="0" y2="200" stroke="#94A3B8" opacity="0.3"/>
+          <g fill="#94A3B8" font-family="Arial" font-size="10">
+            <text x="-30" y="205">0</text><text x="-40" y="155">4K</text><text x="-40" y="105">8K</text><text x="-45" y="55">12K</text><text x="-45" y="5">16K</text>
+          </g>
+          <g fill="#94A3B8" font-family="Arial" font-size="10">
+            <text x="0" y="215">Ene</text><text x="60" y="215">Feb</text><text x="120" y="215">Mar</text><text x="180" y="215">Abr</text><text x="240" y="215">May</text>
+            <text x="300" y="215">Jun</text><text x="360" y="215">Jul</text><text x="420" y="215">Ago</text><text x="480" y="215">Sep</text><text x="540" y="215">Oct</text><text x="600" y="215">Nov</text><text x="660" y="215">Dic</text>
+          </g>
+          <path d="M0,195 Q120,175 240,140 T480,60 T700,20" fill="none" stroke="#22D3EE" stroke-width="3" stroke-dasharray="6,4"/>
+          <path d="M0,195 Q100,180 240,150 T460,72 T650,40" fill="none" stroke="#F59E0B" stroke-width="3.5"/>
+          <g fill="#F59E0B" stroke="#0A1628" stroke-width="1.5">
+            <circle cx="0" cy="195" r="5"/><circle cx="60" cy="185" r="5"/><circle cx="120" cy="170" r="5"/>
+            <circle cx="180" cy="155" r="5"/><circle cx="240" cy="150" r="5"/><circle cx="300" cy="130" r="5"/>
+            <circle cx="360" cy="110" r="5"/><circle cx="420" cy="90" r="5"/><circle cx="480" cy="72" r="5"/>
+            <circle cx="540" cy="60" r="5"/><circle cx="600" cy="48" r="5"/><circle cx="650" cy="40" r="5"/>
+          </g>
+          <g transform="translate(480,-20)">
+            <line x1="0" y1="0" x2="20" y2="0" stroke="#22D3EE" stroke-width="2" stroke-dasharray="4,3"/>
+            <text x="24" y="4" fill="#22D3EE" font-family="Arial" font-size="11">Planeado · 13,200 HH</text>
+            <line x1="200" y1="0" x2="220" y2="0" stroke="#F59E0B" stroke-width="3"/>
+            <text x="224" y="4" fill="#F59E0B" font-family="Arial" font-size="11">Ejecutado · 12,480 HH</text>
+          </g>
+        </g>
+        <g transform="translate(50,340)">
+          <rect x="0" y="0" width="220" height="45" rx="6" fill="#152A47"/>
+          <text x="15" y="18" fill="#94A3B8" font-family="Arial" font-size="10">PRODUCTIVIDAD</text>
+          <text x="15" y="38" fill="#10B981" font-family="Arial" font-size="18" font-weight="bold">94.5%</text>
+          <rect x="240" y="0" width="220" height="45" rx="6" fill="#152A47"/>
+          <text x="255" y="18" fill="#94A3B8" font-family="Arial" font-size="10">DESVIACIÓN</text>
+          <text x="255" y="38" fill="#F59E0B" font-family="Arial" font-size="18" font-weight="bold">-5.5% vs. plan</text>
+          <rect x="480" y="0" width="220" height="45" rx="6" fill="#152A47"/>
+          <text x="495" y="18" fill="#94A3B8" font-family="Arial" font-size="10">HH POR CLUSTER</text>
+          <text x="495" y="38" fill="#22D3EE" font-family="Arial" font-size="18" font-weight="bold">1,560 HH/skid</text>
+        </g>
+      </svg>`,
+      doc: `<svg viewBox="0 0 800 400" style="width:100%;height:auto;background:#0F1F35;border-radius:8px">
+        <rect x="0" y="0" width="800" height="50" fill="#0A1628"/>
+        <text x="20" y="30" fill="#F59E0B" font-family="Arial" font-size="16" font-weight="bold">DOCUMENTO EJECUTIVO · FORMATO CORPORATIVO</text>
+        <g transform="translate(100,80)">
+          <rect x="0" y="0" width="600" height="290" fill="#fff" rx="4"/>
+          <rect x="0" y="0" width="600" height="45" fill="#644365"/>
+          <text x="300" y="28" text-anchor="middle" fill="#fff" font-family="Arial" font-size="18" font-weight="bold">REPORTE DIARIO · ATIP</text>
+          <rect x="0" y="45" width="600" height="30" fill="#F0DAEE"/>
+          <text x="300" y="65" text-anchor="middle" fill="#644365" font-family="Arial" font-size="13">Viernes, 11 de julio de 2026</text>
+          <rect x="0" y="80" width="600" height="26" fill="#F0DAEE"/>
+          <text x="300" y="98" text-anchor="middle" fill="#644365" font-family="Arial" font-size="12" font-weight="bold">📋 EXTERIORES</text>
+          <rect x="0" y="110" width="600" height="26" fill="#4F4E4F"/>
+          <text x="40" y="128" fill="#fff" font-family="Arial" font-size="11" font-weight="bold">UBICACIÓN</text>
+          <text x="230" y="128" fill="#fff" font-family="Arial" font-size="11" font-weight="bold">ACTIVIDADES DÍA</text>
+          <text x="400" y="128" fill="#fff" font-family="Arial" font-size="11" font-weight="bold">ACTIVIDADES MAÑANA</text>
+          <text x="550" y="128" fill="#fff" font-family="Arial" font-size="11" font-weight="bold">REQ</text>
+          <g stroke="#B4B4B4" stroke-width="0.5">
+            <line x1="0" y1="160" x2="600" y2="160"/><line x1="0" y1="190" x2="600" y2="190"/>
+            <line x1="0" y1="220" x2="600" y2="220"/><line x1="0" y1="250" x2="600" y2="250"/>
+            <line x1="0" y1="280" x2="600" y2="280"/>
+          </g>
+          <g fill="#333" font-family="Arial" font-size="10">
+            <text x="10" y="150">Cluster A-1 · SKID-05</text><text x="220" y="150">Ensamble SKID nuevo</text>
+            <text x="10" y="180">Cluster B-3 · Ampliación</text><text x="220" y="180">Pruebas de aislamiento</text>
+            <text x="10" y="210">Estación Alfa · Bodega</text><text x="220" y="210">Recepción de equipos</text>
+            <text x="10" y="240">PyC · Punto R-4</text><text x="220" y="240">Revisión documental</text>
+            <text x="10" y="270">SKID T-08 · Cluster C</text><text x="220" y="270">Comisionamiento COM</text>
+          </g>
+        </g>
+      </svg>`,
+      table: `<svg viewBox="0 0 800 400" style="width:100%;height:auto;background:#0F1F35;border-radius:8px">
+        <rect x="0" y="0" width="800" height="50" fill="#0A1628"/>
+        <text x="20" y="30" fill="#F59E0B" font-family="Arial" font-size="16" font-weight="bold">FACTURACIÓN · ACTAS DE RECIBO</text>
+        <g transform="translate(30,80)">
+          <rect x="0" y="0" width="740" height="35" fill="#1F4E78"/>
+          <g fill="#fff" font-family="Arial" font-size="11" font-weight="bold">
+            <text x="15" y="22">Nº ACTA</text><text x="100" y="22">FECHA</text><text x="220" y="22">DESCRIPCIÓN</text>
+            <text x="440" y="22">DÍAS</text><text x="530" y="22">VALOR</text><text x="640" y="22">ESTADO</text>
+          </g>
+          <g stroke="#B4B4B4" stroke-width="0.5">
+            <rect x="0" y="35" width="740" height="30" fill="#F8FAFC"/>
+            <rect x="0" y="65" width="740" height="30" fill="#fff"/>
+            <rect x="0" y="95" width="740" height="30" fill="#F8FAFC"/>
+            <rect x="0" y="125" width="740" height="30" fill="#fff"/>
+            <rect x="0" y="155" width="740" height="30" fill="#F8FAFC"/>
+            <rect x="0" y="185" width="740" height="30" fill="#fff"/>
+          </g>
+          <g fill="#333" font-family="Arial" font-size="11">
+            <text x="15" y="55">GAB-080-001</text><text x="100" y="55">10/06/2026</text><text x="220" y="55">Comm SKID-01 CASE-0387</text><text x="440" y="55">43</text><text x="530" y="55">$120M</text><text x="640" y="55" fill="#10B981" font-weight="bold">FIRMADA</text>
+            <text x="15" y="85">GAB-080-002</text><text x="100" y="85">20/06/2026</text><text x="220" y="85">Comm SKID-02 CASE-0566</text><text x="440" y="85">43</text><text x="530" y="85">$150M</text><text x="640" y="85" fill="#10B981" font-weight="bold">FIRMADA</text>
+            <text x="15" y="115">GAB-080-003</text><text x="100" y="115">05/07/2026</text><text x="220" y="115">Comm SKID-03 CASE-0601</text><text x="440" y="115">18</text><text x="530" y="115">$85M</text><text x="640" y="115" fill="#10B981" font-weight="bold">FIRMADA</text>
+            <text x="15" y="145">GAB-080-004</text><text x="100" y="145">10/07/2026</text><text x="220" y="145">Comm SKID-04 CASE-0347</text><text x="440" y="145">39</text><text x="530" y="145">$180M</text><text x="640" y="145" fill="#F59E0B" font-weight="bold">EN REVISIÓN</text>
+            <text x="15" y="175">GAB-080-005</text><text x="100" y="175">11/07/2026</text><text x="220" y="175">Comm SKID-05 · DISPUTA</text><text x="440" y="175">13/40</text><text x="530" y="175">$82M</text><text x="640" y="175" fill="#F43F5E" font-weight="bold">DISPUTA</text>
+            <text x="15" y="205">GAB-080-006</text><text x="100" y="205">Pend.</text><text x="220" y="205">Comm SKID-06 · RIESGO</text><text x="440" y="205">56</text><text x="530" y="205">$194M</text><text x="640" y="205" fill="#94A3B8" font-weight="bold">EN EJEC.</text>
+          </g>
+          <rect x="0" y="240" width="740" height="35" fill="#644365"/>
+          <text x="15" y="262" fill="#fff" font-family="Arial" font-size="12" font-weight="bold">TOTAL FACTURADO A LA FECHA</text>
+          <text x="530" y="262" fill="#FBBF24" font-family="Arial" font-size="14" font-weight="bold">$811M COP</text>
+        </g>
+      </svg>`,
+      org: `<svg viewBox="0 0 800 400" style="width:100%;height:auto;background:#0F1F35;border-radius:8px">
+        <rect x="0" y="0" width="800" height="50" fill="#0A1628"/>
+        <text x="20" y="30" fill="#F59E0B" font-family="Arial" font-size="16" font-weight="bold">ORGANIGRAMA INTERACTIVO · 80+ PERSONAS</text>
+        <g transform="translate(400,90)">
+          <g stroke="#94A3B8" stroke-width="1" fill="none" opacity="0.5">
+            <line x1="0" y1="0" x2="-200" y2="80"/><line x1="0" y1="0" x2="-100" y2="80"/>
+            <line x1="0" y1="0" x2="0" y2="80"/><line x1="0" y1="0" x2="100" y2="80"/>
+            <line x1="0" y1="0" x2="200" y2="80"/>
+            <line x1="-200" y1="130" x2="-240" y2="200"/><line x1="-200" y1="130" x2="-160" y2="200"/>
+            <line x1="-100" y1="130" x2="-140" y2="200"/><line x1="-100" y1="130" x2="-60" y2="200"/>
+            <line x1="0" y1="130" x2="-40" y2="200"/><line x1="0" y1="130" x2="40" y2="200"/>
+            <line x1="100" y1="130" x2="60" y2="200"/><line x1="100" y1="130" x2="140" y2="200"/>
+            <line x1="200" y1="130" x2="160" y2="200"/><line x1="200" y1="130" x2="240" y2="200"/>
+          </g>
+          <g><circle cx="0" cy="0" r="30" fill="#F59E0B"/><text x="0" y="4" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="13" font-weight="bold">CEO</text></g>
+          <g fill="#22D3EE">
+            <circle cx="-200" cy="105" r="22"/><text x="-200" y="110" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="10" font-weight="bold">EXT</text>
+            <circle cx="-100" cy="105" r="22"/><text x="-100" y="110" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="10" font-weight="bold">FAC</text>
+            <circle cx="0" cy="105" r="22"/><text x="0" y="110" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="10" font-weight="bold">MAT</text>
+            <circle cx="100" cy="105" r="22"/><text x="100" y="110" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="10" font-weight="bold">EST</text>
+            <circle cx="200" cy="105" r="22"/><text x="200" y="110" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="10" font-weight="bold">IDA</text>
+          </g>
+          <g fill="#0891B2">
+            <circle cx="-240" cy="220" r="16"/><circle cx="-160" cy="220" r="16"/>
+            <circle cx="-140" cy="220" r="16"/><circle cx="-60" cy="220" r="16"/>
+            <circle cx="-40" cy="220" r="16"/><circle cx="40" cy="220" r="16"/>
+            <circle cx="60" cy="220" r="16"/><circle cx="140" cy="220" r="16"/>
+            <circle cx="160" cy="220" r="16"/><circle cx="240" cy="220" r="16"/>
+          </g>
+        </g>
+        <g transform="translate(30,340)">
+          <text x="0" y="0" fill="#22D3EE" font-family="Arial" font-size="12" font-weight="bold">FILTROS ACTIVOS:</text>
+          <rect x="150" y="-14" width="80" height="20" rx="10" fill="#F59E0B"/><text x="190" y="0" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="10" font-weight="bold">Ing. Sr</text>
+          <rect x="240" y="-14" width="90" height="20" rx="10" fill="#22D3EE"/><text x="285" y="0" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="10" font-weight="bold">Turno 1</text>
+          <rect x="340" y="-14" width="100" height="20" rx="10" fill="#10B981"/><text x="390" y="0" text-anchor="middle" fill="#0A1628" font-family="Arial" font-size="10" font-weight="bold">Bog-Mor-Bog</text>
+          <text x="600" y="0" fill="#F59E0B" font-family="Arial" font-size="12" font-weight="bold">42 personas visibles</text>
+        </g>
+      </svg>`
+    };
+    return svgs[type] || svgs.dashboard;
+  }
+
+  // ============ MODAL LOGIC ============
+  const overlay = document.getElementById('modalOverlay');
+  const modalContent = document.getElementById('modalContent');
+  const modalClose = document.getElementById('modalClose');
+
+  function openModal(key){
+    const d = modalData[key];
+    if(!d) return;
+    modalContent.innerHTML = `
+      <div class="modal-header">
+        <div class="badge">${d.badge}</div>
+        <h2>${d.title}</h2>
+        <p>${d.desc}</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-preview">${getPreviewSVG(d.preview)}</div>
+        <div class="modal-stats">
+          ${d.stats.map(([v,l])=>`<div><div class="modal-stat-val">${v}</div><div class="modal-stat-lbl">${l}</div></div>`).join('')}
+        </div>
+        <div class="modal-section">
+          <h4>Capacidades incluidas</h4>
+          <div class="modal-features">
+            ${d.features.map(f=>`
+              <div class="modal-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>${f}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="modal-cta">
+        <a href="mailto:contacto@bsenergy.co?subject=Consulta: ${encodeURIComponent(d.title)}" class="btn-primary">
+          Solicitar propuesta
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <button class="btn-secondary" onclick="closeModal()">Cerrar</button>
+      </div>
+    `;
+    overlay.classList.add('active');
+    document.body.style.overflow='hidden';
+  }
+
+  function closeModal(){
+    overlay.classList.remove('active');
+    document.body.style.overflow='';
+  }
+
+  document.querySelectorAll('[data-modal]').forEach(el=>{
+    el.addEventListener('click',e=>{
+      e.preventDefault();
+      const key = el.dataset.modal;
+      openModal(key);
+    });
+  });
+  modalClose.addEventListener('click',closeModal);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) closeModal(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+  // ============ FILTROS DE SERVICIOS ============
+  document.querySelectorAll('.cat-pill').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.cat-pill').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const cat = btn.dataset.cat;
+      document.querySelectorAll('.service').forEach(s=>{
+        if(cat==='all' || s.dataset.cat===cat){
+          s.style.display='block';
+          setTimeout(()=>{s.style.opacity='1';s.style.transform='translateY(0)'},50);
+        }else{
+          s.style.opacity='0';s.style.transform='translateY(20px)';
+          setTimeout(()=>s.style.display='none',300);
+        }
+      });
+    });
+  });
+
+  // ============ SMOOTH SCROLL ============
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const t = document.querySelector(a.getAttribute('href'));
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'})}
+    });
+  });
+
+  // ============ FADE-IN ON SCROLL ============
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';io.unobserve(e.target)}
+    });
+  },{threshold:0.1});
+  document.querySelectorAll('.service, .case, .impact-card, .dashboard-card, .testimonial').forEach(el=>{
+    el.style.opacity='0';el.style.transform='translateY(30px)';el.style.transition='opacity 0.6s ease, transform 0.6s ease';
+    io.observe(el);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<title>Línea de Tiempo · Cierre Pronosticado · Estación Centauros</title>
+<style>
+:root{
+  --bg:#0a0f1e;--bg2:#111a30;--panel:#161f38;--panel2:#1b264a;--text:#e8edff;--text-2:#a8b6d4;--muted:#6b779b;
+  --accent:#46d3ff;--accent2:#a78bfa;--good:#27d29c;--warn:#f7b955;--bad:#ff6b6b;--orange:#ff8c42;
+  --ribbon:#f7b955;--ribbon-d:#c87f1a;--border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:radial-gradient(ellipse at top,#13203c 0%,var(--bg) 60%);color:var(--text);font:14px/1.5 'Inter','Segoe UI',system-ui,sans-serif;overflow-x:hidden;min-height:100vh}
+.wrap{max-width:1640px;margin:0 auto;padding:24px 28px 80px}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:28px;border-bottom:1px solid var(--border);padding-bottom:18px;margin-bottom:22px}
+.hero h1{font-size:28px;letter-spacing:.3px;font-weight:800;background:linear-gradient(90deg,#46d3ff,#a78bfa,#ff8c42);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 8s ease-in-out infinite;background-size:200% 200%}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hero .sub{color:var(--text-2);font-size:13px;margin-top:6px}
+.hero-right{text-align:right}
+.hero-right .big{font-size:38px;font-weight:800;color:var(--accent);line-height:1}
+.hero-right .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:var(--text-2)}
+.cut{color:var(--muted);font-size:11.5px;margin-top:6px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.kpi{background:linear-gradient(135deg,var(--panel) 0%,var(--panel2) 100%);border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;transition:transform .3s, box-shadow .3s}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(70,211,255,.15)}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:.5}
+.kpi .lbl{color:var(--text-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;font-weight:700}
+.kpi .val{font-size:26px;font-weight:800;margin-top:4px}
+.kpi .sub{font-size:11.5px;color:var(--text-2);margin-top:2px}
+.kpi.acc .val{color:var(--accent)} .kpi.good .val{color:var(--good)} .kpi.warn .val{color:var(--warn)} .kpi.v2 .val{color:var(--accent2)}
+.section-title{margin:30px 0 14px;font-size:13.5px;color:var(--text-2);text-transform:uppercase;letter-spacing:1.2px;font-weight:700;display:flex;align-items:center;gap:10px}
+.section-title::before{content:"";width:4px;height:14px;background:var(--accent);border-radius:2px}
+.card{background:linear-gradient(180deg,rgba(22,31,56,.7) 0%,rgba(11,17,33,.7) 100%);border:1px solid var(--border);border-radius:16px;padding:20px 24px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-2);margin:10px 0 14px;align-items:center}
+.legend .dot{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:6px;vertical-align:middle;box-shadow:0 0 8px currentColor}
+.legend .tri{display:inline-block;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--bad);margin-right:6px;vertical-align:middle}
+.tl-wrap{overflow-x:auto;overflow-y:hidden;padding:8px 0;position:relative}
+.tl-wrap::-webkit-scrollbar{height:10px}
+.tl-wrap::-webkit-scrollbar-thumb{background:rgba(70,211,255,.3);border-radius:5px}
+.tl-wrap::-webkit-scrollbar-track{background:rgba(255,255,255,.04)}
+/* ===== Animaciones SVG ===== */
+@keyframes barIn{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
+@keyframes flagPulse{0%,100%{filter:drop-shadow(0 2px 5px rgba(0,0,0,.6))}50%{filter:drop-shadow(0 0 14px currentColor) drop-shadow(0 2px 5px rgba(0,0,0,.6))}}
+@keyframes ribbonShine{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+svg .bar{transform-box:fill-box;transform-origin:left center;animation:barIn .85s cubic-bezier(.2,.85,.2,1) backwards;transition:filter .2s;cursor:pointer}
+svg .bar:hover{filter:brightness(1.35) drop-shadow(0 0 10px currentColor) drop-shadow(0 0 22px currentColor)}
+svg .flag-grp{cursor:pointer;transition:.25s;animation:fadeUp .6s ease backwards}
+svg .flag-grp path{animation:flagPulse 3.5s ease-in-out infinite}
+svg .flag-grp:hover{transform:translateY(-2px)}
+svg .swim:hover{fill:rgba(70,211,255,.04)}
+svg text{user-select:none}
+svg .desc{transition:.2s}
+svg g.row:hover .desc{fill:#46d3ff!important}
+/* ===== Lupa que sigue el cursor ===== */
+.lens{position:absolute;width:150px;height:150px;border-radius:50%;border:3px solid var(--accent);background:radial-gradient(circle,rgba(10,15,30,.95) 60%,rgba(10,15,30,.7) 100%);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(70,211,255,.55),inset 0 0 25px rgba(70,211,255,.18);opacity:0;transition:opacity .15s;z-index:10;transform:translate(-50%,-50%)}
+.lens::after{content:"";position:absolute;inset:6px;border-radius:50%;border:1px dashed rgba(70,211,255,.35)}
+.lens .lens-date{font-size:22px;font-weight:800;color:var(--accent);letter-spacing:.5px;text-shadow:0 0 12px rgba(70,211,255,.7)}
+.lens .lens-year{font-size:12px;color:var(--text-2);font-weight:600;margin-top:2px}
+.lens .lens-info{font-size:10.5px;color:var(--text);text-align:center;margin-top:8px;padding:0 10px;font-weight:600;line-height:1.3}
+.lens .lens-info b{color:var(--warn)}
+.tag{display:inline-block;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;background:rgba(255,255,255,.06);color:var(--text)}
+/* ===== Modal ===== */
+.modal-back{position:fixed;inset:0;background:rgba(3,5,11,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:998;opacity:0;pointer-events:none;transition:.25s}
+.modal-back.open{opacity:1;pointer-events:auto}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.92);opacity:0;pointer-events:none;width:min(640px,94vw);max-height:88vh;background:linear-gradient(180deg,#0c1428 0%,#0a0f1e 100%);border:1px solid var(--border);border-radius:18px;z-index:999;transition:opacity .25s,transform .25s cubic-bezier(.4,0,.2,1);box-shadow:0 30px 90px rgba(0,0,0,.75);display:flex;flex-direction:column;overflow:hidden}
+.modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.modal-head{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.modal-head h2{font-size:17px;color:var(--text)}
+.modal-head .sub{color:var(--text-2);font-size:12px;margin-top:4px}
+.modal-close{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#ff8f8f;width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
+.modal-close:hover{background:rgba(255,107,107,.22)}
+.modal-body{padding:18px 24px 24px;overflow-y:auto;flex:1;font-size:13.5px;line-height:1.65}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:8px 18px;margin:14px 0}
+.kv .k{color:var(--text-2);font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;padding-top:2px}
+.kv .v{color:var(--text);font-weight:600}
+.vendor-pill{display:inline-block;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:800;color:#0a1020;letter-spacing:.4px}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}}
+footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--border);color:var(--muted);font-size:11.5px;text-align:center}
+@media print{body{background:#fff;color:#000}}
+</style>
+</head><body>
+<div class="wrap">
+<div class="hero">
+  <div>
+    <h1 id="hT">Línea de Tiempo · Cierre Pronosticado · Estación Centauros</h1>
+    <div class="sub" id="hS">—</div>
+  </div>
+  <div class="hero-right">
+    <div class="big" id="hCount">—</div>
+    <div class="lbl">Actividades pronosticadas</div>
+    <div class="cut" id="hCut">—</div>
+  </div>
+</div>
+
+<div class="kpis" id="kpiBar"></div>
+
+<div class="section-title">Cronograma · Inicio → Pronóstico de cierre · Hito por vendor</div>
+<div class="card">
+  <div class="legend" id="leg"></div>
+  <div class="tl-wrap" id="tlWrap"><div id="tl"></div><div class="lens" id="lens"><div class="lens-date">—</div><div class="lens-year">—</div><div class="lens-info">Pasa el cursor sobre la cinta</div></div></div>
+</div>
+
+<footer id="ftr">APPLUS+ · Línea de Tiempo de Cierre Pronosticado</footer>
+</div>
+
+<div class="modal-back" id="modalBack"></div>
+<div class="modal" id="modal">
+  <div class="modal-head">
+    <div><h2 id="modalTitle">Detalle</h2><div class="sub" id="modalSub">—</div></div>
+    <button class="modal-close" id="modalClose" title="Cerrar (Esc)">✕</button>
+  </div>
+  <div class="modal-body" id="modalBody"></div>
+</div>
+
+<script>
+const DATA = {"meta": {"titulo": "Línea de Tiempo · Cierre Pronosticado · Estación Centauros", "subtitulo": "Hitos por vendor con fecha final = Pronóstico", "fuente": "Linea_de_Tiempo_Pronostico.xlsx", "corte": "2026-05-31 19:27", "rango": {"min": "2025-09-24", "max": "2027-11-16"}}, "activities": [{"area": "ETK 1102B", "vendor": "DIATECO", "desc": "ACTIVIDADES COMPLEMENTARIAS INTERCONECTING TANQUE CABEZA DE CRUDO ETK 1102B", "start": "2026-04-02", "endOrig": "2026-04-15", "pron": "2026-05-22"}, {"area": "INTERCAMBIADOR DE CALOR", "vendor": "DIATECO", "desc": "INTERCAMBIADOR DE CALOR", "start": null, "endOrig": null, "pron": "2026-06-05"}, {"area": "BOTAS DE GAS", "vendor": "DIATECO", "desc": "ACTIVIDADES DE CIERRE MONTAJE BOTAS DE GAS TANQUES FWKO ETK-1101-A/B", "start": "2025-09-24", "endOrig": "2026-06-01", "pron": "2026-06-07"}, {"area": "FYG MOD4", "vendor": "DIATECO", "desc": "SISTEMA FIRE AND GAS DE INTERCAMBIADORES Y TRATADOR", "start": null, "endOrig": null, "pron": "2026-06-08"}, {"area": "EP-1105-5", "vendor": "DIATECO", "desc": "OBRAS MECANICAS AREA BOMBAS EP1105-5", "start": "2026-03-21", "endOrig": "2026-05-06", "pron": "2026-06-15"}, {"area": "SISTEMA SIS", "vendor": "ROCKWELL", "desc": "IMPLEMENTACIÓN DE LOS PUESTOS FISICOS ASOCIADOS AL SISTEMA SIS", "start": null, "endOrig": null, "pron": "2026-06-30"}, {"area": "ETSGL-1191-15", "vendor": "EQUITRONICA", "desc": "ETSGL-1191-15", "start": null, "endOrig": null, "pron": "2026-07-10"}, {"area": "PAVIMENTACION", "vendor": "PETROLABIN", "desc": "PAVIMENTACION ESTACIÓN CENTAUROS Y CONSTRUCCION ECOBODEGA X5", "start": "2026-02-19", "endOrig": "2026-06-30", "pron": "2026-07-25"}, {"area": "EP-1105-7", "vendor": "DIATECO", "desc": "OBRAS MECANICAS AREA BOMBAS EP1105-7", "start": "2026-03-21", "endOrig": "2026-07-09", "pron": "2026-07-30"}, {"area": "EET-1174", "vendor": "ROCKWELL", "desc": "TRATADOR ELECTROSTATICO 300-ET-0501 (EET-1174)", "start": null, "endOrig": null, "pron": "2026-08-30"}, {"area": "TEA", "vendor": "DIATECO", "desc": "Montaje de TEA", "start": null, "endOrig": null, "pron": "2026-11-15"}, {"area": "PAD 3", "vendor": "TBD", "desc": "COMPLETAMIENTO MECANICO PAD 3", "start": null, "endOrig": null, "pron": "2026-11-15"}, {"area": "STAP 7", "vendor": "TBD", "desc": "COMPLETAMIENTO MECANICO STAP 7", "start": null, "endOrig": null, "pron": "2027-11-16"}], "vendorColor": {"DIATECO": "#46d3ff", "PETROLABIN": "#a78bfa", "ROCKWELL": "#f7b955", "EQUITRONICA": "#ff8c42", "TBD": "#6b779b"}, "vendorCounts": {"DIATECO": 7, "PETROLABIN": 1, "ROCKWELL": 2, "TBD": 2, "EQUITRONICA": 1}, "today": "2026-05-31"};
+const C={accent:'#46d3ff',accent2:'#a78bfa',good:'#27d29c',warn:'#f7b955',bad:'#ff6b6b',orange:'#ff8c42',muted:'#6b779b',ribbon:'#f7b955',ribbonD:'#c87f1a'};
+const MESES_ABR=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtN=n=>(n==null||isNaN(n))?'—':new Intl.NumberFormat('es-CO').format(n);
+const fmtDate=d=>{if(!d)return'—';const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('es-CO',{year:'numeric',month:'short',day:'numeric'});};
+
+document.getElementById('hS').textContent = DATA.meta.subtitulo + ' · Fuente: ' + DATA.meta.fuente;
+document.getElementById('hCount').textContent = DATA.activities.length;
+document.getElementById('hCut').textContent = 'Corte: ' + DATA.meta.corte;
+document.getElementById('ftr').textContent = 'APPLUS+ Colombia · Línea de Tiempo de Cierre Pronosticado · ' + DATA.meta.fuente;
+
+// KPIs
+const hoy = DATA.today;
+const future = DATA.activities.filter(a=>a.pron && a.pron >= hoy);
+const past = DATA.activities.filter(a=>a.pron && a.pron < hoy);
+const proxima = future.length ? future.reduce((m,a)=>a.pron<m.pron?a:m) : null;
+const ultima = DATA.activities.reduce((m,a)=>(!m || (a.pron && a.pron>m.pron))?a:m, null);
+const sinInicio = DATA.activities.filter(a=>!a.start).length;
+const kpis = [
+  {lbl:'Actividades totales', val:DATA.activities.length, sub:`${Object.keys(DATA.vendorCounts).length} vendors`, cls:'acc'},
+  {lbl:'Próximo cierre', val: proxima ? fmtDate(proxima.pron) : '—', sub: proxima ? proxima.area : '—', cls:'good'},
+  {lbl:'Último cierre', val: ultima ? fmtDate(ultima.pron) : '—', sub: ultima ? ultima.area : '—', cls:'warn'},
+  {lbl:'Vendors involucrados', val: Object.keys(DATA.vendorCounts).length, sub: Object.entries(DATA.vendorCounts).map(([k,v])=>k+':'+v).join(' · ').slice(0,80), cls:'v2'},
+];
+document.getElementById('kpiBar').innerHTML = kpis.map(k=>`<div class="kpi ${k.cls}"><div class="lbl">${k.lbl}</div><div class="val">${k.val}</div><div class="sub">${esc(k.sub)}</div></div>`).join('');
+
+// Leyenda
+const vendorEntries = Object.entries(DATA.vendorColor).filter(([v])=>DATA.vendorCounts[v]);
+document.getElementById('leg').innerHTML =
+  vendorEntries.map(([v,c])=>`<span style="color:${c}"><span class="dot" style="background:${c};color:${c}"></span><b style="color:var(--text)">${esc(v)}</b> · ${DATA.vendorCounts[v]}</span>`).join('') +
+  `<span style="margin-left:auto;color:var(--accent)">━ ━ ━ HOY</span>` +
+  `<span><span class="tri"></span>Hito · Pronóstico de cierre</span>`;
+
+// ===== Render SVG Timeline =====
+const parseD = s => new Date(s+'T00:00:00');
+const t0 = parseD(DATA.meta.rango.min);
+const t1 = parseD(DATA.meta.rango.max);
+const totalDays = Math.max(1, (t1 - t0)/86400000);
+const TODAY = parseD(DATA.today);
+
+const labelW = 320, padR = 90, ribbonH = 52, axisH = 28, flagH = 90, rowH = 46;
+const baseTop = flagH + axisH + ribbonH + 18;
+const acts = DATA.activities;
+const H = baseTop + acts.length * rowH + 24;
+const W = 1640;
+const plotW = W - labelW - padR;
+
+function x(d){
+  const dt = d instanceof Date ? d : parseD(d);
+  return labelW + ((dt - t0)/86400000)/totalDays * plotW;
+}
+
+// meses
+function monthsBetween(a, b){
+  const out = []; const d = new Date(a.getFullYear(), a.getMonth(), 1);
+  while(d <= b){ out.push(new Date(d)); d.setMonth(d.getMonth()+1); }
+  return out;
+}
+const months = monthsBetween(t0, t1);
+
+let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="Inter,sans-serif" style="display:block">`;
+
+// Definir gradientes por vendor
+s += `<defs>`;
+Object.entries(DATA.vendorColor).forEach(([v,c],i)=>{
+  s += `<linearGradient id="grad_${i}" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%" stop-color="${c}" stop-opacity=".55"/>
+    <stop offset="100%" stop-color="${c}" stop-opacity="1"/>
+  </linearGradient>`;
+});
+// Patrón rayado para actividades sin inicio
+s += `<pattern id="diag" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+  <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(255,255,255,.4)" stroke-width="2"/>
+</pattern>`;
+s += `</defs>`;
+
+const VC = DATA.vendorColor;
+const vendorIdx = Object.fromEntries(Object.keys(VC).map((v,i)=>[v,i]));
+
+// Cinta amarilla (más alta + dorada con sombra)
+const ribY = flagH;
+s += `<defs>
+  <linearGradient id="ribGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#ffd968"/>
+    <stop offset="50%" stop-color="${C.ribbon}"/>
+    <stop offset="100%" stop-color="#d99520"/>
+  </linearGradient>
+</defs>`;
+s += `<rect x="${labelW}" y="${ribY}" width="${plotW}" height="${ribbonH}" rx="9" fill="url(#ribGrad)" stroke="${C.ribbonD}" stroke-width="1.8" filter="drop-shadow(0 4px 14px rgba(247,185,85,.35))"/>`;
+s += `<text x="${labelW-8}" y="${ribY+ribbonH/2+6}" fill="${C.bad}" font-size="18" font-weight="800" text-anchor="end">${t0.getFullYear()}</text>`;
+s += `<text x="${labelW+plotW+8}" y="${ribY+ribbonH/2+6}" fill="${C.bad}" font-size="18" font-weight="800">${t1.getFullYear()}</text>`;
+
+// Meses DENTRO de la cinta (más visibles) + ticks bajo
+months.forEach((m,i)=>{
+  const px = x(m);
+  s += `<line x1="${px}" y1="${ribY+ribbonH-10}" x2="${px}" y2="${ribY+ribbonH}" stroke="rgba(0,0,0,.35)" stroke-width="1"/>`;
+  s += `<text x="${px}" y="${ribY+ribbonH/2+5}" fill="#3a2a08" font-size="13" font-weight="800" text-anchor="middle" style="letter-spacing:.3px">${MESES_ABR[m.getMonth()]}</text>`;
+  // Año al inicio de cada año dentro de la cinta
+  if(m.getMonth()===0){
+    s += `<text x="${px}" y="${ribY+ribbonH+18}" fill="${C.bad}" font-size="11" font-weight="800" text-anchor="middle">${m.getFullYear()}</text>`;
+  }
+});
+
+// Banderas (hitos) por encima de la cinta
+acts.forEach((a, i)=>{
+  if(!a.pron) return;
+  const px = x(a.pron);
+  const fy = ribY - 6;
+  const col = VC[a.vendor] || C.muted;
+  // Apilar etiquetas alternadas para evitar solape
+  const lvl = i % 2;
+  const labelY = fy - 24 - lvl*22;
+  s += `<g class="flag-grp" data-idx="${i}">`;
+  // mástil
+  s += `<line x1="${px}" y1="${fy-8}" x2="${px}" y2="${labelY-2}" stroke="${col}" stroke-width="1.5"/>`;
+  // triángulo apuntando hacia abajo
+  s += `<path d="M${px-9},${fy-22} L${px+9},${fy-22} L${px},${fy-8} Z" fill="${col}" filter="drop-shadow(0 2px 4px rgba(0,0,0,.5))"/>`;
+  // pin circular
+  s += `<circle cx="${px}" cy="${fy-22}" r="3" fill="#0a1020"/>`;
+  // etiqueta (área + fecha)
+  const label = (a.area || 'Item').slice(0, 18);
+  s += `<text x="${px}" y="${labelY-12}" fill="${C.text}" font-size="10.5" font-weight="800" text-anchor="middle">${esc(label)}</text>`;
+  s += `<text x="${px}" y="${labelY-1}" fill="${col}" font-size="9.5" font-weight="700" text-anchor="middle">${a.pron.slice(5)}</text>`;
+  s += `</g>`;
+});
+
+// Línea HOY
+if(TODAY >= t0 && TODAY <= t1){
+  const px = x(TODAY);
+  s += `<line x1="${px}" y1="${ribY-10}" x2="${px}" y2="${H-10}" stroke="${C.accent}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  s += `<rect x="${px-26}" y="${H-22}" width="52" height="18" rx="5" fill="${C.accent}"/>`;
+  s += `<text x="${px}" y="${H-9}" fill="#0a1020" font-size="10" font-weight="800" text-anchor="middle">HOY</text>`;
+}
+
+// Swimlanes (cada fila envuelta en <g class="row"> para hover highlight)
+acts.forEach((a, i)=>{
+  const y = baseTop + i * rowH;
+  s += `<g class="row" data-idx="${i}">`;
+  // Banda hover invisible (se ilumina con CSS)
+  s += `<rect class="swim" x="0" y="${y}" width="${W}" height="${rowH}" fill="${i%2===0?'rgba(255,255,255,.015)':'transparent'}"/>`;
+  // Etiqueta izquierda - BLANCA PURA
+  const desc = a.desc || a.area;
+  s += `<text class="desc" x="14" y="${y+rowH/2-3}" fill="#ffffff" font-size="13" font-weight="700">${esc((desc||'').slice(0,42))}</text>`;
+  // Vendor badge
+  const col = VC[a.vendor] || C.muted;
+  s += `<rect x="14" y="${y+rowH/2+6}" width="${a.vendor.length*7+18}" height="17" rx="4" fill="${col}" opacity="0.9"/>`;
+  s += `<text x="${14+(a.vendor.length*7+18)/2}" y="${y+rowH/2+18}" fill="#0a1020" font-size="10.5" font-weight="800" text-anchor="middle">${esc(a.vendor)}</text>`;
+  // Línea base (carril)
+  s += `<line x1="${labelW}" y1="${y+rowH/2}" x2="${labelW+plotW}" y2="${y+rowH/2}" stroke="rgba(255,255,255,.05)" stroke-width="1"/>`;
+  // Barra (animación de entrada escalonada por delay)
+  const startD = a.start ? parseD(a.start) : TODAY;
+  const endD = a.pron ? parseD(a.pron) : TODAY;
+  if(endD < startD){ s += `</g>`; return; }
+  const x1 = Math.max(labelW, x(startD));
+  const x2 = Math.min(labelW+plotW, x(endD));
+  const wBar = Math.max(3, x2-x1);
+  const gradIdx = vendorIdx[a.vendor] || 0;
+  const delay = (i*80) + 200;
+  s += `<rect class="bar" data-idx="${i}" x="${x1}" y="${y+10}" width="${wBar}" height="${rowH-23}" rx="6" fill="url(#grad_${gradIdx})" stroke="${col}" stroke-width="1.3" style="color:${col};animation-delay:${delay}ms">`;
+  s += `<title>${esc(a.area)} · ${esc(a.vendor)}\nInicio: ${a.start||'(sin definir)'}\nPronóstico: ${a.pron||'(sin definir)'}\n${esc(a.desc||'')}</title></rect>`;
+  if(!a.start){
+    s += `<rect x="${x1}" y="${y+10}" width="${wBar}" height="${rowH-23}" rx="6" fill="url(#diag)" pointer-events="none" style="animation:barIn .85s cubic-bezier(.2,.85,.2,1) backwards;animation-delay:${delay+100}ms;transform-box:fill-box;transform-origin:left center"/>`;
+  }
+  // Fecha pronóstico al final (negrita color vendor)
+  s += `<text x="${x2+8}" y="${y+rowH/2+4}" fill="${col}" font-size="11.5" font-weight="800">${a.pron ? a.pron.slice(5) : '—'}</text>`;
+  if(a.start && (x1-labelW) > 50){
+    s += `<text x="${x1-6}" y="${y+rowH/2+4}" fill="${C.text2}" font-size="10" text-anchor="end">${a.start.slice(5)}</text>`;
+  }
+  s += `</g>`;
+});
+
+s += '</svg>';
+document.getElementById('tl').innerHTML = s;
+
+// ===== Modal =====
+const modal = document.getElementById('modal'), modalBack = document.getElementById('modalBack');
+function openModal(){ modal.classList.add('open'); modalBack.classList.add('open'); }
+function closeModal(){ modal.classList.remove('open'); modalBack.classList.remove('open'); }
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modalBack.addEventListener('click', closeModal);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+function showDetail(idx){
+  const a = acts[idx]; if(!a) return;
+  const col = DATA.vendorColor[a.vendor] || C.muted;
+  document.getElementById('modalTitle').textContent = a.area || a.desc.slice(0,50);
+  document.getElementById('modalSub').textContent = 'Detalle de la actividad';
+  let html = `<span class="vendor-pill" style="background:${col}">${esc(a.vendor)}</span>`;
+  html += `<div class="kv">`;
+  html += `<div class="k">Descripción</div><div class="v">${esc(a.desc||'—')}</div>`;
+  html += `<div class="k">Área / Equipo</div><div class="v">${esc(a.area||'—')}</div>`;
+  html += `<div class="k">Vendor</div><div class="v" style="color:${col}">${esc(a.vendor)}</div>`;
+  html += `<div class="k">Comienzo</div><div class="v">${a.start ? fmtDate(a.start) : '<span style="color:var(--muted)">Sin definir</span>'}</div>`;
+  html += `<div class="k">Fin original</div><div class="v">${a.endOrig ? fmtDate(a.endOrig) : '<span style="color:var(--muted)">—</span>'}</div>`;
+  html += `<div class="k">PRONÓSTICO</div><div class="v" style="color:${col};font-size:15px"><b>${fmtDate(a.pron)}</b></div>`;
+  if(a.start && a.pron){
+    const dias = Math.round((parseD(a.pron)-parseD(a.start))/86400000);
+    html += `<div class="k">Duración total</div><div class="v">${dias} días</div>`;
+  }
+  if(a.pron){
+    const dh = Math.round((parseD(a.pron)-TODAY)/86400000);
+    const cls = dh<0?'var(--bad)':dh<=30?'var(--warn)':dh<=90?'var(--orange)':'var(--good)';
+    const txt = dh<0?`Pronóstico vencido hace ${-dh} días`:`Faltan ${dh} días para el pronóstico`;
+    html += `<div class="k">Situación</div><div class="v" style="color:${cls};font-weight:700">${txt}</div>`;
+  }
+  html += `</div>`;
+  document.getElementById('modalBody').innerHTML = html;
+  openModal();
+}
+
+document.querySelectorAll('svg .bar').forEach(el=>el.addEventListener('click',()=>showDetail(+el.getAttribute('data-idx'))));
+document.querySelectorAll('svg .flag-grp').forEach(el=>el.addEventListener('click',()=>showDetail(+el.getAttribute('data-idx'))));
+
+// ===== Lupa que sigue el cursor =====
+const tlWrap = document.getElementById('tlWrap');
+const lens = document.getElementById('lens');
+const svgEl = document.querySelector('#tl svg');
+function activitiesAtDate(d){
+  const ds = d.toISOString().slice(0,10);
+  return acts.filter(a=>{
+    const s = a.start || (a.pron||ds);
+    const e = a.pron || s;
+    return ds >= s && ds <= e;
+  });
+}
+tlWrap.addEventListener('mousemove', e=>{
+  if(!svgEl) return;
+  const wrapRect = tlWrap.getBoundingClientRect();
+  const svgRect = svgEl.getBoundingClientRect();
+  const localX = e.clientX - wrapRect.left + tlWrap.scrollLeft;
+  // Mapear pixel local del wrap -> coord viewBox SVG
+  const scale = svgRect.width / W;
+  const svgX = (e.clientX - svgRect.left) / scale;
+  // Solo activar lupa dentro de la zona del plot (cinta + barras)
+  if(svgX < labelW || svgX > labelW + plotW){ lens.style.opacity = 0; return; }
+  // posición de la lupa (relativa al wrap, descontando scroll)
+  const lensX = e.clientX - wrapRect.left;
+  const lensY = e.clientY - wrapRect.top;
+  lens.style.left = lensX + 'px';
+  lens.style.top  = lensY + 'px';
+  lens.style.opacity = 1;
+  // Fecha exacta en esa posición
+  const dayOffset = (svgX - labelW) / plotW * totalDays;
+  const d = new Date(t0.getTime() + dayOffset * 86400000);
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  lens.querySelector('.lens-date').textContent = d.getDate() + ' ' + meses[d.getMonth()];
+  lens.querySelector('.lens-year').textContent = d.getFullYear();
+  // Actividades activas en ese día
+  const list = activitiesAtDate(d);
+  const info = lens.querySelector('.lens-info');
+  if(list.length){
+    const names = list.slice(0,2).map(a=>esc(a.area)).join(' · ');
+    info.innerHTML = `<b>${list.length}</b> activa${list.length===1?'':'s'}<br>${names}${list.length>2?'…':''}`;
+  } else {
+    info.innerHTML = '<span style="color:var(--muted)">Sin actividades</span>';
+  }
+});
+tlWrap.addEventListener('mouseleave', ()=>{ lens.style.opacity = 0; });
+
+</script>
+</body></html>

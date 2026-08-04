@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Asistencias Técnicas · CSE</title>
+<style>
+:root{
+  --bg:#0a0f1e;--bg2:#111a30;--panel:#161f38;--panel2:#1b264a;--text:#e8edff;--text-2:#a8b6d4;--muted:#6b779b;
+  --accent:#46d3ff;--accent2:#a78bfa;--good:#27d29c;--warn:#f7b955;--bad:#ff6b6b;--orange:#ff8c42;
+  --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:13.5px/1.5 'Inter','Segoe UI',system-ui,sans-serif}
+.wrap{max-width:1640px;margin:0 auto;padding:22px 26px 80px}
+.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:18px}
+.hero h1{margin:0;font-size:22px;letter-spacing:.3px;background:linear-gradient(90deg,#46d3ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero .sub{color:var(--text-2);font-size:12.5px;margin-top:5px}
+.hero-right{text-align:right;flex-shrink:0}
+.hero-right .big{font-size:42px;font-weight:800;color:var(--accent);line-height:1}
+.hero-right .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-2)}
+.cut{color:var(--muted);font-size:11px;margin-top:6px}
+.btn{background:transparent;border:1px solid var(--border);color:var(--text-2);padding:6px 12px;border-radius:7px;cursor:pointer;font-size:12px;margin-top:8px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.filterbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:13px 16px;margin-bottom:18px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-2);font-weight:600}
+.fg select{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:6px 9px;border-radius:7px;font-size:12.5px;min-width:130px}
+.fclear{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#ff8f8f;padding:7px 13px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.kpi .lbl{color:var(--text-2);font-size:10px;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.kpi .val{font-size:24px;font-weight:800;margin-top:3px}
+.kpi .sub{font-size:11px;color:var(--text-2);margin-top:2px}
+.kpi.good .val{color:var(--good)}.kpi.warn .val{color:var(--warn)}.kpi.bad .val{color:var(--bad)}.kpi.acc .val{color:var(--accent)}.kpi.v2 .val{color:var(--accent2)}.kpi.orange .val{color:var(--orange)}
+.section-title{margin:22px 0 10px;font-size:13px;color:var(--text-2);text-transform:uppercase;letter-spacing:1.1px;font-weight:700;display:flex;align-items:center;gap:9px}
+.section-title::before{content:"";width:4px;height:14px;background:var(--accent);border-radius:2px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px}
+.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}.span-12{grid-column:span 12}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:15px 17px}
+.card h3{margin:0 0 3px;font-size:13.5px}
+.card .desc{color:var(--text-2);font-size:11.5px;margin-bottom:9px}
+.chart{width:100%;overflow-x:auto}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:11px;color:var(--text-2);margin:6px 0}
+.legend .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+th{color:var(--text-2);font-size:10px;text-transform:uppercase;letter-spacing:.5px;background:rgba(255,255,255,.02);position:sticky;top:0;z-index:2}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:hover td{background:rgba(255,255,255,.025)}
+.tabwrap{max-height:560px;overflow:auto;border:1px solid var(--border);border-radius:8px}
+.pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:10.5px;font-weight:700}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--border);color:var(--muted);font-size:11px;text-align:center}
+/* Cuadrícula diaria */
+#tblCuad th,#tblCuad td{padding:0;border:none}
+#tblCuad th{position:sticky;top:0;background:#16203a;z-index:3;font-size:9px;color:var(--text-2);text-align:center;height:28px;min-width:14px}
+#tblCuad td.lbl{position:sticky;left:0;background:#16203a;z-index:2;min-width:170px;padding:3px 8px;font-size:11px;color:var(--text);font-weight:600;border-right:1px solid var(--border);text-align:left;white-space:nowrap}
+#tblCuad th.lbl{left:0;z-index:4;text-align:left;padding:0 8px;min-width:170px}
+#tblCuad td.cell{width:14px;min-width:14px;height:22px;text-align:center;font-size:8.5px;font-weight:700;color:#0a1020;border-right:1px solid rgba(255,255,255,.04)}
+#tblCuad .mes-sep{border-left:2px solid rgba(255,255,255,.12)!important}
+#tblCuad tbody tr:hover td.lbl{color:var(--accent)}
+@media(max-width:1200px){.kpis{grid-template-columns:repeat(2,1fr)}[class*=span-]{grid-column:span 12}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div><h1 id="hT">Dashboard Asistencias Técnicas · CSE</h1><div class="sub" id="hS">—</div></div>
+  <div class="hero-right"><div class="big" id="hPct">—</div><div class="lbl">Avance global (días)</div><div class="cut" id="hCut">—</div>
+  <button class="btn" onclick="window.print()">⤓ Exportar PDF</button></div>
+</div>
+
+<div class="filterbar">
+  <div class="fg"><label>Administrador</label><select id="fAdmin"></select></div>
+  <div class="fg"><label>Subproyecto</label><select id="fSubproy"></select></div>
+  <div class="fg"><label>Vendor</label><select id="fVendor"></select></div>
+  <div class="fg"><label>Estado</label><select id="fEstado"></select></div>
+  <button class="fclear" onclick="resetF()">Limpiar</button>
+</div>
+
+<div class="kpis" id="kpiBar"></div>
+
+<div class="section-title">Avance global · Estados · Distribución</div>
+<div class="grid">
+  <div class="card span-4"><h3>Por Estado</h3><div class="desc">Servicios por estado · clic para filtrar</div><div class="chart" id="chEstado"></div></div>
+  <div class="card span-4"><h3>Por Subproyecto</h3><div class="desc">Días totales vs ejecutados · clic para filtrar</div><div class="chart" id="chSubproy"></div></div>
+  <div class="card span-4"><h3>Distribución por % Avance</h3><div class="desc">Cantidad de servicios por rango</div><div class="chart" id="chHisto"></div></div>
+</div>
+
+<div class="section-title">Vendors y Administradores</div>
+<div class="grid">
+  <div class="card span-7"><h3>Top Vendors (días totales)</h3><div class="desc">Clic en una barra para filtrar todo el dashboard</div><div class="chart" id="chVendor"></div></div>
+  <div class="card span-5"><h3>Por Administrador</h3><div class="desc">Días gestionados por cada administrador</div><div class="chart" id="chAdmin"></div></div>
+</div>
+
+<div class="section-title">Gantt · Días Programados vs Ejecutados vs Pendientes</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="desc">Cada barra representa la duración del servicio (DT). En verde los días ejecutados (DE), en ámbar los pendientes (DR). Ordenado por % de avance.</div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--good)"></span>Días ejecutados (DE)</span>
+      <span><span class="dot" style="background:var(--warn);opacity:.75"></span>Días pendientes (DR)</span>
+      <span style="margin-left:auto;color:var(--muted)" id="ganttInfo">—</span>
+    </div>
+    <div class="chart" id="chGantt"></div>
+  </div>
+</div>
+
+<div class="section-title">Cuadrícula Diaria · Códigos de Estado</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="filterbar" style="margin-bottom:10px;padding:10px 12px">
+      <div class="fg"><label>Desde</label><select id="fDesde"></select></div>
+      <div class="fg"><label>Hasta</label><select id="fHasta"></select></div>
+      <div class="fg"><label>Vista rápida</label><select id="fVista"><option value="">—</option><option value="3m">Últimos 3 meses</option><option value="6m">Últimos 6 meses</option><option value="ytd">Año actual</option><option value="all">Todo</option></select></div>
+      <div style="margin-left:auto;color:var(--muted);font-size:11.5px" id="cuadInfo">—</div>
+    </div>
+    <div class="legend" id="cuadLeyenda"></div>
+    <div style="overflow:auto;max-height:540px;border:1px solid var(--border);border-radius:8px">
+      <table id="tblCuad" style="font-size:10px;border-collapse:separate;border-spacing:0">
+        <thead></thead><tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">Vigencias próximas (próximos 365 días)</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="desc" id="vigInfo">—</div>
+    <div class="tabwrap" style="max-height:320px"><table id="tblVig">
+      <thead><tr><th>Vendor</th><th>Administrador</th><th>Vigencia</th><th class="num">Faltan</th><th class="num">DT</th><th class="num">DR</th><th class="num">% Avance</th><th>Riesgo</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+</div>
+
+<div class="section-title">Detalle de servicios</div>
+<div class="grid">
+  <div class="card span-12">
+    <div class="desc" id="tblInfo">—</div>
+    <div class="tabwrap"><table id="tblSrv">
+      <thead><tr><th>Administrador</th><th>Contrato</th><th>ODS</th><th>Subproyecto</th><th>Vendor</th><th>Alcance</th>
+        <th class="num">DT</th><th class="num">DE</th><th class="num">DR</th><th class="num">% Avance</th><th>Vigencia</th><th>Estado</th><th>Avance</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+</div>
+
+<footer id="ftr">APPLUS+ · Dashboard de Asistencias Técnicas</footer>
+</div>
+
+<script>
+const DATA = {
+  "meta": {
+    "titulo": "Dashboard Asistencias Técnicas · Caño Sur Este",
+    "subtitulo": "Seguimiento de servicios técnicos por vendor / administrador / subproyecto",
+    "fuente": "Asistencias Tecnicas CSE 18ABR2026.xlsx",
+    "corte": "2026-05-30 20:51",
+    "rangoCuadricula": {
+      "min": "2024-01-02",
+      "max": "2026-10-31"
+    },
+    "leyendaCodigos": [
+      {
+        "code": "EC",
+        "label": "En campo",
+        "color": "#27d29c"
+      },
+      {
+        "code": "F",
+        "label": "Finalizado (100 %)",
+        "color": "#1ea27a"
+      },
+      {
+        "code": "P",
+        "label": "Programado",
+        "color": "#46d3ff"
+      },
+      {
+        "code": "R",
+        "label": "Reprogramado",
+        "color": "#ff8c42"
+      },
+      {
+        "code": "G",
+        "label": "Garantía",
+        "color": "#a78bfa"
+      },
+      {
+        "code": "MOV",
+        "label": "Movilización",
+        "color": "#36c5f0"
+      },
+      {
+        "code": "AI",
+        "label": "Acta de inicio",
+        "color": "#fbbf24"
+      },
+      {
+        "code": "D",
+        "label": "Descanso",
+        "color": "#6b779b"
+      },
+      {
+        "code": "SV",
+        "label": "Sin validar",
+        "color": "#ff6b6b"
+      },
+      {
+        "code": "JE",
+        "label": "Jornada extendida",
+        "color": "#e879f9"
+      },
+      {
+        "code": "JN",
+        "label": "Jornada nocturna",
+        "color": "#7c3aed"
+      },
+      {
+        "code": "SB",
+        "label": "Stand by",
+        "color": "#f7b955"
+      }
+    ]
+  },
+  "kpis": {
+    "servicios": 29,
+    "vendors": 20,
+    "admins": 12,
+    "subproys": 3,
+    "dt": 2649.0,
+    "de": 1510.5,
+    "dr": 1138.5,
+    "pctGlobal": 57.0,
+    "finalizados": 0,
+    "noIniciado": 16,
+    "proximos60": 7
+  },
+  "servicios": [
+    {
+      "admin": "Sebastian Arias",
+      "contrato": "3032969-2021-005",
+      "ods": "—",
+      "acta": null,
+      "vigencia": "2026-06-30",
+      "duracion": 372.0,
+      "subproy": "CLUSTER EXTERIORES",
+      "vendor": "SCHNEIDER ELECTRIC DE COLOMBIA S.A",
+      "alcance": "Asistencia técnica para el comisionamiento, arranque y estabilización de equipos elécricos de superficie para Ecopetrol S.A. y su grupo empresarial. CCP",
+      "dt": 372.0,
+      "de": 361.0,
+      "dr": 11.0,
+      "ejec": 97.0,
+      "acum": 197.0,
+      "estado": "Avanzado",
+      "daily": {
+        "2024-01-08": "EC",
+        "2024-01-09": "EC",
+        "2024-01-10": "EC",
+        "2024-01-11": "EC",
+        "2024-02-02": "P",
+        "2024-02-03": "EC",
+        "2024-02-04": "EC",
+        "2024-02-05": "S",
+        "2024-02-18": "P",
+        "2024-02-19": "EC",
+        "2024-02-20": "EC",
+        "2024-02-21": "EC",
+        "2024-02-22": "EC",
+        "2024-02-23": "EC",
+        "2024-02-24": "EC",
+        "2024-02-25": "EC",
+        "2024-02-26": "EC",
+        "2024-02-27": "EC",
+        "2024-02-28": "EC",
+        "2024-02-29": "EC",
+        "2024-03-01": "EC",
+        "2024-04-18": "EC",
+        "2024-04-19": "EC",
+        "2024-04-20": "EC",
+        "2024-04-21": "EC",
+        "2024-04-22": "EC",
+        "2024-04-23": "EC",
+        "2024-04-24": "EC",
+        "2024-04-25": "EC",
+        "2024-04-26": "EC",
+        "2024-04-27": "EC",
+        "2024-04-29": "EC",
+        "2024-04-30": "EC",
+        "2024-05-01": "EC",
+        "2024-06-02": "P",
+        "2024-06-03": "EC",
+        "2024-06-04": "EC",
+        "2024-06-05": "EC",
+        "2024-06-06": "EC",
+        "2024-06-07": "EC",
+        "2024-06-08": "EC",
+        "2024-06-09": "EC",
+        "2024-06-10": "EC",
+        "2024-06-11": "EC",
+        "2024-06-12": "EC",
+        "2024-06-13": "EC",
+        "2024-06-14": "EC",
+        "2024-06-15": "EC",
+        "2024-06-16": "EC",
+        "2024-08-13": "EC",
+        "2024-08-14": "EC",
+        "2024-08-15": "EC",
+        "2024-08-16": "EC",
+        "2024-08-17": "EC",
+        "2024-08-18": "EC",
+        "2024-08-19": "EC",
+        "2024-08-20": "EC",
+        "2024-08-21": "EC",
+        "2024-08-22": "EC",
+        "2024-08-23": "EC",
+        "2024-08-24": "EC",
+        "2024-08-25": "EC",
+        "2024-08-26": "EC",
+        "2024-08-27": "EC",
+        "2024-09-26": "EC",
+        "2024-09-27": "EC",
+        "2024-09-28": "EC",
+        "2024-09-29": "EC",
+        "2024-09-30": "EC",
+        "2024-10-01": "EC",
+        "2024-10-02": "EC",
+        "2024-10-03": "EC",
+        "2024-10-04": "EC",
+        "2024-10-05": "EC",
+        "2024-10-06": "EC",
+        "2024-10-07": "EC",
+        "2024-10-08": "EC",
+        "2024-10-09": "EC",
+        "2024-10-10": "EC",
+        "2024-10-11": "EC",
+        "2024-10-12": "EC",
+        "2024-10-13": "EC",
+        "2024-10-14": "EC",
+        "2024-10-15": "EC",
+        "2024-10-16": "EC",
+        "2024-10-17": "EC",
+        "2024-10-18": "EC",
+        "2024-10-19": "EC",
+        "2024-10-20": "EC",
+        "2024-10-21": "EC",
+        "2024-10-22": "EC",
+        "2024-10-23": "EC",
+        "2024-12-06": "P",
+        "2024-12-07": "EC",
+        "2024-12-08": "EC",
+        "2024-12-09": "EC",
+        "2024-12-10": "EC",
+        "2024-12-11": "EC",
+        "2024-12-12": "EC",
+        "2024-12-13": "EC",
+        "2024-12-14": "EC",
+        "2024-12-15": "EC",
+        "2024-12-16": "EC",
+        "2025-01-07": "MOV",
+        "2025-01-08": "EC",
+        "2025-01-09": "EC",
+        "2025-01-10": "EC",
+        "2025-01-11": "EC",
+        "2025-01-12": "EC",
+        "2025-01-13": "EC",
+        "2025-01-14": "EC",
+        "2025-01-15": "EC",
+        "2025-02-27": "P",
+        "2025-02-28": "EC",
+        "2025-03-01": "EC",
+        "2025-03-02": "EC",
+        "2025-03-03": "EC",
+        "2025-03-04": "EC",
+        "2025-03-05": "EC",
+        "2025-03-06": "EC",
+        "2025-04-23": "EC",
+        "2025-04-24": "EC",
+        "2025-04-25": "EC",
+        "2025-04-26": "EC",
+        "2025-04-27": "EC",
+        "2025-04-28": "EC",
+        "2025-04-29": "EC",
+        "2025-04-30": "EC",
+        "2025-05-01": "EC",
+        "2025-05-02": "EC",
+        "2025-05-03": "EC",
+        "2025-05-04": "EC",
+        "2025-05-05": "EC",
+        "2025-05-06": "EC",
+        "2025-05-07": "EC",
+        "2025-05-08": "EC",
+        "2025-06-06": "EC",
+        "2025-06-07": "EC",
+        "2025-06-08": "EC",
+        "2025-06-09": "EC",
+        "2025-06-10": "EC",
+        "2025-06-11": "EC",
+        "2025-06-12": "EC",
+        "2025-06-13": "EC",
+        "2025-06-14": "EC",
+        "2025-06-15": "EC",
+        "2025-08-06": "EC",
+        "2025-08-07": "EC",
+        "2025-08-08": "EC",
+        "2025-08-09": "EC",
+        "2025-08-10": "EC",
+        "2025-08-11": "EC",
+        "2025-11-13": "EC",
+        "2025-11-14": "EC",
+        "2025-11-15": "EC",
+        "2025-11-17": "EC",
+        "2025-11-18": "EC",
+        "2025-11-19": "EC",
+        "2025-11-20": "EC",
+        "2025-11-21": "EC",
+        "2025-11-22": "EC",
+        "2025-11-23": "EC",
+        "2025-11-24": "EC",
+        "2026-01-26": "EC",
+        "2026-01-27": "EC",
+        "2026-01-28": "EC",
+        "2026-01-29": "EC",
+        "2026-01-30": "EC",
+        "2026-02-15": "EC",
+        "2026-02-16": "EC",
+        "2026-02-17": "EC"
+      }
+    },
+    {
+      "admin": "Sebastian Arias",
+      "contrato": "3032928-2021-009",
+      "ods": "—",
+      "acta": null,
+      "vigencia": "2026-06-30",
+      "duracion": 647.0,
+      "subproy": "CLUSTER EXTERIORES",
+      "vendor": "SLA COL S.A.S",
+      "alcance": "Aistencia técnica para el comisionamiento, arranque y estabilización de equipos eléctricos de superficie para Ecopetrol S.A. y su grupo empresarial (VDF-SUT)",
+      "dt": 669.0,
+      "de": 615.0,
+      "dr": 54.0,
+      "ejec": 91.9,
+      "acum": 370.0,
+      "estado": "Avanzado",
+      "daily": {
+        "2024-01-02": "EC",
+        "2024-01-03": "EC",
+        "2024-01-04": "EC",
+        "2024-01-05": "EC",
+        "2024-01-06": "EC",
+        "2024-01-07": "EC",
+        "2024-01-08": "EC",
+        "2024-01-09": "EC",
+        "2024-01-10": "EC",
+        "2024-01-26": "EC",
+        "2024-01-27": "EC",
+        "2024-01-28": "EC",
+        "2024-01-29": "EC",
+        "2024-01-30": "EC",
+        "2024-01-31": "EC",
+        "2024-02-01": "EC",
+        "2024-02-02": "EC",
+        "2024-02-03": "EC",
+        "2024-02-04": "EC",
+        "2024-02-05": "EC",
+        "2024-02-23": "EC",
+        "2024-02-24": "EC",
+        "2024-02-25": "EC",
+        "2024-02-26": "EC",
+        "2024-02-27": "EC",
+        "2024-04-23": "P",
+        "2024-04-25": "EC",
+        "2024-04-26": "EC",
+        "2024-04-27": "EC",
+        "2024-04-28": "EC",
+        "2024-04-30": "EC",
+        "2024-05-01": "EC",
+        "2024-05-02": "EC",
+        "2024-05-03": "EC",
+        "2024-05-04": "EC",
+        "2024-05-05": "EC",
+        "2024-05-06": "EC",
+        "2024-05-07": "EC",
+        "2024-05-08": "EC",
+        "2024-05-09": "EC",
+        "2024-05-10": "EC",
+        "2024-05-11": "EC",
+        "2024-05-23": "P",
+        "2024-05-25": "EC",
+        "2024-05-26": "EC",
+        "2024-05-27": "EC",
+        "2024-06-01": "EC",
+        "2024-06-03": "EC",
+        "2024-06-04": "EC",
+        "2024-06-05": "EC",
+        "2024-06-06": "EC",
+        "2024-06-07": "EC",
+        "2024-06-08": "EC",
+        "2024-06-09": "EC",
+        "2024-06-10": "EC",
+        "2024-10-04": "P",
+        "2024-10-05": "EC",
+        "2024-10-06": "EC",
+        "2024-10-07": "EC",
+        "2024-10-08": "EC",
+        "2024-10-09": "EC",
+        "2024-10-10": "EC",
+        "2024-10-11": "EC",
+        "2024-10-12": "EC",
+        "2024-10-13": "EC",
+        "2024-10-14": "EC",
+        "2024-11-02": "EC",
+        "2024-11-03": "EC",
+        "2024-11-04": "EC",
+        "2024-11-05": "EC",
+        "2024-11-06": "EC",
+        "2024-11-07": "EC",
+        "2024-11-08": "EC",
+        "2024-11-09": "EC",
+        "2024-11-10": "EC",
+        "2024-11-11": "EC",
+        "2024-11-12": "EC",
+        "2024-11-13": "EC",
+        "2024-11-14": "EC",
+        "2024-11-15": "EC",
+        "2024-11-16": "EC",
+        "2024-11-17": "EC",
+        "2024-11-18": "EC",
+        "2024-11-19": "EC",
+        "2024-11-20": "EC",
+        "2024-11-21": "EC",
+        "2024-11-22": "EC",
+        "2024-11-23": "EC",
+        "2024-11-24": "EC",
+        "2024-12-10": "P",
+        "2024-12-12": "EC",
+        "2024-12-13": "EC",
+        "2024-12-14": "EC",
+        "2024-12-15": "EC",
+        "2024-12-16": "EC",
+        "2024-12-17": "EC",
+        "2024-12-18": "EC",
+        "2024-12-19": "EC",
+        "2024-12-20": "EC",
+        "2024-12-21": "EC",
+        "2024-12-22": "EC",
+        "2024-12-23": "EC",
+        "2024-12-24": "EC",
+        "2024-12-25": "EC",
+        "2024-12-26": "EC",
+        "2024-12-27": "EC",
+        "2024-12-28": "EC",
+        "2024-12-29": "EC",
+        "2025-05-04": "EC",
+        "2025-05-05": "EC",
+        "2025-05-06": "EC",
+        "2025-05-15": "P",
+        "2025-05-21": "EC",
+        "2025-05-22": "EC",
+        "2025-05-23": "EC",
+        "2025-05-24": "EC",
+        "2025-05-25": "EC",
+        "2025-05-26": "EC",
+        "2025-05-27": "EC",
+        "2025-05-28": "EC",
+        "2025-05-29": "EC",
+        "2025-05-30": "EC",
+        "2025-05-31": "EC",
+        "2025-06-01": "EC",
+        "2025-06-02": "EC",
+        "2025-06-03": "EC",
+        "2025-06-04": "EC",
+        "2025-06-05": "EC",
+        "2025-06-06": "EC",
+        "2025-06-07": "EC",
+        "2025-06-08": "EC",
+        "2025-06-09": "EC",
+        "2025-06-10": "EC",
+        "2025-06-11": "EC",
+        "2025-06-12": "EC",
+        "2025-06-13": "EC",
+        "2025-06-22": "EC",
+        "2025-06-23": "EC",
+        "2025-06-24": "EC",
+        "2025-06-25": "EC",
+        "2025-06-26": "EC",
+        "2025-06-27": "EC",
+        "2025-06-28": "EC",
+        "2025-06-29": "EC",
+        "2025-07-01": "EC",
+        "2025-07-02": "EC",
+        "2025-07-03": "EC",
+        "2025-07-04": "EC",
+        "2025-07-05": "EC",
+        "2025-07-08": "EC",
+        "2025-07-09": "EC",
+        "2025-07-26": "EC",
+        "2025-07-27": "EC",
+        "2025-07-28": "EC",
+        "2025-07-29": "EC",
+        "2025-07-30": "EC",
+        "2025-07-31": "EC",
+        "2025-08-01": "EC",
+        "2025-08-02": "EC",
+        "2025-08-03": "EC",
+        "2025-08-04": "EC",
+        "2025-08-05": "EC",
+        "2025-08-06": "EC",
+        "2025-08-07": "EC",
+        "2025-08-18": "EC",
+        "2025-08-19": "EC",
+        "2025-08-20": "EC",
+        "2025-08-21": "EC",
+        "2025-08-22": "EC",
+        "2025-08-23": "EC",
+        "2025-08-24": "EC",
+        "2025-08-25": "EC",
+        "2025-08-26": "EC",
+        "2025-08-27": "EC",
+        "2025-08-28": "EC",
+        "2025-08-29": "EC",
+        "2025-08-30": "EC",
+        "2025-08-31": "EC",
+        "2025-09-01": "EC",
+        "2025-09-02": "EC",
+        "2025-09-03": "EC",
+        "2025-10-07": "EC",
+        "2025-10-08": "EC",
+        "2025-10-09": "EC",
+        "2025-10-10": "EC",
+        "2025-10-11": "EC",
+        "2025-10-12": "EC",
+        "2025-10-13": "EC",
+        "2025-10-14": "EC",
+        "2025-10-15": "EC",
+        "2025-10-16": "EC",
+        "2025-10-17": "EC",
+        "2025-10-27": "EC",
+        "2025-10-28": "EC",
+        "2025-10-29": "EC",
+        "2025-10-30": "EC",
+        "2025-10-31": "EC",
+        "2025-11-01": "EC",
+        "2025-11-02": "EC",
+        "2025-11-03": "EC",
+        "2025-11-04": "EC",
+        "2025-11-05": "EC",
+        "2025-11-06": "EC",
+        "2025-11-07": "EC",
+        "2025-11-08": "EC",
+        "2025-11-09": "EC",
+        "2025-11-10": "EC",
+        "2025-11-11": "EC",
+        "2025-11-12": "EC",
+        "2025-11-13": "EC",
+        "2025-11-14": "EC",
+        "2025-11-15": "EC",
+        "2025-11-16": "EC",
+        "2025-11-17": "EC",
+        "2025-11-18": "EC",
+        "2025-11-19": "EC",
+        "2025-11-20": "EC",
+        "2025-11-21": "EC",
+        "2025-11-22": "EC",
+        "2025-11-23": "EC",
+        "2025-11-24": "EC",
+        "2025-11-25": "EC",
+        "2025-11-26": "EC",
+        "2025-11-27": "EC",
+        "2025-11-28": "EC",
+        "2025-12-07": "EC",
+        "2025-12-08": "EC",
+        "2025-12-09": "EC",
+        "2025-12-10": "EC",
+        "2025-12-11": "EC",
+        "2025-12-12": "EC",
+        "2025-12-13": "EC",
+        "2025-12-14": "EC",
+        "2025-12-15": "EC",
+        "2025-12-16": "EC",
+        "2025-12-17": "EC",
+        "2025-12-18": "EC",
+        "2025-12-19": "EC",
+        "2025-12-20": "EC",
+        "2025-12-21": "EC",
+        "2025-12-22": "EC",
+        "2025-12-23": "EC",
+        "2025-12-24": "EC",
+        "2025-12-25": "EC",
+        "2025-12-26": "EC",
+        "2025-12-27": "EC",
+        "2026-01-20": "EC",
+        "2026-01-23": "EC",
+        "2026-01-28": "EC",
+        "2026-02-14": "EC"
+      }
+    },
+    {
+      "admin": "Wilfredo Charry",
+      "contrato": "CW233230",
+      "ods": "9996257",
+      "acta": null,
+      "vigencia": "2026-06-30",
+      "duracion": 234.0,
+      "subproy": "CLUSTER EXTERIORES",
+      "vendor": "SLA COL S.A.S",
+      "alcance": "Prestar el servicio de asistencia técnica, pruebas en sitio y capacitación de soluciones de baja y media tensión (hasta 57,5 KV) en E-HOUSE / POWER ROOM / SHELTER / EQUIPOS INDIVIDUALES INCLUYE EQUIPO",
+      "dt": 234.0,
+      "de": 69.0,
+      "dr": 165.0,
+      "ejec": 29.5,
+      "acum": 0,
+      "estado": "En curso",
+      "daily": {
+        "2024-12-13": "MOV",
+        "2024-12-14": "ENS",
+        "2024-12-15": "ENS",
+        "2024-12-16": "ENS",
+        "2024-12-17": "ENS",
+        "2024-12-18": "ENS",
+        "2024-12-19": "ENS",
+        "2024-12-20": "ENS",
+        "2024-12-21": "EC",
+        "2024-12-22": "EC",
+        "2024-12-23": "EC",
+        "2024-12-24": "EC",
+        "2024-12-25": "EC",
+        "2024-12-26": "EC",
+        "2024-12-27": "EC",
+        "2024-12-28": "EC",
+        "2024-12-29": "EC",
+        "2024-12-30": "EC",
+        "2024-12-31": "EC",
+        "2025-01-01": "EC",
+        "2025-01-02": "EC",
+        "2025-01-03": "EC",
+        "2025-01-04": "EC",
+        "2025-01-05": "EC",
+        "2025-01-06": "EC",
+        "2025-01-07": "EC",
+        "2025-01-08": "EC",
+        "2025-01-09": "EC",
+        "2025-01-10": "EC",
+        "2025-01-11": "EC",
+        "2025-01-12": "EC",
+        "2025-01-13": "EC",
+        "2025-01-14": "EC",
+        "2025-01-15": "EC",
+        "2025-01-16": "EC",
+        "2025-01-17": "EC",
+        "2025-01-18": "EC",
+        "2025-01-19": "EC",
+        "2025-01-20": "EC",
+        "2025-01-21": "EC",
+        "2025-01-22": "EC",
+        "2025-01-23": "EC",
+        "2025-01-24": "EC",
+        "2025-01-25": "EC",
+        "2025-01-26": "EC",
+        "2025-02-09": "ENS",
+        "2025-02-10": "ENS",
+        "2025-02-11": "ENS",
+        "2025-02-12": "ENS",
+        "2025-02-13": "ENS",
+        "2025-02-14": "ENS",
+        "2025-02-15": "ENS",
+        "2025-02-16": "ENS",
+        "2025-02-17": "ENS",
+        "2025-02-18": "ENS",
+        "2025-02-19": "ENS",
+        "2025-02-20": "ENS",
+        "2025-02-21": "ENS",
+        "2025-02-22": "ENS",
+        "2025-02-23": "ENS",
+        "2025-02-24": "EC",
+        "2025-02-25": "EC",
+        "2025-02-26": "EC",
+        "2025-02-27": "EC",
+        "2025-02-28": "EC",
+        "2025-03-01": "EC",
+        "2025-03-02": "EC",
+        "2025-03-03": "EC",
+        "2025-03-04": "EC",
+        "2025-03-05": "EC",
+        "2025-03-06": "EC",
+        "2025-03-07": "EC",
+        "2025-03-08": "EC",
+        "2025-03-09": "EC",
+        "2025-03-10": "EC",
+        "2025-03-11": "EC",
+        "2025-03-12": "EC",
+        "2025-03-13": "EC",
+        "2025-03-14": "ENS",
+        "2025-03-15": "ENS",
+        "2025-03-16": "ENS",
+        "2025-03-17": "ENS",
+        "2025-03-18": "ENS",
+        "2025-03-19": "ENS",
+        "2025-03-20": "ENS",
+        "2025-04-11": "EC",
+        "2025-04-12": "EC",
+        "2025-04-13": "EC",
+        "2025-04-14": "EC",
+        "2025-04-15": "EC",
+        "2025-04-16": "EC",
+        "2025-04-17": "EC",
+        "2025-04-18": "EC",
+        "2025-04-19": "EC",
+        "2025-04-20": "EC",
+        "2025-04-21": "EC",
+        "2025-04-22": "EC",
+        "2025-04-23": "EC",
+        "2025-04-24": "EC"
+      }
+    },
+    {
+      "admin": "Andres Pereira Castaño",
+      "contrato": "5208529",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 2.0,
+      "subproy": "MITO 2 ESTACIONES",
+      "vendor": "TRIENERGY",
+      "alcance": "SERVICIO PARA EL CAMBIO DE CONTROL Y PUESTA EN MARCHA DE SINCRONISMO EN GENERADORES DEL PAD Y ESTACIÓN CENTAUROS DEL PROYECTO DESARROLLO INTEGRAL CAÑO SUR ESTE MODULO 4 DE ECOPETROL S.A.",
+      "dt": 2.0,
+      "de": 0,
+      "dr": 2.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Angela Maria Correa",
+      "contrato": "CW191332",
+      "ods": "—",
+      "acta": "2025-04-02",
+      "vigencia": "2026-07-31",
+      "duracion": 982.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "ROCKWELL AUTOMATION COLOMBIA S.A.",
+      "alcance": "SISTEMA DE CONTROL EP1",
+      "dt": 982.0,
+      "de": 282.5,
+      "dr": 699.5,
+      "ejec": 28.8,
+      "acum": 188.0,
+      "estado": "En curso",
+      "daily": {
+        "2024-10-30": "EC",
+        "2024-10-31": "EC",
+        "2024-11-01": "EC",
+        "2024-11-02": "EC",
+        "2024-11-03": "EC",
+        "2024-11-04": "EC",
+        "2024-11-05": "EC",
+        "2024-11-06": "EC",
+        "2024-11-07": "EC",
+        "2024-11-08": "EC",
+        "2024-11-09": "EC",
+        "2024-11-10": "EC",
+        "2024-11-11": "EC",
+        "2024-11-12": "EC",
+        "2024-11-13": "EC",
+        "2024-11-14": "EC",
+        "2024-11-15": "EC",
+        "2024-11-16": "EC",
+        "2024-11-17": "EC",
+        "2024-11-18": "EC",
+        "2024-11-19": "EC",
+        "2024-11-20": "EC",
+        "2024-11-21": "EC",
+        "2024-11-22": "EC",
+        "2024-11-23": "EC",
+        "2024-11-24": "EC",
+        "2024-11-25": "EC",
+        "2024-11-26": "EC",
+        "2024-11-27": "EC",
+        "2024-11-28": "EC",
+        "2024-11-29": "EC",
+        "2024-11-30": "EC",
+        "2024-12-01": "EC",
+        "2024-12-02": "EC",
+        "2024-12-03": "EC",
+        "2024-12-04": "EC",
+        "2024-12-05": "EC",
+        "2024-12-08": "EC",
+        "2024-12-09": "EC",
+        "2024-12-10": "EC",
+        "2024-12-11": "EC",
+        "2024-12-12": "EC",
+        "2024-12-13": "EC",
+        "2024-12-14": "EC",
+        "2024-12-15": "EC",
+        "2024-12-16": "EC",
+        "2024-12-17": "EC",
+        "2024-12-18": "EC",
+        "2024-12-19": "EC",
+        "2024-12-20": "EC",
+        "2024-12-21": "EC",
+        "2024-12-27": "EC",
+        "2024-12-31": "EC",
+        "2025-01-02": "EC",
+        "2025-01-03": "EC",
+        "2025-01-04": "EC",
+        "2025-01-15": "EC",
+        "2025-01-16": "EC",
+        "2025-01-17": "EC",
+        "2025-01-18": "EC",
+        "2025-01-19": "EC",
+        "2025-01-20": "EC",
+        "2025-01-21": "0.5",
+        "2025-01-23": "EC",
+        "2025-01-24": "EC",
+        "2025-01-25": "EC",
+        "2025-01-26": "EC",
+        "2025-01-27": "EC",
+        "2025-01-28": "EC",
+        "2025-07-30": "EC",
+        "2025-07-31": "EC",
+        "2025-08-01": "EC",
+        "2025-08-02": "EC",
+        "2025-08-03": "EC",
+        "2025-08-04": "EC",
+        "2025-08-05": "EC",
+        "2025-08-06": "EC",
+        "2025-08-07": "EC",
+        "2025-08-08": "EC",
+        "2025-08-09": "EC",
+        "2025-08-10": "EC",
+        "2025-08-11": "EC",
+        "2025-10-15": "EC",
+        "2025-10-16": "EC",
+        "2025-10-17": "EC",
+        "2025-10-18": "EC",
+        "2025-10-19": "EC",
+        "2025-10-20": "EC",
+        "2025-10-21": "EC",
+        "2025-10-22": "EC",
+        "2025-10-23": "EC",
+        "2025-10-24": "EC",
+        "2025-10-25": "EC",
+        "2025-10-26": "EC",
+        "2025-10-27": "EC"
+      }
+    },
+    {
+      "admin": "Angela Maria Correa",
+      "contrato": "CW191332",
+      "ods": "—",
+      "acta": "2025-04-02",
+      "vigencia": "2026-07-31",
+      "duracion": 132.0,
+      "subproy": "MITO 2 ESTACIONES",
+      "vendor": "ROCKWELL AUTOMATION COLOMBIA S.A.",
+      "alcance": "SISTEMA DE CONTROL MITO 2",
+      "dt": 132.0,
+      "de": 75.5,
+      "dr": 56.5,
+      "ejec": 57.2,
+      "acum": 37.0,
+      "estado": "Avanzado",
+      "daily": {
+        "2024-12-06": "EC",
+        "2024-12-07": "EC",
+        "2024-12-11": "EC",
+        "2024-12-12": "EC",
+        "2024-12-15": "EC",
+        "2024-12-17": "EC",
+        "2024-12-18": "EC",
+        "2024-12-19": "EC",
+        "2024-12-20": "EC",
+        "2024-12-21": "EC",
+        "2024-12-28": "EC",
+        "2024-12-29": "EC",
+        "2024-12-30": "EC",
+        "2025-01-01": "EC",
+        "2025-01-05": "EC",
+        "2025-01-06": "EC",
+        "2025-01-07": "EC",
+        "2025-01-08": "EC",
+        "2025-01-09": "EC",
+        "2025-01-21": "0.5",
+        "2025-01-22": "EC",
+        "2025-01-23": "EC",
+        "2025-01-24": "EC",
+        "2025-01-25": "EC",
+        "2025-01-26": "EC",
+        "2025-01-27": "EC",
+        "2025-01-28": "EC",
+        "2025-01-29": "EC",
+        "2025-01-30": "EC",
+        "2025-01-31": "EC",
+        "2025-02-01": "EC",
+        "2025-02-02": "EC",
+        "2025-02-03": "EC",
+        "2025-02-04": "EC",
+        "2025-04-10": "EC",
+        "2025-04-11": "EC",
+        "2025-04-12": "EC",
+        "2025-04-13": "EC",
+        "2025-04-14": "EC"
+      }
+    },
+    {
+      "admin": "Andres Pereira Castaño",
+      "contrato": "5208529",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 12.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "TRIENERGY",
+      "alcance": "GENERADOR TRIFÁSICO DE 500 KW A 480/277 V, CON MOTOR DE COMBUSTIÓN INTERNA (DIESEL), DISPUESTO EN CONTENEDOR INSONORIZADO CON GRADO DE PROTECCIÓN",
+      "dt": 2.0,
+      "de": 0,
+      "dr": 2.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "William Andrés Romero",
+      "contrato": "CW191659",
+      "ods": "9696894",
+      "acta": null,
+      "vigencia": "2025-12-31",
+      "duracion": 12.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "FLOWSERVE",
+      "alcance": "BOMBAS FWKO: RETROFIT BOMBA DE CRUDO EP-1150 J + VFD + VMS",
+      "dt": 12.0,
+      "de": 8.0,
+      "dr": 4.0,
+      "ejec": 66.7,
+      "acum": 0,
+      "estado": "Avanzado",
+      "daily": {
+        "2025-08-10": "G",
+        "2025-08-11": "G",
+        "2025-08-12": "EC",
+        "2025-08-13": "EC",
+        "2025-08-14": "EC",
+        "2025-08-15": "EC",
+        "2025-08-16": "EC",
+        "2025-08-18": "EC",
+        "2025-08-20": "EC",
+        "2025-08-24": "EC"
+      }
+    },
+    {
+      "admin": "Wilfredo Charry",
+      "contrato": "3050816",
+      "ods": "9758665",
+      "acta": "2025-11-18",
+      "vigencia": "2026-05-30",
+      "duracion": 20.0,
+      "subproy": "MITO 2 ESTACIONES",
+      "vendor": "SCHNEIDER ELECTRIC DE COLOMBIA S.A",
+      "alcance": "ODB 8001227: TABLERO DCS SCADA PAD - SUMINISTRO DE TABLERO CON SERVICIO DE ASISTENCIA TÉCNICA PARA EL PAD DEL PROYECTO DESARROLLO INTEGRAL CAÑO SUR ESTE MODULO 4 DE ECOPETROL S.A - SCADA ELECTRICO MIT",
+      "dt": 20.0,
+      "de": 12.0,
+      "dr": 8.0,
+      "ejec": 60.0,
+      "acum": 0,
+      "estado": "Avanzado",
+      "daily": {
+        "2025-11-22": "EC",
+        "2025-11-23": "EC",
+        "2025-11-24": "EC",
+        "2025-11-25": "EC",
+        "2025-11-26": "EC",
+        "2025-11-27": "EC",
+        "2025-11-28": "EC",
+        "2025-11-29": "EC",
+        "2025-11-30": "EC",
+        "2025-12-02": "EC",
+        "2025-12-03": "EC",
+        "2026-01-15": "EC"
+      }
+    },
+    {
+      "admin": "Wilfredo Charry",
+      "contrato": "3050816",
+      "ods": "9765021",
+      "acta": "2025-11-18",
+      "vigencia": "2026-05-30",
+      "duracion": 14.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "SCHNEIDER ELECTRIC DE COLOMBIA S.A",
+      "alcance": "ODB8001228: SCADA ELECTRICO CENTAUROS",
+      "dt": 14.0,
+      "de": 4.0,
+      "dr": 10.0,
+      "ejec": 28.6,
+      "acum": 0,
+      "estado": "En curso",
+      "daily": {
+        "2025-11-19": "EC",
+        "2025-11-20": "EC",
+        "2025-11-21": "EC",
+        "2025-11-22": "EC"
+      }
+    },
+    {
+      "admin": "Samuel Orlando Blanco Ruiz",
+      "contrato": "3050619",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "EQUIPOS Y LABORATORIO DE COLOMBIA",
+      "alcance": "MOD3: ASISTENCIA TÉCNICA DE EQUIPOS DE LABORATORIO EP1 DEL PROYECTO CAÑO SUR ESTE MODULO 3 DE ECOPETROL SA",
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Samuel Orlando Blanco Ruiz",
+      "contrato": "3050624",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "HACH COLOMBIA S.A.S.",
+      "alcance": "MOD3: ASISTENCIA TÉCNICA DE EQUIPOS DE LABORATORIO EP1 DEL PROYECTO CAÑO SUR ESTE MODULO 3 DE ECOPETROL SA",
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Omar Enrique Orjuela",
+      "contrato": "5209050",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "ALSA SOLUCIONES",
+      "alcance": "SERVICIO DE ASISTENCIA TÉCNICA EN CAMPO, PARA EL PROYECTO CAÑO SUR ESTE MODULO 3 DE ECOPETROL S.A - F&G HMI",
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Samuel Orlando Blanco Ruiz",
+      "contrato": "CW223232",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 3.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "INGENIERIA SUMINISTROS Y REPRESENTACIONES DE COLOMBIA S.A.S. - INSURCOL S.A.S",
+      "alcance": "SUMINISTRO DE DETECTORES ESTACIONES MANUALES FIRE & GAS PARA LA ESTACIÓN CENTAUROS Y SERVICIO DE ASISTENCIA TÉCNICA EN CAMPO, PARA EL PROYECTO DESARROLLO INTEGRAL CAÑO SUR ESTE MODULO 4 DE ECOPETROL S",
+      "dt": 3.0,
+      "de": 0,
+      "dr": 3.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Omar Enrique Orjuela",
+      "contrato": "3043959",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "GIM INGENIERIA ELECTRICA LTDA",
+      "alcance": "ASISTENCA TECNICA PARA TABLEROS ELECTRICOS DE EP1 DEL PROYECTO CAÑO SUR ESTE MODULO 3 DE ECOPETROL S.A",
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Omar Enrique Orjuela",
+      "contrato": "3047457",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "EQUIPOS Y LABORATORIO DE COLOMBIA",
+      "alcance": "MOD3: ASISTENCIA TECNICA DE EQUIPOS DE LABORATORIO EP1 DEL PROYECTO CAÑO SUR ESTE MODULO 3 DE ECOPETROL SA",
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Andres Pereira Castaño",
+      "contrato": "3050626",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "S Y Z COLOMBIA",
+      "alcance": "ASISTENCIA TÉCNICA DE EQUIPOS DE LABORATORIO EP1 DEL PROYECTO CAÑO SUR ESTE MODULO 3 DE ECOPETROL SA",
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Andres Pereira Castaño",
+      "contrato": "3050528",
+      "ods": "9985674",
+      "acta": null,
+      "vigencia": "2026-10-28",
+      "duracion": 13.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "INDUSTRIAS ECTRICOL S.A.S.",
+      "alcance": "SERVICIO DE ASISTENCIA CMO-06 CSE M4 DE ECOPETROL",
+      "dt": 13.0,
+      "de": 0,
+      "dr": 13.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Omar Enrique Orjuela",
+      "contrato": "CW220864",
+      "ods": "5350641",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 12.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "EQUIPOS Y CONTROLES INDUSTRIALES",
+      "alcance": "SERVICIO DE ASISTENCIA TECNICA EN CAMPO, PARA EL PROYECTO DESARROLLO INTEGRAL CAÑO SUR ESTE MODULO 4 DE ECOPETROL",
+      "dt": 12.0,
+      "de": 0,
+      "dr": 12.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Sebastian Arias",
+      "contrato": "3032970-2025-002",
+      "ods": "—",
+      "acta": null,
+      "vigencia": "2026-03-30",
+      "duracion": 14.0,
+      "subproy": "CLUSTER EXTERIORES",
+      "vendor": "HITACHI ENERGY COLOMBIA LTDA",
+      "alcance": "Asistencia técnica para el comisionamiento, arranque y estabilización de equipos eléctricos de superficie para Ecopetrol S.A. y su grupo empresarial. Módulo 4",
+      "dt": 14.0,
+      "de": 12.0,
+      "dr": 2.0,
+      "ejec": 85.7,
+      "acum": 0,
+      "estado": "Avanzado",
+      "daily": {
+        "2025-08-25": "EC",
+        "2025-08-26": "EC",
+        "2025-08-27": "EC",
+        "2025-08-28": "EC",
+        "2025-10-15": "EC",
+        "2025-10-16": "EC",
+        "2025-10-17": "EC",
+        "2026-01-21": "EC",
+        "2026-01-22": "EC",
+        "2026-01-23": "EC",
+        "2026-01-24": "EC",
+        "2026-01-25": "EC"
+      }
+    },
+    {
+      "admin": "Sebastian Arias",
+      "contrato": "3032851-2025-004",
+      "ods": "—",
+      "acta": null,
+      "vigencia": "2026-06-30",
+      "duracion": 8.0,
+      "subproy": "CLUSTER EXTERIORES",
+      "vendor": "WEG COLOMBIA S.A.S",
+      "alcance": "Suministro y asistencia técnica de equipos eléctricos de superficie para Ecopetrol S.A. y su grupo empresarial",
+      "dt": 8.0,
+      "de": 2.0,
+      "dr": 6.0,
+      "ejec": 25.0,
+      "acum": 0,
+      "estado": "En curso",
+      "daily": {
+        "2025-11-11": "EC",
+        "2025-11-12": "EC"
+      }
+    },
+    {
+      "admin": "Gustavo Adolfo Rhenals",
+      "contrato": "3043145",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "SMART INSTRUMENTS SAS",
+      "alcance": "—",
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Gustavo Adolfo Rhenals",
+      "contrato": "3047142",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "PUFFER COLOMBIA",
+      "alcance": "—",
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Sebastian Arias",
+      "contrato": "CW300916",
+      "ods": "—",
+      "acta": "2026-02-06",
+      "vigencia": "2026-07-15",
+      "duracion": 50.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "SCHLUMBERGER SURENCO S.A",
+      "alcance": "Asistencia técnica para la reparación y mejora tecnológica de tratador CPF2 para Centauros como parte del proyecto desarrollo Integral CSE M4 de Ecopetrol S.A.",
+      "dt": 50.0,
+      "de": 48.5,
+      "dr": 1.5,
+      "ejec": 97.0,
+      "acum": 0,
+      "estado": "Avanzado",
+      "daily": {
+        "2025-11-19": "EC",
+        "2025-11-20": "EC",
+        "2025-11-21": "EC",
+        "2025-11-22": "EC",
+        "2025-11-23": "EC",
+        "2025-11-24": "EC",
+        "2025-11-25": "EC",
+        "2025-11-26": "EC",
+        "2025-11-27": "EC",
+        "2025-11-28": "EC",
+        "2025-11-29": "EC",
+        "2025-11-30": "EC",
+        "2025-12-01": "EC",
+        "2025-12-02": "EC",
+        "2025-12-15": "EC",
+        "2025-12-16": "EC",
+        "2025-12-17": "EC",
+        "2025-12-18": "EC",
+        "2026-01-13": "I",
+        "2026-02-06": "P",
+        "2026-02-07": "EC",
+        "2026-02-08": "EC",
+        "2026-02-09": "EC",
+        "2026-02-10": "EC",
+        "2026-02-11": "EC",
+        "2026-02-13": "0.5",
+        "2026-02-14": "EC",
+        "2026-02-15": "EC",
+        "2026-02-16": "EC",
+        "2026-02-17": "EC",
+        "2026-02-18": "EC",
+        "2026-02-19": "EC",
+        "2026-02-25": "EC",
+        "2026-02-26": "EC",
+        "2026-02-27": "EC",
+        "2026-02-28": "EC",
+        "2026-03-01": "EC",
+        "2026-03-02": "EC",
+        "2026-03-03": "EC",
+        "2026-03-04": "EC",
+        "2026-03-05": "EC",
+        "2026-03-06": "EC",
+        "2026-03-07": "EC",
+        "2026-03-08": "EC",
+        "2026-03-09": "EC",
+        "2026-03-10": "EC",
+        "2026-03-11": "EC",
+        "2026-03-12": "EC",
+        "2026-03-13": "EC",
+        "2026-03-14": "EC",
+        "2026-03-15": "EC"
+      }
+    },
+    {
+      "admin": "—",
+      "contrato": "CW304616",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 120.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "ROCKWELL AUTOMATION COLOMBIA S.A.",
+      "alcance": "Suministro, Instalación, Cableado, Conexionado, Configuración y Puesta en marcha de los elementos que componen el sistema SIS M4, en los tableros existentes SIS-11001 y SIS-11002",
+      "dt": 22.0,
+      "de": 0,
+      "dr": 22.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Omaira Lucia Tobar Portilla",
+      "contrato": "CW358905",
+      "ods": "—",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 120.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "ROCKWELL AUTOMATION COLOMBIA S.A.",
+      "alcance": "SUMINISTRO, CONFIGURACIÓN, INTEGRACIÓN, PRUEBAS Y PUESTA EN OPERACIÓN DE LOS NUEVOS EQUIPOS DEL BPCS DE LA ESTACIÓN EP-1 CENTAUROS DEL CAMPO CAÑO SUR DE ECOPETROL S.A. - Suministro de equipos de comun",
+      "dt": 24.0,
+      "de": 15.0,
+      "dr": 9.0,
+      "ejec": 62.5,
+      "acum": 0,
+      "estado": "Avanzado",
+      "daily": {
+        "2026-03-11": "EC",
+        "2026-03-12": "EC",
+        "2026-03-13": "EC",
+        "2026-03-14": "EC",
+        "2026-03-15": "EC",
+        "2026-03-16": "EC",
+        "2026-03-17": "EC",
+        "2026-03-18": "EC",
+        "2026-03-19": "EC",
+        "2026-03-20": "EC",
+        "2026-03-21": "EC",
+        "2026-03-22": "EC",
+        "2026-03-23": "EC",
+        "2026-03-24": "EC",
+        "2026-03-25": "EC"
+      }
+    },
+    {
+      "admin": "Marcela Benavides Bohórquez",
+      "contrato": "CW339416",
+      "ods": "0",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 7.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "EXPERTOS EN SOLUCIONES ELECTRICAS S.A.S",
+      "alcance": "Asistencia tecnica para la configuración y pruebas de las UPS en la estación Centauros del proyecto Caño Sur Este Módulo 3 de Ecoetrol S.A.",
+      "dt": 7.0,
+      "de": 6.0,
+      "dr": 1.0,
+      "ejec": 85.7,
+      "acum": 0,
+      "estado": "Avanzado",
+      "daily": {
+        "2026-02-09": "EC",
+        "2026-02-10": "EC",
+        "2026-02-11": "P",
+        "2026-02-12": "EC",
+        "2026-02-13": "EC",
+        "2026-02-14": "EC",
+        "2026-02-15": "EC"
+      }
+    },
+    {
+      "admin": "Marcela Benavides Bohórquez",
+      "contrato": "3050816",
+      "ods": "90441450",
+      "acta": "2026-02-13",
+      "vigencia": "2026-05-16",
+      "duracion": 33.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "SCHNEIDER ELECTRIC DE COLOMBIA S.A",
+      "alcance": "ID15839 Asistencia tecnica para integración celda +s2h06 al sistema de control eléctrico del Power Room de crudo y programación de trasferencia automática entre crudo y aguas 2, desarrollo integral CS",
+      "dt": 33.0,
+      "de": 0,
+      "dr": 33.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    },
+    {
+      "admin": "Diana Rubiela Amaya Ramirez",
+      "contrato": "CW345538",
+      "ods": "5353346",
+      "acta": null,
+      "vigencia": null,
+      "duracion": 24.0,
+      "subproy": "CENTAUROS ESTACIONES",
+      "vendor": "ITT GOULDS",
+      "alcance": "SERVICIO PARA LA MODIFICACIÓN BOMBA EP1105-7 (BOMBA CABEZA DE CRUDO) y SUMINISTRO MATERIALES PARA INCREMENTO CAPACIDAD TRATAMIENTO DE CRUDO ESTACIÓN CENTAUROS DE ECOPETROL.",
+      "dt": 24.0,
+      "de": 0,
+      "dr": 24.0,
+      "ejec": 0,
+      "acum": 0,
+      "estado": "No iniciado",
+      "daily": {}
+    }
+  ],
+  "porAdmin": [
+    {
+      "nombre": "Angela Maria Correa",
+      "count": 2,
+      "dt": 1114.0,
+      "de": 358.0,
+      "dr": 756.0,
+      "pctProm": 43.0,
+      "pctReal": 32.1
+    },
+    {
+      "nombre": "Sebastian Arias",
+      "count": 5,
+      "dt": 1113.0,
+      "de": 1038.5,
+      "dr": 74.5,
+      "pctProm": 79.3,
+      "pctReal": 93.3
+    },
+    {
+      "nombre": "Wilfredo Charry",
+      "count": 3,
+      "dt": 268.0,
+      "de": 85.0,
+      "dr": 183.0,
+      "pctProm": 39.4,
+      "pctReal": 31.7
+    },
+    {
+      "nombre": "Marcela Benavides Bohórquez",
+      "count": 2,
+      "dt": 40.0,
+      "de": 6.0,
+      "dr": 34.0,
+      "pctProm": 42.9,
+      "pctReal": 15.0
+    },
+    {
+      "nombre": "Omaira Lucia Tobar Portilla",
+      "count": 1,
+      "dt": 24.0,
+      "de": 15.0,
+      "dr": 9.0,
+      "pctProm": 62.5,
+      "pctReal": 62.5
+    },
+    {
+      "nombre": "Diana Rubiela Amaya Ramirez",
+      "count": 1,
+      "dt": 24.0,
+      "de": 0,
+      "dr": 24.0,
+      "pctProm": 0.0,
+      "pctReal": 0.0
+    },
+    {
+      "nombre": "—",
+      "count": 1,
+      "dt": 22.0,
+      "de": 0,
+      "dr": 22.0,
+      "pctProm": 0.0,
+      "pctReal": 0.0
+    },
+    {
+      "nombre": "Andres Pereira Castaño",
+      "count": 4,
+      "dt": 17.0,
+      "de": 0,
+      "dr": 17.0,
+      "pctProm": 0.0,
+      "pctReal": 0.0
+    },
+    {
+      "nombre": "William Andrés Romero",
+      "count": 1,
+      "dt": 12.0,
+      "de": 8.0,
+      "dr": 4.0,
+      "pctProm": 66.7,
+      "pctReal": 66.7
+    },
+    {
+      "nombre": "Omar Enrique Orjuela",
+      "count": 4,
+      "dt": 12.0,
+      "de": 0,
+      "dr": 12.0,
+      "pctProm": 0.0,
+      "pctReal": 0.0
+    },
+    {
+      "nombre": "Samuel Orlando Blanco Ruiz",
+      "count": 3,
+      "dt": 3.0,
+      "de": 0,
+      "dr": 3.0,
+      "pctProm": 0.0,
+      "pctReal": 0.0
+    },
+    {
+      "nombre": "Gustavo Adolfo Rhenals",
+      "count": 2,
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "pctProm": 0.0,
+      "pctReal": 0
+    }
+  ],
+  "porVendor": [
+    {
+      "nombre": "ROCKWELL AUTOMATION COLOMBIA S.A.",
+      "count": 4,
+      "dt": 1160.0,
+      "de": 373.0,
+      "dr": 787.0,
+      "pctProm": 37.1,
+      "pctReal": 32.2
+    },
+    {
+      "nombre": "SLA COL S.A.S",
+      "count": 2,
+      "dt": 903.0,
+      "de": 684.0,
+      "dr": 219.0,
+      "pctProm": 60.7,
+      "pctReal": 75.7
+    },
+    {
+      "nombre": "SCHNEIDER ELECTRIC DE COLOMBIA S.A",
+      "count": 4,
+      "dt": 439.0,
+      "de": 377.0,
+      "dr": 62.0,
+      "pctProm": 46.4,
+      "pctReal": 85.9
+    },
+    {
+      "nombre": "SCHLUMBERGER SURENCO S.A",
+      "count": 1,
+      "dt": 50.0,
+      "de": 48.5,
+      "dr": 1.5,
+      "pctProm": 97.0,
+      "pctReal": 97.0
+    },
+    {
+      "nombre": "ITT GOULDS",
+      "count": 1,
+      "dt": 24.0,
+      "de": 0,
+      "dr": 24.0,
+      "pctProm": 0.0,
+      "pctReal": 0.0
+    },
+    {
+      "nombre": "HITACHI ENERGY COLOMBIA LTDA",
+      "count": 1,
+      "dt": 14.0,
+      "de": 12.0,
+      "dr": 2.0,
+      "pctProm": 85.7,
+      "pctReal": 85.7
+    },
+    {
+      "nombre": "INDUSTRIAS ECTRICOL S.A.S.",
+      "count": 1,
+      "dt": 13.0,
+      "de": 0,
+      "dr": 13.0,
+      "pctProm": 0.0,
+      "pctReal": 0.0
+    },
+    {
+      "nombre": "FLOWSERVE",
+      "count": 1,
+      "dt": 12.0,
+      "de": 8.0,
+      "dr": 4.0,
+      "pctProm": 66.7,
+      "pctReal": 66.7
+    },
+    {
+      "nombre": "EQUIPOS Y CONTROLES INDUSTRIALES",
+      "count": 1,
+      "dt": 12.0,
+      "de": 0,
+      "dr": 12.0,
+      "pctProm": 0.0,
+      "pctReal": 0.0
+    },
+    {
+      "nombre": "WEG COLOMBIA S.A.S",
+      "count": 1,
+      "dt": 8.0,
+      "de": 2.0,
+      "dr": 6.0,
+      "pctProm": 25.0,
+      "pctReal": 25.0
+    },
+    {
+      "nombre": "EXPERTOS EN SOLUCIONES ELECTRICAS S.A.S",
+      "count": 1,
+      "dt": 7.0,
+      "de": 6.0,
+      "dr": 1.0,
+      "pctProm": 85.7,
+      "pctReal": 85.7
+    },
+    {
+      "nombre": "TRIENERGY",
+      "count": 2,
+      "dt": 4.0,
+      "de": 0,
+      "dr": 4.0,
+      "pctProm": 0.0,
+      "pctReal": 0.0
+    },
+    {
+      "nombre": "INGENIERIA SUMINISTROS Y REPRESENTACIONES DE COLOMBIA S.A.S. - INSURCOL S.A.S",
+      "count": 1,
+      "dt": 3.0,
+      "de": 0,
+      "dr": 3.0,
+      "pctProm": 0.0,
+      "pctReal": 0.0
+    },
+    {
+      "nombre": "EQUIPOS Y LABORATORIO DE COLOMBIA",
+      "count": 2,
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "pctProm": 0.0,
+      "pctReal": 0
+    },
+    {
+      "nombre": "HACH COLOMBIA S.A.S.",
+      "count": 1,
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "pctProm": 0.0,
+      "pctReal": 0
+    },
+    {
+      "nombre": "ALSA SOLUCIONES",
+      "count": 1,
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "pctProm": 0.0,
+      "pctReal": 0
+    },
+    {
+      "nombre": "GIM INGENIERIA ELECTRICA LTDA",
+      "count": 1,
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "pctProm": 0.0,
+      "pctReal": 0
+    },
+    {
+      "nombre": "S Y Z COLOMBIA",
+      "count": 1,
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "pctProm": 0.0,
+      "pctReal": 0
+    },
+    {
+      "nombre": "SMART INSTRUMENTS SAS",
+      "count": 1,
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "pctProm": 0.0,
+      "pctReal": 0
+    },
+    {
+      "nombre": "PUFFER COLOMBIA",
+      "count": 1,
+      "dt": 0,
+      "de": 0,
+      "dr": 0.0,
+      "pctProm": 0.0,
+      "pctReal": 0
+    }
+  ],
+  "porSubproyecto": [
+    {
+      "nombre": "CLUSTER EXTERIORES",
+      "count": 5,
+      "dt": 1297.0,
+      "de": 1059.0,
+      "dr": 238.0,
+      "pctProm": 65.8,
+      "pctReal": 81.6
+    },
+    {
+      "nombre": "CENTAUROS ESTACIONES",
+      "count": 21,
+      "dt": 1198.0,
+      "de": 364.0,
+      "dr": 834.0,
+      "pctProm": 17.6,
+      "pctReal": 30.4
+    },
+    {
+      "nombre": "MITO 2 ESTACIONES",
+      "count": 3,
+      "dt": 154.0,
+      "de": 87.5,
+      "dr": 66.5,
+      "pctProm": 39.1,
+      "pctReal": 56.8
+    }
+  ],
+  "histograma": [
+    {
+      "rango": "0 % · No iniciado",
+      "count": 16
+    },
+    {
+      "rango": "1–25 %",
+      "count": 1
+    },
+    {
+      "rango": "26–50 %",
+      "count": 3
+    },
+    {
+      "rango": "51–75 %",
+      "count": 4
+    },
+    {
+      "rango": "76–99 %",
+      "count": 5
+    },
+    {
+      "rango": "100 % · Finalizado",
+      "count": 0
+    }
+  ],
+  "vencenPronto": [
+    {
+      "vendor": "FLOWSERVE",
+      "admin": "William Andrés Romero",
+      "vigencia": "2025-12-31",
+      "dias": -150,
+      "ejec": 66.7,
+      "dt": 12.0,
+      "dr": 4.0
+    },
+    {
+      "vendor": "HITACHI ENERGY COLOMBIA LTDA",
+      "admin": "Sebastian Arias",
+      "vigencia": "2026-03-30",
+      "dias": -61,
+      "ejec": 85.7,
+      "dt": 14.0,
+      "dr": 2.0
+    },
+    {
+      "vendor": "SCHNEIDER ELECTRIC DE COLOMBIA S.A",
+      "admin": "Marcela Benavides Bohórquez",
+      "vigencia": "2026-05-16",
+      "dias": -14,
+      "ejec": 0,
+      "dt": 33.0,
+      "dr": 33.0
+    },
+    {
+      "vendor": "SCHNEIDER ELECTRIC DE COLOMBIA S.A",
+      "admin": "Wilfredo Charry",
+      "vigencia": "2026-05-30",
+      "dias": 0,
+      "ejec": 60.0,
+      "dt": 20.0,
+      "dr": 8.0
+    },
+    {
+      "vendor": "SCHNEIDER ELECTRIC DE COLOMBIA S.A",
+      "admin": "Wilfredo Charry",
+      "vigencia": "2026-05-30",
+      "dias": 0,
+      "ejec": 28.6,
+      "dt": 14.0,
+      "dr": 10.0
+    },
+    {
+      "vendor": "SCHNEIDER ELECTRIC DE COLOMBIA S.A",
+      "admin": "Sebastian Arias",
+      "vigencia": "2026-06-30",
+      "dias": 31,
+      "ejec": 97.0,
+      "dt": 372.0,
+      "dr": 11.0
+    },
+    {
+      "vendor": "SLA COL S.A.S",
+      "admin": "Sebastian Arias",
+      "vigencia": "2026-06-30",
+      "dias": 31,
+      "ejec": 91.9,
+      "dt": 669.0,
+      "dr": 54.0
+    },
+    {
+      "vendor": "SLA COL S.A.S",
+      "admin": "Wilfredo Charry",
+      "vigencia": "2026-06-30",
+      "dias": 31,
+      "ejec": 29.5,
+      "dt": 234.0,
+      "dr": 165.0
+    },
+    {
+      "vendor": "WEG COLOMBIA S.A.S",
+      "admin": "Sebastian Arias",
+      "vigencia": "2026-06-30",
+      "dias": 31,
+      "ejec": 25.0,
+      "dt": 8.0,
+      "dr": 6.0
+    },
+    {
+      "vendor": "SCHLUMBERGER SURENCO S.A",
+      "admin": "Sebastian Arias",
+      "vigencia": "2026-07-15",
+      "dias": 46,
+      "ejec": 97.0,
+      "dt": 50.0,
+      "dr": 1.5
+    },
+    {
+      "vendor": "ROCKWELL AUTOMATION COLOMBIA S.A.",
+      "admin": "Angela Maria Correa",
+      "vigencia": "2026-07-31",
+      "dias": 62,
+      "ejec": 28.8,
+      "dt": 982.0,
+      "dr": 699.5
+    },
+    {
+      "vendor": "ROCKWELL AUTOMATION COLOMBIA S.A.",
+      "admin": "Angela Maria Correa",
+      "vigencia": "2026-07-31",
+      "dias": 62,
+      "ejec": 57.2,
+      "dt": 132.0,
+      "dr": 56.5
+    },
+    {
+      "vendor": "INDUSTRIAS ECTRICOL S.A.S.",
+      "admin": "Andres Pereira Castaño",
+      "vigencia": "2026-10-28",
+      "dias": 151,
+      "ejec": 0,
+      "dt": 13.0,
+      "dr": 13.0
+    }
+  ]
+};
+const C={accent:'#46d3ff',accent2:'#a78bfa',good:'#27d29c',warn:'#f7b955',bad:'#ff6b6b',orange:'#ff8c42',muted:'#6b779b'};
+const PALETTE=['#46d3ff','#a78bfa','#27d29c','#f7b955','#ff8c42','#ff6b6b','#36c5f0','#e879f9','#4ade80','#fbbf24','#fb7185','#22d3ee','#c084fc','#34d399','#f59e0b','#60a5fa'];
+const STATE_COLOR={'Finalizado':C.good,'Avanzado':C.accent,'En curso':C.warn,'No iniciado':C.bad};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtN=n=>(n==null||isNaN(n))?'—':new Intl.NumberFormat('es-CO',{maximumFractionDigits:1}).format(n);
+
+/* ===== SVG helpers ===== */
+function barH(elId, items, color, fkey){
+  const el=document.getElementById(elId); if(!el)return;
+  if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
+  const max=Math.max(1,...items.map(i=>i.value));
+  const active=fkey?document.getElementById(fkey).value:'';
+  const rowH=26, padT=6, labelW=160, W=600, H=items.length*rowH+padT*2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  items.forEach((it,i)=>{
+    const y=padT+i*rowH, bw=Math.max(1,(W-labelW-70)*it.value/max), col=Array.isArray(color)?color[i%color.length]:color;
+    const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';
+    const dim=(active&&active!==it.label)?' opacity="0.32"':'';
+    s+=`<g${click}${dim}><text x="0" y="${y+rowH/2+4}" fill="#a8b6d4" font-size="11">${esc(it.label).slice(0,24)}</text>`;
+    s+=`<rect x="${labelW}" y="${y+4}" width="${bw}" height="${rowH-9}" rx="3" fill="${col}"><title>${esc(it.label)}: ${fmtN(it.value)}${it.sub?' · '+esc(it.sub):''}</title></rect>`;
+    s+=`<text x="${labelW+bw+5}" y="${y+rowH/2+4}" fill="#e8edff" font-size="11" font-weight="700">${fmtN(it.value)}</text></g>`;
+  });
+  el.innerHTML=s+'</svg>';
+}
+function barV(elId, items, colorFn){
+  const el=document.getElementById(elId); if(!el)return;
+  if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
+  const max=Math.max(1,...items.map(i=>i.value));
+  const W=Math.max(360,items.length*80), H=260, padB=46, padT=20, plotH=H-padB-padT, bw=(W-20)/items.length;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  items.forEach((it,i)=>{
+    const h=plotH*it.value/max, x=10+i*bw, y=padT+plotH-h, col=colorFn?colorFn(it,i):C.accent;
+    s+=`<rect x="${x+8}" y="${y}" width="${bw-16}" height="${h}" rx="3" fill="${col}"><title>${esc(it.label)}: ${fmtN(it.value)}</title></rect>`;
+    s+=`<text x="${x+bw/2}" y="${y-5}" fill="#e8edff" font-size="12" font-weight="700" text-anchor="middle">${fmtN(it.value)}</text>`;
+    // label puede ocupar 2 líneas
+    const lines=esc(it.label).split(' ');
+    if(lines.length>=2){
+      s+=`<text x="${x+bw/2}" y="${H-padB+15}" fill="#a8b6d4" font-size="10" text-anchor="middle">${lines[0]}</text>`;
+      s+=`<text x="${x+bw/2}" y="${H-padB+28}" fill="#a8b6d4" font-size="10" text-anchor="middle">${lines.slice(1).join(' ').slice(0,12)}</text>`;
+    } else {
+      s+=`<text x="${x+bw/2}" y="${H-padB+18}" fill="#a8b6d4" font-size="10" text-anchor="middle">${esc(it.label).slice(0,12)}</text>`;
+    }
+  });
+  el.innerHTML=s+'</svg>';
+}
+function stackedBar(elId, items, color1, color2, fkey){
+  const el=document.getElementById(elId); if(!el)return;
+  if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
+  const max=Math.max(1,...items.map(i=>i.total));
+  const active=fkey?document.getElementById(fkey).value:'';
+  const rowH=30, padT=6, labelW=160, W=560, H=items.length*rowH+padT*2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  items.forEach((it,i)=>{
+    const y=padT+i*rowH;
+    const wTotal = W-labelW-60;
+    const wDE = wTotal * (it.de/max);
+    const wDR = wTotal * (it.dr/max);
+    const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';
+    const dim=(active&&active!==it.label)?' opacity="0.32"':'';
+    s+=`<g${click}${dim}><text x="0" y="${y+rowH/2+4}" fill="#a8b6d4" font-size="11">${esc(it.label).slice(0,22)}</text>`;
+    s+=`<rect x="${labelW}" y="${y+5}" width="${wDE}" height="${rowH-13}" rx="2" fill="${color1}"><title>${esc(it.label)} · Ejecutados: ${fmtN(it.de)} días</title></rect>`;
+    s+=`<rect x="${labelW+wDE}" y="${y+5}" width="${wDR}" height="${rowH-13}" rx="2" fill="${color2}" opacity="0.7"><title>${esc(it.label)} · Restantes: ${fmtN(it.dr)} días</title></rect>`;
+    s+=`<text x="${labelW+wDE+wDR+5}" y="${y+rowH/2+4}" fill="#e8edff" font-size="11" font-weight="700">${it.pct}%</text></g>`;
+  });
+  el.innerHTML=s+'</svg>'+`<div class="legend"><span><span class="dot" style="background:${color1}"></span>Ejecutados</span><span><span class="dot" style="background:${color2};opacity:.7"></span>Restantes</span></div>`;
+}
+function donut(elId, items, colors, fkey){
+  const el=document.getElementById(elId); if(!el)return;
+  items=items.filter(i=>i.value>0);
+  if(!items.length){el.innerHTML='<div class="empty">Sin datos</div>';return;}
+  const total=items.reduce((s,i)=>s+i.value,0)||1;
+  const active=fkey?document.getElementById(fkey).value:'';
+  const cx=80,cy=84,r=58,circ=2*Math.PI*r; let off=0;
+  const H=Math.max(180,items.length*19+10);
+  let s=`<svg viewBox="0 0 340 ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  items.forEach((it,i)=>{
+    const len=it.value/total*circ, col=colors[i%colors.length];
+    const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';
+    const dim=(active&&active!==it.label)?' opacity="0.3"':'';
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="22" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"${click}${dim}><title>${esc(it.label)}: ${it.value} (${(it.value/total*100).toFixed(0)}%)</title></circle>`;
+    off+=len;
+  });
+  s+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" fill="#e8edff" font-size="22" font-weight="800">${total}</text>`;
+  s+=`<text x="${cx}" y="${cy+15}" text-anchor="middle" fill="#a8b6d4" font-size="10">servicios</text>`;
+  items.forEach((it,i)=>{const ly=18+i*19;const click=fkey?` class="clk" data-fk="${fkey}" data-fv="${esc(it.label)}" style="cursor:pointer"`:'';s+=`<g${click}><rect x="170" y="${ly-10}" width="11" height="11" rx="2" fill="${colors[i%colors.length]}"/><text x="187" y="${ly}" fill="#cdd9ee" font-size="11">${esc(it.label)} · ${it.value}</text></g>`;});
+  el.innerHTML=s+'</svg>';
+}
+
+/* ===== App ===== */
+document.getElementById('hS').textContent=DATA.meta.subtitulo+' · Fuente: '+DATA.meta.fuente;
+document.getElementById('hPct').textContent=DATA.kpis.pctGlobal+'%';
+document.getElementById('hCut').textContent='Corte: '+DATA.meta.corte;
+document.getElementById('ftr').textContent='APPLUS+ Colombia · Dashboard Asistencias Técnicas · '+DATA.meta.fuente+' · Corte '+DATA.meta.corte;
+
+const SELS={fAdmin:'admin',fSubproy:'subproy',fVendor:'vendor',fEstado:'estado'};
+function uniq(k){return [...new Set(DATA.servicios.map(s=>s[k]))].sort();}
+function fill(id,k,all){const s=document.getElementById(id);s.innerHTML=`<option value="">${all}</option>`+uniq(k).map(v=>`<option>${esc(v)}</option>`).join('');s.addEventListener('change',renderAll);}
+fill('fAdmin','admin','Todos');fill('fSubproy','subproy','Todos');fill('fVendor','vendor','Todos');fill('fEstado','estado','Todos');
+function resetF(){['fAdmin','fSubproy','fVendor','fEstado'].forEach(id=>document.getElementById(id).value='');renderAll();}
+
+function filtered(){
+  const f={};Object.entries(SELS).forEach(([id,k])=>f[k]=document.getElementById(id).value);
+  return DATA.servicios.filter(s=>{
+    for(const[k,v] of Object.entries(f)){ if(v&&s[k]!==v)return false; }
+    return true;
+  });
+}
+
+document.addEventListener('click',ev=>{
+  const t=ev.target.closest&&ev.target.closest('.clk'); if(!t)return;
+  const fk=t.getAttribute('data-fk'),fv=t.getAttribute('data-fv');const sel=document.getElementById(fk);if(!sel)return;
+  sel.value=(sel.value===fv)?'':fv; renderAll();
+});
+
+function renderAll(){
+  const arr=filtered();
+  try{renderKPIs(arr)}catch(e){console.error(e)}
+  // Estado
+  try{
+    const m={};arr.forEach(s=>m[s.estado]=(m[s.estado]||0)+1);
+    const items=Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([label,value])=>({label,value}));
+    const colors=items.map(it=>STATE_COLOR[it.label]||C.muted);
+    donut('chEstado',items,colors,'fEstado');
+  }catch(e){console.error(e)}
+  // Subproyecto stacked
+  try{
+    const m={};arr.forEach(s=>{const k=s.subproy;const d=m[k]||(m[k]={de:0,dr:0,dt:0,n:0});d.de+=s.de;d.dr+=s.dr;d.dt+=s.dt;d.n++;});
+    const items=Object.entries(m).map(([k,v])=>({label:k,de:v.de,dr:v.dr,total:v.dt,pct:v.dt?Math.round(v.de/v.dt*100):0})).sort((a,b)=>b.total-a.total);
+    stackedBar('chSubproy',items,C.good,C.warn,'fSubproy');
+  }catch(e){console.error(e)}
+  // Histograma
+  try{
+    const buckets=[[0,0,'0%'],[0.01,25,'1-25%'],[25.01,50,'26-50%'],[50.01,75,'51-75%'],[75.01,99.49,'76-99%'],[99.5,200,'100%']];
+    const items=buckets.map(b=>({label:b[2],value:arr.filter(s=>s.ejec>=b[0]&&s.ejec<=b[1]).length}));
+    const cf=(_,i)=>[C.bad,C.bad,C.orange,C.warn,C.accent,C.good][i];
+    barV('chHisto',items,cf);
+  }catch(e){console.error(e)}
+  // Vendor
+  try{
+    const m={};arr.forEach(s=>{const k=s.vendor;const d=m[k]||(m[k]={dt:0,de:0,n:0});d.dt+=s.dt;d.de+=s.de;d.n++;});
+    const items=Object.entries(m).map(([k,v])=>({label:k,value:Math.round(v.dt),sub:`${v.n} servicios · ${v.dt?Math.round(v.de/v.dt*100):0}% avance`})).sort((a,b)=>b.value-a.value);
+    barH('chVendor',items,C.accent,'fVendor');
+  }catch(e){console.error(e)}
+  // Admin
+  try{
+    const m={};arr.forEach(s=>{const k=s.admin;const d=m[k]||(m[k]={dt:0,n:0});d.dt+=s.dt;d.n++;});
+    const items=Object.entries(m).map(([k,v])=>({label:k,value:Math.round(v.dt),sub:`${v.n} servicios`})).sort((a,b)=>b.value-a.value);
+    barH('chAdmin',items,C.accent2,'fAdmin');
+  }catch(e){console.error(e)}
+  // Gantt
+  try{renderGantt(arr)}catch(e){console.error(e)}
+  // Cuadrícula diaria
+  try{renderCuadricula(arr)}catch(e){console.error(e)}
+  // Vigencias
+  try{renderVigencias(arr)}catch(e){console.error(e)}
+  // Tabla
+  try{renderTabla(arr)}catch(e){console.error(e)}
+}
+
+/* ===== Gantt: DT como barra base, DE verde + DR ámbar ===== */
+function renderGantt(arr){
+  const el=document.getElementById('chGantt'); if(!el)return;
+  const items=[...arr].filter(s=>s.dt>0).sort((a,b)=>a.ejec-b.ejec);
+  if(!items.length){el.innerHTML='<div class="empty">Sin servicios para mostrar</div>';return;}
+  const max=Math.max(1,...items.map(s=>s.dt));
+  const rowH=28, padT=8, labelW=240, barAreaW=900, totalW=labelW+barAreaW+90, H=items.length*rowH+padT*2;
+  let s=`<svg viewBox="0 0 ${totalW} ${H}" width="100%" height="${H}" font-family="Inter,sans-serif">`;
+  // gridlines verticales
+  for(let q=0;q<=10;q++){
+    const gx=labelW+barAreaW*q/10;
+    s+=`<line x1="${gx}" y1="${padT}" x2="${gx}" y2="${H-padT}" stroke="rgba(255,255,255,.05)"/>`;
+    if(q%2===0) s+=`<text x="${gx}" y="${padT-2}" fill="#6b779b" font-size="8.5" text-anchor="middle">${Math.round(max*q/10)}d</text>`;
+  }
+  items.forEach((it,i)=>{
+    const y=padT+i*rowH;
+    const wDE = barAreaW * (it.de/max);
+    const wDR = barAreaW * (it.dr/max);
+    // etiqueta vendor + admin
+    s+=`<text x="0" y="${y+rowH/2-1}" fill="#e8edff" font-size="11" font-weight="700">${esc(it.vendor).slice(0,28)}</text>`;
+    s+=`<text x="0" y="${y+rowH/2+11}" fill="#a8b6d4" font-size="9">${esc(it.admin).slice(0,30)}</text>`;
+    // base (DT) sutil
+    s+=`<rect x="${labelW}" y="${y+5}" width="${barAreaW*it.dt/max}" height="${rowH-12}" rx="3" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.1)" stroke-width="0.5"/>`;
+    // DE verde
+    if(wDE>0) s+=`<rect x="${labelW}" y="${y+5}" width="${wDE}" height="${rowH-12}" rx="3" fill="${C.good}"><title>${esc(it.vendor)} · Ejecutados: ${fmtN(it.de)} de ${fmtN(it.dt)} días</title></rect>`;
+    // DR ámbar
+    if(wDR>0) s+=`<rect x="${labelW+wDE}" y="${y+5}" width="${wDR}" height="${rowH-12}" fill="${C.warn}" opacity="0.78"><title>${esc(it.vendor)} · Pendientes: ${fmtN(it.dr)} de ${fmtN(it.dt)} días</title></rect>`;
+    // % al final
+    const cls = it.ejec>=90?C.good:it.ejec>=50?C.accent:it.ejec>=25?C.warn:C.bad;
+    s+=`<text x="${labelW+barAreaW+5}" y="${y+rowH/2+1}" fill="${cls}" font-size="12" font-weight="800">${it.ejec}%</text>`;
+    s+=`<text x="${labelW+barAreaW+5}" y="${y+rowH/2+13}" fill="#a8b6d4" font-size="9">DT ${fmtN(it.dt)} · DE ${fmtN(it.de)} · DR ${fmtN(it.dr)}</text>`;
+  });
+  s+='</svg>';
+  el.innerHTML=s;
+  document.getElementById('ganttInfo').textContent=`${items.length} servicios · DT máx ${fmtN(max)} días`;
+}
+
+/* ===== Cuadrícula diaria ===== */
+const CODE_MAP = (DATA.meta.leyendaCodigos||[]).reduce((m,c)=>(m[c.code]=c,m),{});
+// poblar selectores de fecha
+(function initCuad(){
+  const rg=DATA.meta.rangoCuadricula||{};
+  if(!rg.min||!rg.max){return;}
+  // generar lista de fechas en el rango (un select por mes para no saturar)
+  const opts=[];
+  let d=new Date(rg.min+'T00:00:00'), end=new Date(rg.max+'T00:00:00');
+  while(d<=end){
+    opts.push(d.toISOString().slice(0,10));
+    d.setDate(d.getDate()+1);
+  }
+  const sd=document.getElementById('fDesde'), sh=document.getElementById('fHasta');
+  // submuestra cada 7 días para no tener 912 opciones — pero conviene listar todas o por mes
+  const mes=[...new Set(opts.map(s=>s.slice(0,7)+'-01'))];
+  sd.innerHTML=mes.map(m=>`<option value="${m}">${m.slice(0,7)}</option>`).join('');
+  sh.innerHTML=mes.map(m=>{const dt=new Date(m+'T00:00:00');dt.setMonth(dt.getMonth()+1);dt.setDate(0);return `<option value="${dt.toISOString().slice(0,10)}">${m.slice(0,7)}</option>`}).join('');
+  // default: año en curso (Ene -> Oct 2026) — vista de planificación completa
+  const yearNow = new Date().getFullYear();
+  const yearStart = mes.find(m=>m.startsWith(yearNow)) || mes[Math.max(0,mes.length-10)];
+  sd.value = yearStart;
+  sh.value = sh.options[mes.length-1].value;
+  sd.addEventListener('change', renderAll);
+  sh.addEventListener('change', renderAll);
+  document.getElementById('fVista').addEventListener('change', e=>{
+    const v=e.target.value;
+    if(!v) return;
+    if(v==='3m'){sd.value=mes[Math.max(0,mes.length-3)];}
+    else if(v==='6m'){sd.value=mes[Math.max(0,mes.length-6)];}
+    else if(v==='ytd'){sd.value=mes.find(m=>m.startsWith(new Date().getFullYear()))||mes[0];}
+    else if(v==='all'){sd.value=mes[0];}
+    sh.value=sh.options[mes.length-1].value;
+    renderAll();
+  });
+  // leyenda
+  document.getElementById('cuadLeyenda').innerHTML=(DATA.meta.leyendaCodigos||[]).map(c=>`<span><span class="dot" style="background:${c.color}"></span><b>${c.code}</b> ${esc(c.label)}</span>`).join('');
+})();
+
+function renderCuadricula(arr){
+  const sd=document.getElementById('fDesde').value, eh=document.getElementById('fHasta').value;
+  if(!sd||!eh){document.querySelector('#tblCuad tbody').innerHTML='';return;}
+  // construir lista de días
+  const days=[]; let d=new Date(sd+'T00:00:00'), end=new Date(eh+'T00:00:00');
+  while(d<=end){days.push(d.toISOString().slice(0,10)); d.setDate(d.getDate()+1);}
+  const MESES_ABR=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  // construir thead: dos filas (mes + día)
+  let mesHTML=`<tr><th class="lbl">Vendor · Admin</th>`;
+  let diaHTML=`<tr><th class="lbl"></th>`;
+  let lastMonth=null, monthSpan=0, monthStart=0;
+  days.forEach((dstr,i)=>{
+    const m=dstr.slice(5,7);
+    const sep=(m!==lastMonth)?'mes-sep':'';
+    if(m!==lastMonth){lastMonth=m;}
+    diaHTML+=`<th class="${sep}">${parseInt(dstr.slice(8,10))}</th>`;
+  });
+  // primer pass: mes con colspan
+  lastMonth=null; let mCount=0;
+  const monthSpans=[];
+  days.forEach(dstr=>{
+    const m=dstr.slice(0,7);
+    if(m!==lastMonth){ if(lastMonth)monthSpans.push({m:lastMonth,n:mCount}); lastMonth=m; mCount=1; }
+    else mCount++;
+  });
+  if(lastMonth)monthSpans.push({m:lastMonth,n:mCount});
+  mesHTML+=monthSpans.map(ms=>{
+    const [y,mm]=ms.m.split('-');
+    return `<th class="mes-sep" colspan="${ms.n}" style="background:#1b264a;color:#46d3ff">${MESES_ABR[parseInt(mm)-1]} ${y.slice(2)}</th>`;
+  }).join('');
+  mesHTML+='</tr>'; diaHTML+='</tr>';
+  document.querySelector('#tblCuad thead').innerHTML=mesHTML+diaHTML;
+  // body
+  let body='';
+  arr.forEach(s=>{
+    body+=`<tr><td class="lbl" title="${esc(s.vendor)} — ${esc(s.admin)}">${esc(s.vendor).slice(0,22)}<br><span style="color:#6b779b;font-weight:400;font-size:9.5px">${esc(s.admin).slice(0,28)}</span></td>`;
+    let lastMonth=null;
+    days.forEach(dstr=>{
+      const m=dstr.slice(5,7), sep=(m!==lastMonth)?'mes-sep':''; if(m!==lastMonth)lastMonth=m;
+      const code=s.daily[dstr];
+      if(code){
+        const info=CODE_MAP[code]||{label:code,color:'#888'};
+        body+=`<td class="cell ${sep}" style="background:${info.color}" title="${dstr} · ${esc(info.label)}">${code==='EC'?'':code.slice(0,1)}</td>`;
+      } else {
+        body+=`<td class="cell ${sep}"></td>`;
+      }
+    });
+    body+='</tr>';
+  });
+  document.querySelector('#tblCuad tbody').innerHTML=body;
+  document.getElementById('cuadInfo').textContent=`${arr.length} servicios · ${days.length} días (${sd} → ${eh})`;
+}
+
+function renderKPIs(arr){
+  const dt=arr.reduce((s,x)=>s+x.dt,0), de=arr.reduce((s,x)=>s+x.de,0), dr=arr.reduce((s,x)=>s+x.dr,0);
+  const pct=dt?Math.round(de/dt*1000)/10:0;
+  document.getElementById('hPct').textContent=pct+'%';
+  const fin=arr.filter(s=>s.estado==='Finalizado').length, ni=arr.filter(s=>s.estado==='No iniciado').length;
+  const hoy=new Date().toISOString().slice(0,10);
+  const vp=DATA.vencenPronto.filter(v=>v.vigencia>=hoy && (new Date(v.vigencia)-new Date(hoy))/86400000<=60);
+  const k=[
+    {lbl:'Servicios (filtro)',val:arr.length,sub:`${new Set(arr.map(s=>s.vendor)).size} vendors · ${new Set(arr.map(s=>s.admin)).size} admins`,cls:'acc'},
+    {lbl:'Días totales (DT)',val:fmtN(Math.round(dt)),sub:'duración contratada',cls:'v2'},
+    {lbl:'Días ejecutados (DE)',val:fmtN(Math.round(de)),sub:`${pct}% del total`,cls:'good'},
+    {lbl:'Días restantes (DR)',val:fmtN(Math.round(dr)),sub:'pendientes de ejecutar',cls:'warn'},
+    {lbl:'Finalizados',val:fin,sub:'servicios al 100%',cls:'good'},
+    {lbl:'No iniciados',val:ni,sub:'0% avance',cls:'bad'},
+    {lbl:'Vigencias < 60 días',val:vp.length,sub:'requieren atención',cls:'orange'},
+    {lbl:'Subproyectos',val:new Set(arr.map(s=>s.subproy)).size,sub:'frentes activos',cls:'acc'},
+  ];
+  document.getElementById('kpiBar').innerHTML=k.map(x=>`<div class="kpi ${x.cls}"><div class="lbl">${x.lbl}</div><div class="val">${x.val}</div><div class="sub">${esc(x.sub)}</div></div>`).join('');
+}
+
+function renderVigencias(arr){
+  const sel=new Set(arr.map(s=>s.vendor+'|'+s.admin));
+  const items=DATA.vencenPronto.filter(v=>sel.has(v.vendor+'|'+v.admin));
+  document.getElementById('vigInfo').textContent=`${items.length} servicios con vigencia en los próximos 365 días`;
+  if(!items.length){document.querySelector('#tblVig tbody').innerHTML='<tr><td colspan="8" class="empty">Sin vigencias próximas en el filtro</td></tr>';return;}
+  document.querySelector('#tblVig tbody').innerHTML=items.map(v=>{
+    const riesgo = v.dias<0?'bad':(v.dias<=30?'bad':(v.dias<=60?'warn':(v.dias<=180?'orange':'good')));
+    const txt = v.dias<0?'Vencido':(v.dias<=30?'Crítico':(v.dias<=60?'Alto':(v.dias<=180?'Medio':'Bajo')));
+    return `<tr><td><b>${esc(v.vendor)}</b></td><td>${esc(v.admin)}</td><td>${v.vigencia}</td>
+      <td class="num">${v.dias} días</td>
+      <td class="num">${fmtN(v.dt)}</td>
+      <td class="num">${fmtN(v.dr)}</td>
+      <td class="num">${v.ejec}%</td>
+      <td><span class="pill" style="background:rgba(255,255,255,.06);color:var(--${riesgo})">${txt}</span></td></tr>`;
+  }).join('');
+}
+
+function estadoPill(e){
+  const map={'Finalizado':'good','Avanzado':'acc','En curso':'warn','No iniciado':'bad'};
+  const c=map[e]||'muted';
+  return `<span class="pill" style="background:rgba(255,255,255,.06);color:var(--${c})">${e}</span>`;
+}
+function avanceBar(p){
+  const c = p>=90?'good':p>=50?'acc':p>=25?'warn':'bad';
+  return `<div style="height:8px;width:90px;background:rgba(255,255,255,.07);border-radius:4px"><div style="height:100%;width:${Math.min(p,100)}%;background:var(--${c});border-radius:4px"></div></div>`;
+}
+function renderTabla(arr){
+  document.getElementById('tblInfo').textContent=`${arr.length} servicios en el filtro · DT ${fmtN(arr.reduce((s,x)=>s+x.dt,0))} · DE ${fmtN(arr.reduce((s,x)=>s+x.de,0))} · DR ${fmtN(arr.reduce((s,x)=>s+x.dr,0))}`;
+  const sorted=[...arr].sort((a,b)=>a.ejec-b.ejec);
+  document.querySelector('#tblSrv tbody').innerHTML=sorted.map(s=>`
+    <tr><td>${esc(s.admin)}</td><td>${esc(s.contrato)}</td><td>${esc(s.ods)}</td>
+      <td>${esc(s.subproy)}</td><td><b>${esc(s.vendor)}</b></td>
+      <td title="${esc(s.alcance)}">${esc(s.alcance).slice(0,38)}…</td>
+      <td class="num">${fmtN(s.dt)}</td><td class="num">${fmtN(s.de)}</td><td class="num">${fmtN(s.dr)}</td>
+      <td class="num"><b>${s.ejec}%</b></td><td>${s.vigencia||'—'}</td><td>${estadoPill(s.estado)}</td><td>${avanceBar(s.ejec)}</td></tr>`).join('');
+}
+
+renderAll();
+</script>
+</body>
+</html>
