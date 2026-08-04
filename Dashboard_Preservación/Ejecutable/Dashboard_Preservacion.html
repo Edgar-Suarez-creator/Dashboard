@@ -496,8 +496,9 @@ function actividadesDeEquipos(arr){
 function renderCurva(arr){
   const c = document.getElementById('chCurva'); if(!c) return;
   const acts = actividadesDeEquipos(arr);
-  const datesP = acts.filter(a=>a.fp).map(a=>a.fp).sort();
-  const datesE = acts.filter(a=>a.fe).map(a=>a.fe).sort();
+  // Solo mostrar 2026
+  const datesP = acts.filter(a=>a.fp && a.fp.startsWith('2026')).map(a=>a.fp).sort();
+  const datesE = acts.filter(a=>a.fe && a.fe.startsWith('2026')).map(a=>a.fe).sort();
   if(!datesP.length){ c.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">Sin actividades en la selección actual</div>'; return; }
   const TODAY = new Date('2026-08-04');
   const dMin = new Date(datesP[0]);
@@ -791,14 +792,14 @@ function renderActividadesSection(eq, layer){
     <div style="max-height:340px;overflow:auto;border:1px solid var(--border);border-radius:8px">
       <table style="font-size:11px">
         <thead><tr>
-          <th style="width:40px;text-align:center">#</th>
-          <th>Actividad</th>
-          ${compact ? '' : `<th style="width:80px">Especialidad</th>
-          <th style="width:90px">Programada</th>
-          <th style="width:90px">Ejecutada</th>`}
-          <th style="width:70px;text-align:center">Estado</th>
-          <th style="width:160px">Causa / Comentario</th>
-          ${compact ? '' : `<th style="width:90px">N° Reporte</th>`}
+          <th style="width:32px;text-align:center">#</th>
+          <th style="min-width:420px">Actividad</th>
+          ${compact ? '' : `<th style="width:70px">Especialidad</th>
+          <th style="width:82px">Programada</th>
+          <th style="width:82px">Ejecutada</th>`}
+          <th style="width:62px;text-align:center">Estado</th>
+          <th style="width:120px">Causa / Comentario</th>
+          ${compact ? '' : `<th style="width:78px">N° Reporte</th>`}
         </tr></thead>
         <tbody>`;
 
@@ -818,7 +819,7 @@ function renderActividadesSection(eq, layer){
                          : (act.co ? `<span title="${esc(act.co)}">${esc((act.co||'').slice(0,40))}${act.co.length>40?'…':''}</span>` : '—');
     html += `<tr>
       <td style="text-align:center;color:var(--muted);font-variant-numeric:tabular-nums">${i+1}</td>
-      <td style="max-width:340px;white-space:normal;line-height:1.35"><span title="${esc(act.a||'')}">${esc((act.a||'').slice(0,180))}${(act.a||'').length>180?'…':''}</span></td>
+      <td style="min-width:420px;white-space:normal;line-height:1.4"><span title="${esc(act.a||'')}">${esc((act.a||'').slice(0,280))}${(act.a||'').length>280?'…':''}</span></td>
       ${compact ? '' : `<td><span style="color:${espCol};font-weight:700;font-size:10.5px">${esc(act.e||'—')}</span></td>
       <td style="font-variant-numeric:tabular-nums">${esc(act.fp||'—')}</td>
       <td style="font-variant-numeric:tabular-nums;color:${act.fe?'#27d29c':'#6b779b'}">${esc(act.fe||'—')}</td>`}
