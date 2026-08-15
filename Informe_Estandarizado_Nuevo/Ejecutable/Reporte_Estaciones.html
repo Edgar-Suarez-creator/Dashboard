@@ -539420,7 +539420,7 @@ function showPillDrill(field, value){
         <td><b>${escHtml(r.cert||'—')}</b></td>
         <td>${escHtml(r.estado||'—')}</td>
         <td style="font-size:11px">${escHtml(r.contr||'').slice(0,18)}</td>
-        <td style="font-size:11px">${escHtml(r.sub||'').slice(0,35)}</td></tr>`;
+        <td style="font-size:11px">${escHtml(r.sub||'').slice(0,80)}</td></tr>`;
     }
   });
   html += `</tbody></table></div></div>`;
@@ -539586,8 +539586,8 @@ function showPtCertDetail(sp, metric, label){
       <td><b>${escHtml(r.cert||'—')}</b></td>
       <td style="font-size:11px">${escHtml(r.certNom||r.nom||'').slice(0,120)}</td>
       <td><span class="tag" style="font-size:10px">${escHtml(r.disc||'—')}</span></td>
-      <td style="font-size:11px">${escHtml(r.sis||'').slice(0,40)}</td>
-      <td style="font-size:11px">${escHtml(r.sub||'').slice(0,40)}</td>
+      <td style="font-size:11px">${escHtml(r.sis||'').slice(0,80)}</td>
+      <td style="font-size:11px">${escHtml(r.sub||'').slice(0,80)}</td>
       <td style="font-size:11px">${r.fp||'—'}</td>
       <td style="font-size:11px">${r.fe||'—'}</td></tr>`;
   });
@@ -539860,7 +539860,7 @@ function showRcDetail(sp, metric, label){
     html += `<tr><td><b style="font-family:'Consolas',monospace;font-size:11px">${escHtml(r.numCert||'—')}</b></td>
       <td><b>${escHtml(r.cert||'—')}</b></td>
       <td style="font-size:11px">${escHtml(r.desc||'').slice(0,55)}</td>
-      <td style="font-size:11px">${escHtml(r.sub||'').slice(0,35)}</td>
+      <td style="font-size:11px">${escHtml(r.sub||'').slice(0,80)}</td>
       <td><span class="tag" style="font-size:10px">${escHtml(r.estado||'—')}</span></td>
       <td style="font-size:11px">${escHtml(r.contr||'').slice(0,16)}</td>
       <td style="font-size:11px">${r.fp||'—'}</td>
