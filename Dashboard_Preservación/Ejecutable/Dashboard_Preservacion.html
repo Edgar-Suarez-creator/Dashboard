@@ -132,6 +132,7 @@ tbody tr.clickable:hover td{background:rgba(70,211,255,.08)}
   <div class="fg"><label>Estado</label><div id="fEstado" class="ms-w"></div></div>
   <div class="fg"><label>Año (Programado)</label><div id="fAnio" class="ms-w"></div></div>
   <div class="fg"><label>Especialidad</label><div id="fEsp" class="ms-w"></div></div>
+  <div class="fg"><label>Buscar equipo</label><input type="search" id="fSearch" placeholder="Ej: EP-1150, PUMP, RESINC..." style="background:var(--bg2,#0f162d);color:var(--text,#e8f9ff);border:1px solid var(--border,rgba(70,211,255,.2));border-radius:6px;padding:6px 10px;font-size:12px;min-width:180px;height:34px;font-family:inherit;outline:none;transition:border-color .15s"onfocus="this.style.borderColor='var(--accent,#46d3ff)'" onblur="this.style.borderColor='var(--border,rgba(70,211,255,.2))'"></div>
   <button class="fclear" onclick="resetF()">Limpiar</button>
 </div>
 
@@ -2283,8 +2284,21 @@ __MS.fEstado = makeMultiSelect(document.getElementById('fEstado'), uniqJEstado()
 __MS.fAnio   = makeMultiSelect(document.getElementById('fAnio'),   uniqJ('anios'), { placeholder:'Todos', onChange: renderAll });
 __MS.fEsp    = makeMultiSelect(document.getElementById('fEsp'),    uniqJ('esp'),   { placeholder:'Todos', onChange: renderAll });
 
+/* === Filtro busqueda por texto de equipos === */
+(function(){
+  const inp = document.getElementById('fSearch');
+  if(!inp) return;
+  let __to = null;
+  inp.addEventListener('input', ()=>{
+    if(__to) clearTimeout(__to);
+    __to = setTimeout(()=>renderAll(), 180);
+  });
+})();
+
 function resetF(){
   Object.values(__MS).forEach(ms => ms.clear());
+  const inpQ = document.getElementById('fSearch');
+  if (inpQ) inpQ.value = '';
   renderAll();
 }
 
@@ -2294,11 +2308,19 @@ function filtered(){
   const fEst  = __MS.fEstado.getValue();
   const fAnio = __MS.fAnio.getValue();
   const fEsp  = __MS.fEsp.getValue();
+  const inpQ  = document.getElementById('fSearch');
+  const q     = inpQ ? String(inpQ.value||'').toLowerCase().trim() : '';
   return DATA.equipos.filter(e=>{
     for(const[k,arr] of Object.entries(f)){ if(arr.length && !arr.includes(e[k])) return false; }
     if (fEst.length  && !fEst.includes(e.__j.estado)) return false;
     if (fAnio.length && !(e.__j.anios||[]).some(a => fAnio.includes(a))) return false;
     if (fEsp.length  && !(e.__j.esp||[]).some(s => fEsp.includes(s))) return false;
+    if (q){
+      const hay = [e.tag, e.descripcion, e.tipo, e.proyecta, e.nombreProy,
+                   e.fabricante, e.ubicacion, e.destino, e.denominacion, e.sap]
+        .map(x => String(x||'').toLowerCase()).join(' | ');
+      if (!hay.includes(q)) return false;
+    }
     return true;
   });
 }
@@ -2373,7 +2395,7 @@ function renderCurva(arr){
   const datesP = acts.filter(a=>a.fp && a.fp.startsWith('2026')).map(a=>a.fp).sort();
   const datesE = acts.filter(a=>a.fe && a.fe.startsWith('2026')).map(a=>a.fe).sort();
   if(!datesP.length){ c.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">Sin actividades en la selección actual</div>'; return; }
-  const TODAY = new Date('2026-08-04');
+  const TODAY = new Date('2026-08-25');
   const dMin = new Date(datesP[0]);
   const dMaxRaw = new Date(datesP[datesP.length-1]);
   const dMax = dMaxRaw > TODAY ? dMaxRaw : TODAY;
@@ -2454,7 +2476,7 @@ function renderCurvaMes(arr){
   const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
   const bw = cw / months.length;
   const barW = Math.min(18, bw/2.4);
-  const TODAY = new Date('2026-08-04');
+  const TODAY = new Date('2026-08-25');
   const todayYM = TODAY.toISOString().slice(0,7);
   let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">`;
   for(let i=0;i<=5;i++){
@@ -2629,7 +2651,7 @@ function renderActividadesSection(eq, layer){
   const cod = eq.__cod;
   const acts = (cod && ACTS_BY_COD[cod]) ? ACTS_BY_COD[cod] : [];
   const j = eq.__j || {esp:[], estado:'Sin actividad', anios:[], nProg:0, nEjec:0};
-  const TODAY = new Date('2026-08-04');
+  const TODAY = new Date('2026-08-25');
   if (!acts.length){
     return `<div class="modal-section"><h4>Actividades de preservación</h4>
       <div style="padding:14px;color:var(--muted);background:rgba(255,255,255,.02);border:1px dashed var(--border);border-radius:8px;text-align:center">
