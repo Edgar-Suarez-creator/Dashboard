@@ -828,7 +828,7 @@ if(PL.timeline && PL.timeline.length){
       {name:'Creados', data:PL.timeline.map(t=>t.creados)},
       {name:'Cerrados', data:PL.timeline.map(t=>t.cerrados)},
     ],
-    xaxis:{categories:PL.timeline.map(t=>t.semana),
+    xaxis:{categories:PL.timeline.map(t=>{const v=t.mes||t.semana||'';if(/^\d{4}-\d{2}$/.test(v)){const[y,m]=v.split('-');const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return M[+m-1]+' '+y;} return v;}),
       labels:{style:{fontSize:'10px',colors:'#a8b6d4'}, rotate:-55, rotateAlways:true, hideOverlappingLabels:true, minHeight:60},
       tickAmount: Math.min(20, PL.timeline.length)},
     colors:[COLORS.warn, COLORS.good],
