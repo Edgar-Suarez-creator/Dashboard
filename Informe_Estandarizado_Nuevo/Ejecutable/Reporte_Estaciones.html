@@ -160,8 +160,7 @@ td.drill:active{transform:scale(.98)}
 </div>
 <div class="grid">
   <div class="card span-12">
-    <div class="card-head"><div><h3>DETALLE DE CANTIDADES Y PORCENTAJES DE AVANCE — por Subproyecto</h3>
-    <div class="desc">Fuente: <b>1. Planned Task</b> · cols G + AO..BC</div></div>
+    <div class="card-head"><div><h3>DETALLE DE CANTIDADES Y PORCENTAJES DE AVANCE — por Subproyecto</h3></div>
     <span class="tag" id="ptChip">—</span></div>
     <div class="tabwrap"><table id="tblPtSub">
       <thead><tr>
@@ -179,7 +178,7 @@ td.drill:active{transform:scale(.98)}
       </tr></thead>
       <tbody></tbody><tfoot></tfoot>
     </table></div>
-    <div class="fuente">REQ = Total requerido · EJE = Ejecutado acumulado · POR EJEC = Pendiente · PROG/EJEC AL CORTE = compromiso vs ejecutado a la fecha de corte</div>
+    
   </div>
 
   <div class="card span-7">
@@ -223,8 +222,7 @@ td.drill:active{transform:scale(.98)}
 </div>
 <div class="grid">
   <div class="card span-12">
-    <div class="card-head"><div><h3>Resumen Punchlist por Subproyecto</h3>
-    <div class="desc">Fuente: <b>2. PunchList</b> · cols G + AI..AV</div></div>
+    <div class="card-head"><div><h3>Resumen Punchlist por Subproyecto</h3></div>
     <span class="tag" id="plChip">—</span></div>
     <div class="tabwrap"><table id="tblPlSub">
       <thead><tr>
@@ -285,8 +283,7 @@ td.drill:active{transform:scale(.98)}
 </div>
 <div class="grid">
   <div class="card span-12">
-    <div class="card-head"><div><h3>Detalle de Certificados por Subproyecto</h3>
-    <div class="desc">Fuente: <b>3. Reporte AC1-HC1 ECP</b> · cols G + AD..AN</div></div>
+    <div class="card-head"><div><h3>Detalle de Certificados por Subproyecto</h3></div>
     <span class="tag" id="rcChip">—</span></div>
     <div class="tabwrap"><table id="tblRcSub">
       <thead><tr>
@@ -609,14 +606,8 @@ function showPtCertDetail(sp, metric, label){
   const all = (PT.detalle && PT.detalle[sp]) || [];
   // Aplicar mismos filtros activos de la barra (etapa, sistema, etc.)
   const f = filterState.pt || {};
-  const allWithEtapa = all.map(r=>{ const x = Object.assign({}, r); if(!x.etapa) x.etapa = extractEtapa(x); return x; });
-  const filtered = allWithEtapa.filter(r =>
-    (!f.nombreProyecto || r.np === f.nombreProyecto) &&
-    (!f.sistema        || r.sis === f.sistema) &&
-    (!f.subsistema     || r.sub === f.subsistema) &&
-    (!f.planta         || r.pl === f.planta) &&
-    (!f.etapa          || r.etapa === f.etapa)
-  );
+  const allWithEtapa = all.map(r=>{ const x = Object.assign({}, r, {sp:sp}); if(!x.etapa) x.etapa = extractEtapa(x); return x; });
+  const filtered = applyFilterFn(allWithEtapa, f);
   const rows = filtered.filter(r => (r[metric]||0) > 0);
   __pkgCtx = { source:'pt', sp:sp, label:label, rows:rows };
   document.getElementById('modalTitle').textContent = `${label} · ${sp}`;
@@ -749,14 +740,8 @@ document.querySelectorAll('#tblPlSub td.drill').forEach(td=>{
 function showPlDetail(sp, metric, label){
   const all = (PL.detalle && PL.detalle[sp]) || [];
   const f = filterState.pl || {};
-  const allWithEtapa = all.map(r=>{ const x = Object.assign({}, r); if(!x.etapa) x.etapa = extractEtapa(x); return x; });
-  const filtered = allWithEtapa.filter(r =>
-    (!f.nombreProyecto || r.np === f.nombreProyecto) &&
-    (!f.sistema        || r.sis === f.sistema) &&
-    (!f.subsistema     || r.sub === f.subsistema) &&
-    (!f.planta         || r.pl === f.planta) &&
-    (!f.etapa          || r.etapa === f.etapa)
-  );
+  const allWithEtapa = all.map(r=>{ const x = Object.assign({}, r, {sp:sp}); if(!x.etapa) x.etapa = extractEtapa(x); return x; });
+  const filtered = applyFilterFn(allWithEtapa, f);
   const rows = metric==='__ALL__' ? filtered.slice() : filtered.filter(r => (r[metric]||0) > 0);
   __pkgCtx = { source:'pl', sp:sp, label:label, rows:rows };
   document.getElementById('modalTitle').textContent = `${label} · ${sp} (PunchList)`;
@@ -1357,6 +1342,16 @@ function recomputePL(f){
     s.Total = abi + cer;
     s.PctCierre = s.Total>0 ? +(cer/s.Total*100).toFixed(2) : 0;
   });
+  // Fix: incluir los 5 SPs aunque tengan 0 filas en el subset filtrado
+  const _spsAll = (DATA && DATA.meta && DATA.meta.subproyectos) || [];
+  const _spsPresent = new Set(sub.map(x=>x.SUBPROYECTO));
+  _spsAll.forEach(sp=>{
+    if(!_spsPresent.has(sp)){
+      const empty = { SUBPROYECTO: sp, Total: 0, PctCierre: 0 };
+      PL_METRIC_COLS.forEach(m=>{ empty[m] = 0; });
+      sub.push(empty);
+    }
+  });
   sub.sort((a,b)=>a.SUBPROYECTO.localeCompare(b.SUBPROYECTO));
   const disc = aggByDisciplina(rows, PL_METRIC_COLS);
   disc.forEach(d=>{
@@ -1436,6 +1431,16 @@ function recomputeRC(f){
   const rows = applyFilterFn(RC_FLAT, f);
   const sub = aggBySp(rows, RC_METRIC_COLS);
   sub.forEach(s=>{ s.PctAvance = s.REGISTROS>0 ? +(s.EJE/s.REGISTROS*100).toFixed(2) : 0; });
+  // Fix: incluir los 5 SPs aunque tengan 0 filas en el subset filtrado
+  const _spsAll = (DATA && DATA.meta && DATA.meta.subproyectos) || [];
+  const _spsPresent = new Set(sub.map(x=>x.SUBPROYECTO));
+  _spsAll.forEach(sp=>{
+    if(!_spsPresent.has(sp)){
+      const empty = { SUBPROYECTO: sp, PctAvance: 0 };
+      RC_METRIC_COLS.forEach(m=>{ empty[m] = 0; });
+      sub.push(empty);
+    }
+  });
   sub.sort((a,b)=>a.SUBPROYECTO.localeCompare(b.SUBPROYECTO));
   const tot = {};
   RC_METRIC_COLS.forEach(m=>{ tot[m] = rows.reduce((s,r)=>s+(+r[m]||0),0); });
