@@ -3217,7 +3217,7 @@ function renderCurva(arr){
   const datesP = acts.filter(a=>a.fp && a.fp.startsWith('2026')).map(a=>a.fp).sort();
   const datesE = acts.filter(a=>a.fe && a.fe.startsWith('2026')).map(a=>a.fe).sort();
   if(!datesP.length){ c.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">Sin actividades en la selección actual</div>'; return; }
-  const TODAY = new Date('2026-08-25');
+  const TODAY = new Date('2026-09-15');
   const dMin = new Date(datesP[0]);
   const dMaxRaw = new Date(datesP[datesP.length-1]);
   const dMax = dMaxRaw > TODAY ? dMaxRaw : TODAY;
@@ -3298,7 +3298,7 @@ function renderCurvaMes(arr){
   const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
   const bw = cw / months.length;
   const barW = Math.min(18, bw/2.4);
-  const TODAY = new Date('2026-08-25');
+  const TODAY = new Date('2026-09-15');
   const todayYM = TODAY.toISOString().slice(0,7);
   let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">`;
   for(let i=0;i<=5;i++){
@@ -3473,7 +3473,7 @@ function renderActividadesSection(eq, layer){
   const cod = eq.__cod;
   const acts = (cod && ACTS_BY_COD[cod]) ? ACTS_BY_COD[cod] : [];
   const j = eq.__j || {esp:[], estado:'Sin actividad', anios:[], nProg:0, nEjec:0};
-  const TODAY = new Date('2026-08-25');
+  const TODAY = new Date('2026-09-15');
   if (!acts.length){
     return `<div class="modal-section"><h4>Actividades de preservación</h4>
       <div style="padding:14px;color:var(--muted);background:rgba(255,255,255,.02);border:1px dashed var(--border);border-radius:8px;text-align:center">
