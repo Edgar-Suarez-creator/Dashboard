@@ -386,17 +386,17 @@ function renderCharts(rows){
   });
   $('lg-mod').innerHTML = '';
 
-  const clas1 = topN(rows, 'clas1', 10);
-  svgBarH('ch-clas1', clas1, PAL, {onClick:(k,i)=>`applyFilter('clas1', ${JSON.stringify(clas1[i][0]).replace(/"/g,'&quot;')})`});
+  const clas1 = topNSum(rows, 'clas1', 'valor', 10);
+  svgBarH('ch-clas1', clas1, PAL, {money:true, onClick:(k,i)=>`applyFilter('clas1', ${JSON.stringify(clas1[i][0]).replace(/"/g,'&quot;')})`});
 
-  const sistemas = topN(rows, 'sistema', 10);
-  svgBarH('ch-sistema', sistemas, PAL, {onClick:(k,i)=>`applyFilter('sistema', ${JSON.stringify(sistemas[i][0]).replace(/"/g,'&quot;')})`});
+  const sistemas = topNSum(rows, 'sistema', 'valor', 10);
+  svgBarH('ch-sistema', sistemas, PAL, {money:true, onClick:(k,i)=>`applyFilter('sistema', ${JSON.stringify(sistemas[i][0]).replace(/"/g,'&quot;')})`});
 
   const clas2 = topNSum(rows, 'clas2', 'valor', 10);
   svgBarH('ch-clas2', clas2, COLS.GOLD, {money:true, onClick:(k,i)=>`applyFilter('clas2', ${JSON.stringify(clas2[i][0]).replace(/"/g,'&quot;')})`});
 
-  const tipos = topN(rows, 'tipo', 10);
-  svgBarH('ch-tipo', tipos, PAL, {onClick:(k,i)=>`applyFilter('tipo', ${JSON.stringify(tipos[i][0]).replace(/"/g,'&quot;')})`});
+  const tipos = topNSum(rows, 'tipo', 'valor', 10);
+  svgBarH('ch-tipo', tipos, PAL, {money:true, onClick:(k,i)=>`applyFilter('tipo', ${JSON.stringify(tipos[i][0]).replace(/"/g,'&quot;')})`});
 
   const porSistema = topNSum(rows, 'clas1', 'valor', 15);
   svgBarH('ch-por-sistema', porSistema, COLS.ACC, {money:true, onClick:(k,i)=>`applyFilter('clas1', ${JSON.stringify(porSistema[i][0]).replace(/"/g,'&quot;')})`});
@@ -411,7 +411,8 @@ function renderTable(rows){
   const tbl = $('tbl');
   tbl.querySelector('thead').innerHTML = '<tr>'+head.map(h=>`<th>${h}</th>`).join('')+'</tr>';
   const body = tbl.querySelector('tbody');
-  const show = rows.slice(0, 800);
+  const sorted = [...rows].sort((a,b)=>(b.valor||0)-(a.valor||0));
+  const show = sorted.slice(0, 800);
   body.innerHTML = show.map(r=>{
     const idx = DATA.items.indexOf(r);
     return `<tr class="clickable" onclick="openDetail(${idx})">
