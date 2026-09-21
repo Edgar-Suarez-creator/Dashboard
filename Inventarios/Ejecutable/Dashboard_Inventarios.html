@@ -522,7 +522,7 @@ function renderCharts(rows){
   const m3n = rows.filter(r=>r.mod==='M4').length;
   const m4n = rows.filter(r=>r.mod==='M5').length;
   svgDonut('ch-mod', [['Módulo 4', m3n], ['Módulo 5', m4n]], [COLS.ACC, COLS.V2], '', {
-    onClick: (k,i)=> `applyFilter('mod', ${i===0?"'M3'":"'M4'"})`
+    onClick: (k,i)=> `applyFilter('mod', ${i===0?"'M4'":"'M5'"})`
   });
   $('lg-mod').innerHTML = '';
 
@@ -672,7 +672,7 @@ function applyFilter(key, val){
 
 // KPIs sin filtro global → filtran o abren modal según caso
 function openKpiList(key, label){
-  if(key==='m5'){ applyFilter('mod','M4'); return; }
+  if(key==='m4'){ applyFilter('mod','M4'); return; }
   if(key==='m5'){ applyFilter('mod','M5'); return; }
   if(key==='sobrantes'){
     // aplicar filtro "empieza con SOBRANTE" — usar buscador
@@ -686,7 +686,7 @@ function openKpiList(key, label){
   let sub = label; let sort='valor';
   if(key==='total') sub = `Todos los ítems (${rows.length.toLocaleString('es-CO')})`;
   else if(key==='val_total') sub = 'Todos los ítems ordenados por valor (COP)';
-  else if(key==='val_m5'){ sub='Ítems M4 ordenados por valor (COP)'; }
+  else if(key==='val_m4'){ sub='Ítems M4 ordenados por valor (COP)'; }
   else if(key==='val_m5'){ sub='Ítems M5 ordenados por valor (COP)'; }
   else if(key==='cant_total'){ sub='Todos los ítems ordenados por cantidad'; sort='cantidad'; }
   openList(label, sub, rows, sort);
