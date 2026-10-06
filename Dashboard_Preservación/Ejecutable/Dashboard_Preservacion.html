@@ -292,7 +292,7 @@ footer{margin-top:34px;color:var(--muted);font-size:12px;text-align:center}
 <div class="grid g3" id="deltas" style="margin-bottom:14px"></div>
 <div class="card"><div style="overflow-x:auto"><table class="cmp" id="cmp"></table></div><div class="note" id="cmp-note"></div></div>
 
-<footer id="ftr"></footer>
+<footer id="ftr" style="display:none"></footer>
 </div>
 
 <div id="tip"></div>
@@ -772,7 +772,7 @@ document.querySelectorAll('#wmetric button').forEach(b=>b.addEventListener('clic
 
 $('corte').textContent='Corte: '+DATA.corte;
 $('fuente').textContent=DATA.fuente;
-$('ftr').textContent=`APPLUS+ Colombia · Dashboard de Preservación CSE · versión 3 (propuesta) · datos generados ${DATA.generated_at} · fuente: ${DATA.fuente} (hojas Base de datos y Actividades)`;
+$('ftr').textContent='';
 cambios(); render();
 </script>
 </body>
