@@ -4,313 +4,193 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>APPLUS+ · Dashboards ATIP CSE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0a0f1e; --bg2:#111a30; --panel:#161f38; --panel2:#1b264a;
-    --text:#e8edff; --text-2:#a8b6d4; --muted:#6b779b;
-    --accent:#46d3ff; --accent-2:#a78bfa; --good:#27d29c; --warn:#f7b955; --bad:#ff6b6b;
-    --brand:#ffd028;
-    --border:rgba(255,255,255,.08);
+    --bg:#070b18; --bg2:#0c1226; --panel:#0f1730; --panel2:#141e3d; --line:rgba(140,170,255,.13);
+    --text:#eef3ff; --text2:#a9b7d9; --muted:#7385ad;
+    --cyan:#00e5ff; --pink:#ff2bd6; --lime:#a6ff00; --yellow:#ffe600; --orange:#ff8a00; --red:#ff3b6b; --violet:#9d7bff; --mint:#00ffa3;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;background:var(--bg);color:var(--text);font:14px/1.5 'Segoe UI','Inter',Tahoma,sans-serif}
-  body{
-    background:
-      radial-gradient(900px 600px at 15% 5%, rgba(70,211,255,.10), transparent 60%),
-      radial-gradient(800px 500px at 85% 95%, rgba(167,139,250,.10), transparent 60%),
-      var(--bg);
-    min-height:100vh;
-  }
-  .wrap{max-width:1240px;margin:0 auto;padding:48px 28px 80px}
+  html{scroll-behavior:smooth}
+  body{min-height:100vh;background:var(--bg);color:var(--text);font:14px/1.5 Inter,'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+  .num{font-family:'Space Grotesk',Inter,sans-serif;font-variant-numeric:tabular-nums}
 
-  /* Header */
-  .hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-bottom:38px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+  /* fondo animado */
+  .glow{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+  .glow i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.28;animation:drift 22s ease-in-out infinite alternate}
+  .glow i:nth-child(1){width:720px;height:720px;left:-200px;top:-260px;background:var(--cyan)}
+  .glow i:nth-child(2){width:620px;height:620px;right:-200px;top:10%;background:var(--pink);animation-delay:-7s;animation-duration:26s}
+  .glow i:nth-child(3){width:560px;height:560px;left:35%;bottom:-300px;background:var(--lime);animation-delay:-13s;animation-duration:30s;opacity:.18}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(90px,70px) scale(1.15)}}
+  .gridbg{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(140,170,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(140,170,255,.05) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse at 50% 0%,#000 20%,transparent 75%)}
+
+  .wrap{max-width:1380px;margin:0 auto;padding:34px 30px 70px}
+
+  /* header */
+  .hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
   .brand{display:flex;align-items:center;gap:14px}
-  .brand svg{width:54px;height:54px;flex-shrink:0}
-  .brand .ttl{font-size:24px;font-weight:800;letter-spacing:.4px}
-  .brand .ttl .plus{color:var(--brand)}
-  .brand .sub{color:var(--text-2);font-size:13px;margin-top:3px}
-  .meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(70,211,255,.10);color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.4px;border:1px solid rgba(70,211,255,.25)}
-  .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 6px var(--good)}
-  .meta .corte{color:var(--muted);font-size:12px}
+  .brand .logo{width:54px;height:54px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(0,229,255,.18),rgba(255,43,214,.18));border:1px solid rgba(0,229,255,.35);box-shadow:0 0 24px -4px rgba(0,229,255,.55)}
+  .brand .logo svg{width:34px;height:34px}
+  .brand .ttl{font-size:20px;font-weight:900;letter-spacing:.3px}
+  .brand .ttl .plus{color:var(--yellow);text-shadow:0 0 12px rgba(255,230,0,.6)}
+  .brand .sub{color:var(--text2);font-size:12.5px;margin-top:2px}
+  .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;font-size:11.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text2)}
+  .chip.live{color:var(--lime);border-color:rgba(166,255,0,.4);background:rgba(166,255,0,.08)}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
+  .chip a{color:inherit;text-decoration:none}
 
-  /* Hero */
-  .hero{margin:14px 0 32px;padding:24px 28px;border-radius:18px;background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--border);position:relative;overflow:hidden}
-  .hero::after{content:"";position:absolute;right:-80px;top:-80px;width:260px;height:260px;background:radial-gradient(circle,rgba(255,208,40,.15),transparent 65%);pointer-events:none}
-  .hero h1{font-size:22px;font-weight:800;letter-spacing:.3px;margin-bottom:6px}
-  .hero p{color:var(--text-2);font-size:13.5px;max-width:780px;line-height:1.65}
+  /* hero */
+  .hero{margin:34px 0 26px;display:grid;grid-template-columns:1.4fr 1fr;gap:22px;align-items:stretch}
+  @media(max-width:980px){.hero{grid-template-columns:1fr}}
+  .hero .main{position:relative;padding:34px 36px;border-radius:22px;background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);overflow:hidden}
+  .hero .main:before{content:"";position:absolute;inset:-1px;border-radius:22px;padding:1px;background:linear-gradient(120deg,var(--cyan),var(--pink),var(--lime),var(--cyan));background-size:300% 300%;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:border 9s linear infinite;opacity:.8}
+  @keyframes border{to{background-position:300% 0}}
+  .hero .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--cyan);margin-bottom:12px}
+  .hero h1{font-size:clamp(30px,4.2vw,50px);font-weight:900;line-height:1.05;letter-spacing:-.8px}
+  .hero h1 span{background:linear-gradient(90deg,var(--cyan) 0%,var(--lime) 45%,var(--pink) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(0,229,255,.35))}
+  .hero p{color:var(--text2);font-size:14.5px;max-width:640px;line-height:1.65;margin-top:14px}
+  .search{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+  .search input{flex:1;min-width:240px;background:rgba(7,11,24,.7);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px 16px;font:inherit;font-size:14px;outline:none}
+  .search input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.18),0 0 24px -6px var(--cyan)}
+  .search .kbd{display:flex;align-items:center;color:var(--muted);font-size:12px;gap:6px}
+  .search .kbd b{border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--text2);font-family:'Space Grotesk'}
 
-  /* Cards */
-  .section-title{margin:6px 0 16px;font-size:12px;color:var(--text-2);text-transform:uppercase;letter-spacing:1.4px;font-weight:700;display:flex;align-items:center;gap:10px}
-  .section-title::before{content:"";width:4px;height:14px;background:var(--accent);border-radius:2px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stat{padding:18px 20px;border-radius:18px;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);position:relative;overflow:hidden;transition:.2s}
+  .stat:hover{transform:translateY(-3px);box-shadow:0 0 0 1px var(--c),0 18px 40px -16px var(--c)}
+  .stat .v{font-size:34px;font-weight:700;color:var(--c);line-height:1;text-shadow:0 0 18px color-mix(in srgb,var(--c) 55%,transparent)}
+  .stat .l{font-size:11px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--text2);margin-top:8px}
+  .stat .s{font-size:12px;color:var(--muted);margin-top:3px}
+  .stat:after{content:"";position:absolute;right:-30px;bottom:-30px;width:110px;height:110px;border-radius:50%;background:var(--c);opacity:.10;filter:blur(20px)}
 
-  .card{
-    position:relative;background:linear-gradient(155deg,var(--panel),var(--panel2));
-    border:1px solid var(--border);border-radius:16px;padding:22px 22px 18px;
-    text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:14px;
-    transition:transform .25s cubic-bezier(.4,0,.2,1), border-color .2s, box-shadow .25s;
-    overflow:hidden;cursor:pointer;
-  }
-  .card::before{
-    content:"";position:absolute;left:0;top:0;height:4px;width:100%;
-    background:linear-gradient(90deg,var(--accent),var(--accent-2));
-    opacity:.85;
-  }
-  .card::after{
-    content:"↗";position:absolute;top:18px;right:20px;font-size:18px;color:var(--text-2);opacity:.4;transition:.2s;font-weight:800
-  }
-  .card:hover{transform:translateY(-4px);border-color:rgba(70,211,255,.45);box-shadow:0 18px 40px rgba(70,211,255,.12)}
-  .card:hover::after{opacity:1;color:var(--accent);transform:translate(3px,-3px)}
-  .card .icn{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(70,211,255,.08);border:1px solid rgba(70,211,255,.18)}
-  .card.c-purple .icn{background:rgba(167,139,250,.10);border-color:rgba(167,139,250,.25)}
-  .card.c-yellow .icn{background:rgba(255,208,40,.10);border-color:rgba(255,208,40,.25)}
-  .card.c-green  .icn{background:rgba(39,210,156,.10);border-color:rgba(39,210,156,.25)}
-  .card .ttl{font-size:16px;font-weight:800;letter-spacing:.2px;margin-top:4px}
-  .card .desc{color:var(--text-2);font-size:12.5px;line-height:1.55;flex:1}
-  .card .footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;padding-top:12px;border-top:1px dashed var(--border)}
-  .tag{font-size:10.5px;color:var(--text-2);background:rgba(255,255,255,.04);padding:4px 9px;border-radius:6px;border:1px solid var(--border);font-weight:600;letter-spacing:.3px;text-transform:uppercase}
-  .tag.warn{background:rgba(247,185,85,.12);border-color:rgba(247,185,85,.32);color:var(--warn)}
-  .tag.good{background:rgba(39,210,156,.12);border-color:rgba(39,210,156,.32);color:var(--good)}
-  .card .open{font-size:11.5px;color:var(--accent);font-weight:700;letter-spacing:.4px}
+  /* filtros de categoría */
+  .cats{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 22px}
+  .cat{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text2);border-radius:999px;padding:8px 16px;font:700 12.5px Inter;cursor:pointer;transition:.15s}
+  .cat:hover{border-color:var(--cyan);color:var(--text)}
+  .cat.on{background:var(--cyan);color:#001318;border-color:var(--cyan);box-shadow:0 0 18px -2px var(--cyan)}
+  .cat small{opacity:.7;margin-left:6px;font-weight:600}
 
-  /* Placeholder card (próximos) */
-  .card.placeholder{
-    background:repeating-linear-gradient(135deg,rgba(255,255,255,.015) 0 12px,rgba(255,255,255,.03) 12px 24px);
-    border:1px dashed rgba(255,255,255,.10);
-    cursor:default;color:var(--muted);
-  }
-  .card.placeholder::before{display:none}
-  .card.placeholder::after{display:none}
-  .card.placeholder:hover{transform:none;box-shadow:none;border-color:rgba(255,255,255,.10)}
-  .card.placeholder .icn{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.06);color:var(--muted)}
-  .card.placeholder .ttl{color:var(--text-2)}
+  /* secciones y tarjetas */
+  .sec{margin:30px 0 14px;display:flex;align-items:center;gap:12px}
+  .sec h2{font-size:13px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:10px}
+  .sec h2:before{content:"";width:6px;height:18px;border-radius:3px;background:linear-gradient(var(--c),transparent);box-shadow:0 0 12px var(--c)}
+  .sec .n{color:var(--muted);font-size:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+  .card{position:relative;display:flex;flex-direction:column;gap:12px;padding:22px 22px 18px;border-radius:20px;text-decoration:none;color:inherit;background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);overflow:hidden;transition:transform .25s cubic-bezier(.4,0,.2,1),box-shadow .25s,border-color .2s}
+  .card:before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:linear-gradient(90deg,var(--c),transparent 80%);box-shadow:0 0 14px var(--c)}
+  .card:after{content:"↗";position:absolute;top:16px;right:18px;font-size:18px;font-weight:900;color:var(--muted);opacity:.45;transition:.2s}
+  .card:hover{transform:translateY(-6px);border-color:var(--c);box-shadow:0 0 0 1px var(--c),0 26px 50px -18px var(--c)}
+  .card:hover:after{opacity:1;color:var(--c);transform:translate(3px,-3px)}
+  .card .top{display:flex;align-items:center;gap:14px}
+  .card .icn{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:color-mix(in srgb,var(--c) 12%,transparent);border:1px solid color-mix(in srgb,var(--c) 45%,transparent);box-shadow:0 0 22px -6px var(--c),inset 0 0 14px -8px var(--c)}
+  .card .ttl{font-size:16px;font-weight:800;letter-spacing:.1px;line-height:1.25;padding-right:22px}
+  .card .ttl small{display:block;color:var(--c);font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;margin-top:4px}
+  .card .desc{color:var(--text2);font-size:12.8px;line-height:1.55;flex:1}
+  .card .desc b{color:var(--text)}
+  .card .footer{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px dashed var(--line)}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;padding:4px 9px;border-radius:7px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text2);white-space:nowrap}
+  .tag.good{color:var(--lime);border-color:rgba(166,255,0,.4);background:rgba(166,255,0,.08)}
+  .tag.warn{color:var(--orange);border-color:rgba(255,138,0,.45);background:rgba(255,138,0,.10)}
+  .tag.hot{color:var(--yellow);border-color:rgba(255,230,0,.45);background:rgba(255,230,0,.10)}
+  .card .open{font-size:12px;color:var(--c);font-weight:800;letter-spacing:.5px;white-space:nowrap;text-shadow:0 0 10px color-mix(in srgb,var(--c) 50%,transparent)}
+  .badge{position:absolute;top:14px;left:18px;font-size:10px;font-weight:900;letter-spacing:1px;padding:3px 9px;border-radius:999px;background:var(--yellow);color:#1a1600;box-shadow:0 0 16px -2px var(--yellow)}
+  .card.hasbadge{padding-top:34px}
+  .card.hide{display:none}
+  .empty{display:none;padding:28px;border:1px dashed var(--line);border-radius:18px;color:var(--muted);text-align:center}
+  .empty.show{display:block}
 
-  /* Footer */
-  footer{text-align:center;color:var(--muted);font-size:11.5px;margin-top:42px;padding-top:18px;border-top:1px solid var(--border)}
-  footer b{color:var(--text-2)}
+  .card.placeholder{background:repeating-linear-gradient(135deg,rgba(255,255,255,.015) 0 12px,rgba(255,255,255,.035) 12px 24px);border:1px dashed rgba(255,255,255,.12);color:var(--muted);cursor:default}
+  .card.placeholder:before,.card.placeholder:after{display:none}
+  .card.placeholder:hover{transform:none;box-shadow:none;border-color:rgba(255,255,255,.12)}
+  .card.placeholder .icn{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08);box-shadow:none;color:var(--muted)}
+  .card.placeholder .ttl{color:var(--text2)}
 
-  @media (max-width:640px){
-    .wrap{padding:30px 18px 60px}
-    .brand .ttl{font-size:20px}
-    .hero{padding:18px}
-  }
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+  footer b{color:var(--text2)} footer a{color:var(--cyan);text-decoration:none} footer a:hover{text-decoration:underline}
+  @media(max-width:640px){.wrap{padding:24px 16px 50px}.hero .main{padding:24px 20px}.stats{grid-template-columns:1fr 1fr}}
+  @media(prefers-reduced-motion:reduce){.glow i,.hero .main:before,.chip .dot{animation:none}}
 </style>
 </head>
 <body>
+<div class="glow"><i></i><i></i><i></i></div>
+<div class="gridbg"></div>
 <div class="wrap">
 
   <!-- ====== HEADER ====== -->
   <div class="hdr">
     <div class="brand">
-      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%"  stop-color="#46d3ff"/>
-            <stop offset="100%" stop-color="#a78bfa"/>
-          </linearGradient>
-        </defs>
-        <rect x="6" y="6" width="52" height="52" rx="12" fill="url(#g1)" opacity=".18"/>
-        <rect x="6" y="6" width="52" height="52" rx="12" fill="none" stroke="url(#g1)" stroke-width="1.5"/>
-        <path d="M16 42 L26 26 L34 36 L48 18" fill="none" stroke="#ffd028" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="48" cy="18" r="3.5" fill="#ffd028"/>
-        <circle cx="34" cy="36" r="2.8" fill="#46d3ff"/>
-        <circle cx="26" cy="26" r="2.8" fill="#a78bfa"/>
-      </svg>
+      <div class="logo">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 44 L24 26 L34 36 L52 14" fill="none" stroke="#ffe600" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px #ffe600)"/>
+          <circle cx="52" cy="14" r="4" fill="#ffe600"/><circle cx="34" cy="36" r="3.5" fill="#00e5ff"/><circle cx="24" cy="26" r="3.5" fill="#ff2bd6"/><circle cx="12" cy="44" r="3.5" fill="#a6ff00"/>
+        </svg>
+      </div>
       <div>
         <div class="ttl">APPLUS<span class="plus">+</span> · Dashboards ATIP CSE</div>
-        <div class="sub">Aseguramiento técnico integral · Caño Sur Este</div>
+        <div class="sub">Aseguramiento técnico integral · Caño Sur Este · Módulos M3 · M4 · M5</div>
       </div>
     </div>
     <div class="meta">
-      <span class="chip"><span class="dot"></span>EN LÍNEA</span>
-      <span class="corte" id="corte">Última actualización: cargando…</span>
+      <span class="chip live"><span class="dot"></span>En línea</span>
+      <span class="chip">Publicado 06‑oct‑2026</span>
+      <span class="chip"><a href="https://github.com/Edgar-Suarez-creator/Dashboard" target="_blank" rel="noopener">GitHub ↗</a></span>
     </div>
   </div>
 
   <!-- ====== HERO ====== -->
   <div class="hero">
-    <h1>Centro de informes y dashboards</h1>
-    <p>Reportes interactivos generados desde los archivos fuente del proyecto. Hacé clic en una tarjeta para abrir el dashboard correspondiente. Todos están actualizados con el corte más reciente.</p>
+    <div class="main">
+      <div class="eyebrow">Centro de informes y dashboards</div>
+      <h1>Todo el proyecto,<br><span>en un solo tablero.</span></h1>
+      <p>Reportes interactivos generados desde los archivos fuente de ATIP Caño Sur Este. Haz clic en una tarjeta para abrir el dashboard; todos están al corte más reciente y permiten filtrar haciendo clic sobre cualquier gráfica.</p>
+      <div class="search">
+        <input id="q" type="search" placeholder="Buscar un dashboard: preservación, garantías, taladro, QA…" autocomplete="off">
+        <span class="kbd"><b>/</b> para buscar · <b>Esc</b> limpia</span>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat" style="--c:var(--cyan)"><div class="v num" id="st-n">10</div><div class="l">Dashboards</div><div class="s">publicados en GitHub Pages</div></div>
+      <div class="stat" style="--c:var(--lime)"><div class="v num">3</div><div class="l">Actualizados hoy</div><div class="s">Preservación v3 · Inventarios v2 · Organigrama v2</div></div>
+      <div class="stat" style="--c:var(--pink)"><div class="v num">136</div><div class="l">Equipos en preservación</div><div class="s">$45,6 mil M COP sin HC‑1</div></div>
+      <div class="stat" style="--c:var(--yellow)"><div class="v num">1.333</div><div class="l">Ítems en inventario</div><div class="s">$45,8 mil M COP · M3 + M4 + M5</div></div>
+    </div>
   </div>
 
-  <!-- ====== TARJETAS ====== -->
-  <div class="section-title">Dashboards disponibles</div>
-  <div class="grid">
+  <!-- ====== CATEGORÍAS ====== -->
+  <div class="cats" id="cats">
+    <button class="cat on" data-c="">Todos <small id="c-all"></small></button>
+    <button class="cat" data-c="activos">Control de activos</button>
+    <button class="cat" data-c="avance">Avance y calidad</button>
+    <button class="cat" data-c="plan">Planeación y equipo</button>
+  </div>
 
-    <a class="card c-purple" href="Informe_Estandarizado_Nuevo/Ejecutable/Reporte_Subproyectos.html">
-      <div class="icn">🏗</div>
-      <div class="ttl">Reporte Consolidado · Exteriores</div>
-      <div class="desc">
-        Cruza las 3 fuentes (Planned Task, PunchList y AC1-HC1 ECP) para los 8 subproyectos de exteriores
-        ECU17049 / ECU21212 / ECU24091 (clusters · troncales · redes). Trae filtros multi-select por
-        Proyecto, Sistema, Subsistema, Planta y Etapa, gráfica interactiva de % Avance con tooltip detallado
-        y drill-down con sub-modal al clicar cada celda.
-      </div>
-      <div class="footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span class="tag">3 FUENTES</span>
-          <span class="tag">8 SUBPROYECTOS</span>
-          <span class="tag warn">~32 MB · CARGA LENTA</span>
-        </div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
+  <!-- ====== CONTROL DE ACTIVOS ====== -->
+  <div class="sec" data-sec="activos" style="--c:var(--lime)"><h2>Control de activos</h2><span class="n">preservación · inventarios · garantías</span></div>
+  <div class="grid" data-sec="activos">
 
-    <a class="card" href="Informe_Estandarizado_Nuevo/Ejecutable/Reporte_Estaciones.html">
-      <div class="icn">⚡</div>
-      <div class="ttl">Reporte Consolidado · ESTACIONES</div>
-      <div class="desc">
-        Misma estructura que el reporte de subproyectos, enfocado en las <b>3 estaciones</b>:
-        ECU17049_01, ECU21212_02 y ECU21212_06. Cruza Planned Task, PunchList y AC1-HC1 ECP
-        con filtros multi-select (proyecto, sistema, subsistema, planta, etapa), gráficas interactivas
-        y drill-down con ventanas emergentes.
-      </div>
-      <div class="footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span class="tag">3 FUENTES</span>
-          <span class="tag">3 ESTACIONES</span>
-          <span class="tag warn">~18 MB</span>
-        </div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card c-green" href="Dashboard_Preservaci%C3%B3n/Ejecutable/Dashboard_Preservacion.html">
-      <div class="icn">📋</div>
-      <div class="ttl">Dashboard de Preservación · Control de Equipos</div>
+    <a class="card hasbadge" data-c="activos" style="--c:var(--lime)" href="Dashboard_Preservaci%C3%B3n/Ejecutable/Dashboard_Preservacion.html">
+      <span class="badge">NUEVO · V3</span>
+      <div class="top"><div class="icn">📋</div><div class="ttl">Dashboard de Preservación<small>Control de equipos · corte 01‑oct</small></div></div>
       <div class="desc">
         Preservación de los <b>136 equipos</b> de Caño Sur Este M3 + M4 + M5 (bombas, skids, transformadores, VFD, gabinetes, UPS, generadores).
         Proyección de rutinas por mes con filtro al hacer clic en cada barra, carga proyectada, cumplimiento programado vs. ejecutado,
-        riesgo por tiempo sin rutina, cambios frente al corte anterior (15-SEP) y detalle de equipos y rutinas con totales y fichas.
-        Opción para excluir los equipos entregados a operaciones (HC-1).
+        riesgo por tiempo sin rutina, cambios frente al corte anterior (15‑sep) y detalle de equipos y rutinas con totales y fichas.
+        Opción para excluir los equipos entregados a operaciones (HC‑1).
       </div>
       <div class="footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span class="tag">136 EQUIPOS · 123 SIN HC-1</span>
-          <span class="tag">$45,6 mil M COP SIN HC-1</span>
-          <span class="tag">93 RUTINAS PROYECTADAS</span>
-          <span class="tag good">CORTE 01-OCT</span>
-        </div>
+        <div class="tags"><span class="tag">136 equipos · 123 sin HC‑1</span><span class="tag">$45,6 mil M sin HC‑1</span><span class="tag">93 rutinas proyectadas</span><span class="tag good">Corte 01‑oct</span></div>
         <span class="open">ABRIR →</span>
       </div>
     </a>
 
-    <a class="card c-yellow" href="IDA/Ejecutable/Informe_Ejecutivo_IDA_CSE.html">
-      <div class="icn">⚙️</div>
-      <div class="ttl">Informe Ejecutivo IDA · Caño Sur Este</div>
-      <div class="desc">
-        Avance de <b>Incorporación de Activos</b> (CAR · CAT · RBI · RCM) ponderado sobre <b>66 pozos y subproyectos</b>
-        de CSE-FAC + CSE-POZOS. Trae KPIs por disciplina, comparativo por estación, ranking por proyecto/pozo,
-        desglose de sub-actividades y curvas semanales S00-S21 (ejecutado vs programado).
-      </div>
-      <div class="footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span class="tag">66 SUBPROYECTOS</span>
-          <span class="tag">4 DISCIPLINAS</span>
-          <span class="tag good">CARGA RÁPIDA</span>
-        </div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card" href="Consolidado_QA/Ejecutable/Dashboard_QA_CSE.html">
-      <div class="icn">🧪</div>
-      <div class="ttl">Dashboard Consolidado QA · CSE</div>
-      <div class="desc">
-        4 secciones interactivas: <b>Aspectos Relevantes (4,974)</b>, <b>NCR/OBS/PNC (169)</b>,
-        <b>Dossieres (268)</b> y <b>Solicitudes Técnicas (334)</b>. Cada sección con sus propios
-        filtros (proyecto, disciplina, ejecutor, ubicación, etc.), KPIs, gráficos donut/barras/timeline y tablas con drill-down.
-      </div>
-      <div class="footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span class="tag">4 SECCIONES</span>
-          <span class="tag">~5,745 ITEMS</span>
-          <span class="tag good">CORTE 05-OCT</span>
-        </div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card c-purple" href="Organigrama/Ejecutable/Dashboard_Organigrama.html">
-      <div class="icn">👥</div>
-      <div class="ttl">Organigrama ATIP · Caño Sur Este</div>
-      <div class="desc">
-        Equipo de comisionamiento completo: <b>79 integrantes</b> (73 APPLUS+ + 5 Ecopetrol) organizados
-        por jerarquía estilo Excel — coordinación · planeación · certificación · materiales · IDA · logística · HSE ·
-        civil · eléctrico · I&C · mecánica estática y rotativa · KPI. Trae dos vistas (organigrama jerárquico
-        y por área), búsqueda en tiempo real, fotos individuales y ventana emergente con detalle por persona.
-      </div>
-      <div class="footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span class="tag">79 INTEGRANTES</span>
-          <span class="tag">16 EQUIPOS</span>
-          <span class="tag good">CORTE 06-OCT</span>
-        </div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card c-yellow" href="Timeline_Taladro/Ejecutable/Timeline_Taladro_Q3Q4_2026.html">
-      <div class="icn">🛢️</div>
-      <div class="ttl">Timeline Taladro · Q3-Q4 2026 + Q1 2027</div>
-      <div class="desc">
-        Línea de tiempo tipo <b>stem-plot</b> de la Ruta y Conexionado <b>Andina-Oriente</b> (corte 15-sep-2026).
-        Muestra los clusters y pozos por taladro (PW147 · PW157 · IESCO T645), con panel resumen por clúster,
-        filtros por Módulo (M3/M4/M5), evento y tipo de pozo, y visualización de la corriente de trabajo mes a mes
-        desde julio 2026 a marzo 2027.
-      </div>
-      <div class="footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span class="tag">3 TALADROS</span>
-          <span class="tag">246 ACTIVIDADES</span>
-          <span class="tag good">CARGA RÁPIDA</span>
-        </div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card c-purple" href="Timeline_Estaciones/Ejecutable/Timeline_Estaciones_Q3Q4_2026.html">
-      <div class="icn">⚡</div>
-      <div class="ttl">Timeline Estaciones · Q3-Q4 2026 + Q1 2027</div>
-      <div class="desc">
-        Lookahead por <b>aliado/vendor</b> (corte 17-sep-2026) para las 8 estaciones: TECNITANQUES · DIATECO ·
-        PETROLABIN 007 · BIOCAMPAMENTOS · MTZ 08 · DISCON 17 · GTC 010 · PYC ANDINOS 08. Trae 8 paneles Gantt
-        con barras por actividad (niveles 1-3), marcador HOY, filtros por aliado/nivel/estado, y modal detalle
-        con Programado vs Ejecutado.
-      </div>
-      <div class="footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span class="tag">8 ALIADOS</span>
-          <span class="tag">769 ACTIVIDADES</span>
-          <span class="tag good">CARGA RÁPIDA</span>
-        </div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card c-yellow" href="Garantias/Ejecutable/Dashboard_Garantias.html">
-      <div class="icn">🛡️</div>
-      <div class="ttl">Dashboard de Garantías · Caño Sur Este</div>
-      <div class="desc">
-        Seguimiento a garantías vs proveedores en los Módulos 2/3/4. Estado (abiertas/cerradas),
-        aging por disciplina, aperturas vs cierres mensuales, top proveedores y las 15 garantías
-        más antiguas en aging. Filtros por proveedor, disciplina, proyecto y estado.
-      </div>
-      <div class="footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span class="tag">152 GARANTÍAS</span>
-          <span class="tag">19 ABIERTAS</span>
-          <span class="tag good">CORTE 22-SEP</span>
-        </div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card c-green" href="Inventarios/Ejecutable/Dashboard_Inventarios.html">
-      <div class="icn">📦</div>
-      <div class="ttl">Dashboard de Inventarios · CSE</div>
+    <a class="card hasbadge" data-c="activos" style="--c:var(--cyan)" href="Inventarios/Ejecutable/Dashboard_Inventarios.html">
+      <span class="badge">NUEVO · V2</span>
+      <div class="top"><div class="icn">📦</div><div class="ttl">Dashboard de Inventarios<small>CSE · M3 + M4 + M5 · corte 06‑oct</small></div></div>
       <div class="desc">
         Inventario general M3 + M4 + M5 de Caño Sur Este. Resumen de valor, ítems, cantidad y sobrantes,
         reparto por módulo, cambios frente al corte anterior, valor por clasificación, almacén, sistema,
@@ -318,46 +198,163 @@
         Filtros en cascada y todo clickeable.
       </div>
       <div class="footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <span class="tag">1,333 ÍTEMS</span>
-          <span class="tag">$45.8 B COP</span>
-          <span class="tag good">3 MÓDULOS</span>
-        </div>
+        <div class="tags"><span class="tag">1.333 ítems</span><span class="tag">$45,8 mil M COP</span><span class="tag good">3 módulos</span></div>
         <span class="open">ABRIR →</span>
       </div>
     </a>
 
-    <!-- Placeholder para los próximos -->
-    <div class="card placeholder">
-      <div class="icn">＋</div>
-      <div class="ttl">Próximamente</div>
+    <a class="card" data-c="activos" style="--c:var(--yellow)" href="Garantias/Ejecutable/Dashboard_Garantias.html">
+      <div class="top"><div class="icn">🛡️</div><div class="ttl">Dashboard de Garantías<small>Caño Sur Este · corte 22‑sep</small></div></div>
       <div class="desc">
-        Próximos dashboards: Schedule · Asistencia Técnica · Cruce Aliado-Taladro.
-        Al subirlos al repositorio aparecerán como tarjeta aquí.
+        Seguimiento a garantías vs proveedores en los Módulos 2/3/4. Estado (abiertas/cerradas),
+        aging por disciplina, aperturas vs cierres mensuales, top proveedores y las 15 garantías
+        más antiguas en aging. Filtros por proveedor, disciplina, proyecto y estado.
       </div>
       <div class="footer">
-        <span class="tag">EN PREPARACIÓN</span>
-        <span class="open" style="color:var(--muted)">—</span>
+        <div class="tags"><span class="tag">152 garantías</span><span class="tag">19 abiertas</span><span class="tag good">Corte 22‑sep</span></div>
+        <span class="open">ABRIR →</span>
       </div>
-    </div>
-
+    </a>
   </div>
 
+  <!-- ====== AVANCE Y CALIDAD ====== -->
+  <div class="sec" data-sec="avance" style="--c:var(--pink)"><h2>Avance y calidad</h2><span class="n">reportes consolidados · IDA · QA</span></div>
+  <div class="grid" data-sec="avance">
+
+    <a class="card" data-c="avance" style="--c:var(--violet)" href="Informe_Estandarizado_Nuevo/Ejecutable/Reporte_Subproyectos.html">
+      <div class="top"><div class="icn">🏗</div><div class="ttl">Reporte Consolidado · Exteriores<small>8 subproyectos · 3 fuentes</small></div></div>
+      <div class="desc">
+        Cruza las 3 fuentes (Planned Task, PunchList y AC1‑HC1 ECP) para los 8 subproyectos de exteriores
+        ECU17049 / ECU21212 / ECU24091 (clusters · troncales · redes). Trae filtros multi‑select por
+        Proyecto, Sistema, Subsistema, Planta y Etapa, gráfica interactiva de % Avance con tooltip detallado
+        y drill‑down con sub‑modal al clicar cada celda.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">3 fuentes</span><span class="tag">8 subproyectos</span><span class="tag warn">~32 MB · carga lenta</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <a class="card" data-c="avance" style="--c:var(--cyan)" href="Informe_Estandarizado_Nuevo/Ejecutable/Reporte_Estaciones.html">
+      <div class="top"><div class="icn">⚡</div><div class="ttl">Reporte Consolidado · Estaciones<small>3 estaciones · 3 fuentes</small></div></div>
+      <div class="desc">
+        Misma estructura que el reporte de subproyectos, enfocado en las <b>3 estaciones</b>:
+        ECU17049_01, ECU21212_02 y ECU21212_06. Cruza Planned Task, PunchList y AC1‑HC1 ECP
+        con filtros multi‑select (proyecto, sistema, subsistema, planta, etapa), gráficas interactivas
+        y drill‑down con ventanas emergentes.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">3 fuentes</span><span class="tag">3 estaciones</span><span class="tag warn">~18 MB</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <a class="card" data-c="avance" style="--c:var(--orange)" href="IDA/Ejecutable/Informe_Ejecutivo_IDA_CSE.html">
+      <div class="top"><div class="icn">⚙️</div><div class="ttl">Informe Ejecutivo IDA<small>Incorporación de activos · CSE</small></div></div>
+      <div class="desc">
+        Avance de <b>Incorporación de Activos</b> (CAR · CAT · RBI · RCM) ponderado sobre <b>66 pozos y subproyectos</b>
+        de CSE‑FAC + CSE‑POZOS. Trae KPIs por disciplina, comparativo por estación, ranking por proyecto/pozo,
+        desglose de sub‑actividades y curvas semanales S00‑S21 (ejecutado vs programado).
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">66 subproyectos</span><span class="tag">4 disciplinas</span><span class="tag good">Carga rápida</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <a class="card" data-c="avance" style="--c:var(--mint)" href="Consolidado_QA/Ejecutable/Dashboard_QA_CSE.html">
+      <div class="top"><div class="icn">🧪</div><div class="ttl">Dashboard Consolidado QA<small>CSE · corte 05‑oct</small></div></div>
+      <div class="desc">
+        4 secciones interactivas: <b>Aspectos Relevantes (4.974)</b>, <b>NCR/OBS/PNC (169)</b>,
+        <b>Dossieres (268)</b> y <b>Solicitudes Técnicas (334)</b>. Cada sección con sus propios
+        filtros (proyecto, disciplina, ejecutor, ubicación, etc.), KPIs, gráficos donut/barras/timeline y tablas con drill‑down.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">4 secciones</span><span class="tag">~5.745 ítems</span><span class="tag good">Corte 05‑oct</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- ====== PLANEACIÓN Y EQUIPO ====== -->
+  <div class="sec" data-sec="plan" style="--c:var(--cyan)"><h2>Planeación y equipo</h2><span class="n">timelines · organigrama</span></div>
+  <div class="grid" data-sec="plan">
+
+    <a class="card" data-c="plan" style="--c:var(--yellow)" href="Timeline_Taladro/Ejecutable/Timeline_Taladro_Q3Q4_2026.html">
+      <div class="top"><div class="icn">🛢️</div><div class="ttl">Timeline Taladro<small>Q3‑Q4 2026 + Q1 2027 · corte 15‑sep</small></div></div>
+      <div class="desc">
+        Línea de tiempo tipo <b>stem‑plot</b> de la Ruta y Conexionado <b>Andina‑Oriente</b>.
+        Muestra los clusters y pozos por taladro (PW147 · PW157 · IESCO T645), con panel resumen por clúster,
+        filtros por Módulo (M3/M4/M5), evento y tipo de pozo, y visualización de la corriente de trabajo mes a mes
+        desde julio 2026 a marzo 2027.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">3 taladros</span><span class="tag">246 actividades</span><span class="tag good">Carga rápida</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <a class="card" data-c="plan" style="--c:var(--violet)" href="Timeline_Estaciones/Ejecutable/Timeline_Estaciones_Q3Q4_2026.html">
+      <div class="top"><div class="icn">⚡</div><div class="ttl">Timeline Estaciones<small>Q3‑Q4 2026 + Q1 2027 · corte 17‑sep</small></div></div>
+      <div class="desc">
+        Lookahead por <b>aliado/vendor</b> para las 8 estaciones: TECNITANQUES · DIATECO ·
+        PETROLABIN 007 · BIOCAMPAMENTOS · MTZ 08 · DISCON 17 · GTC 010 · PYC ANDINOS 08. Trae 8 paneles Gantt
+        con barras por actividad (niveles 1‑3), marcador HOY, filtros por aliado/nivel/estado, y modal detalle
+        con Programado vs Ejecutado.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">8 aliados</span><span class="tag">769 actividades</span><span class="tag good">Carga rápida</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <a class="card hasbadge" data-c="plan" style="--c:var(--pink)" href="Organigrama/Ejecutable/Dashboard_Organigrama.html">
+      <span class="badge">NUEVO · V2</span>
+      <div class="top"><div class="icn">👥</div><div class="ttl">Organigrama ATIP<small>Caño Sur Este · corte 06‑oct</small></div></div>
+      <div class="desc">
+        Equipo de comisionamiento completo: <b>79 integrantes</b> (73 APPLUS+ + 5 Ecopetrol) organizados
+        por jerarquía estilo Excel — coordinación · planeación · certificación · materiales · IDA · logística · HSE ·
+        civil · eléctrico · I&C · mecánica estática y rotativa · KPI. Dos vistas (jerárquica y por área),
+        búsqueda en tiempo real, fotos individuales y ventana emergente con detalle por persona.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">79 integrantes</span><span class="tag">16 equipos</span><span class="tag good">Corte 06‑oct</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <div class="card placeholder" data-c="plan">
+      <div class="top"><div class="icn">＋</div><div class="ttl">Próximamente</div></div>
+      <div class="desc">Próximos dashboards: Schedule · Asistencia Técnica · Cruce Aliado‑Taladro. Al subirlos al repositorio aparecerán como tarjeta aquí.</div>
+      <div class="footer"><div class="tags"><span class="tag">En preparación</span></div><span class="open" style="color:var(--muted)">—</span></div>
+    </div>
+  </div>
+
+  <div class="empty" id="empty">No hay dashboards que coincidan con esa búsqueda.</div>
+
   <footer>
-    <b>APPLUS+ Colombia</b> · Aseguramiento Técnico Integral · ATIP Caño Sur Este<br>
-    Publicado vía GitHub Pages · <span id="repoLink"></span>
+    <span><b>APPLUS+ Colombia</b> · Aseguramiento Técnico Integral · ATIP Caño Sur Este</span>
+    <span>Publicado vía GitHub Pages · <a href="https://github.com/Edgar-Suarez-creator/Dashboard" target="_blank" rel="noopener">repositorio en GitHub</a></span>
   </footer>
 </div>
 
 <script>
-  // Fecha de "última actualización" = fecha en que se construyó esta página (server-side via build) o fallback al cargar
-  (function(){
-    const fmt = new Intl.DateTimeFormat('es-CO', {dateStyle:'long', timeStyle:'short'});
-    document.getElementById('corte').textContent = 'Última actualización: ' + fmt.format(new Date());
-    const repo = 'https://github.com/Edgar-Suarez-creator/Dashboard';
-    document.getElementById('repoLink').innerHTML =
-      '<a href="' + repo + '" style="color:#a8b6d4;text-decoration:none" target="_blank">repositorio en GitHub</a>';
-  })();
+(function(){
+  const cards=[...document.querySelectorAll('.card')], q=document.getElementById('q'), cats=[...document.querySelectorAll('.cat')];
+  let cat='';
+  document.getElementById('c-all').textContent=cards.filter(c=>!c.classList.contains('placeholder')).length;
+  document.getElementById('st-n').textContent=cards.filter(c=>!c.classList.contains('placeholder')).length;
+  function norm(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
+  function apply(){
+    const t=norm(q.value.trim()); let shown=0;
+    cards.forEach(c=>{const ok=(!cat||c.dataset.c===cat)&&(!t||norm(c.textContent).includes(t)); c.classList.toggle('hide',!ok); if(ok&&!c.classList.contains('placeholder'))shown++;});
+    document.querySelectorAll('[data-sec]').forEach(el=>{const any=[...document.querySelectorAll(`.grid[data-sec="${el.dataset.sec}"] .card`)].some(c=>!c.classList.contains('hide')); el.style.display=any?'':'none';});
+    document.getElementById('empty').classList.toggle('show',shown===0);
+  }
+  q.addEventListener('input',apply);
+  cats.forEach(b=>b.addEventListener('click',()=>{cat=b.dataset.c;cats.forEach(x=>x.classList.toggle('on',x===b));apply();}));
+  document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();} if(e.key==='Escape'){q.value='';apply();q.blur();}});
+})();
 </script>
 </body>
 </html>
