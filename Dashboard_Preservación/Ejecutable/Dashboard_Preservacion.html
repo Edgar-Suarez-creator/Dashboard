@@ -220,7 +220,7 @@ footer{margin-top:34px;color:var(--muted);font-size:12px;text-align:center}
 <!-- 2. Proyección de equipos -->
 <div class="sec"><h2>Proyección de equipos a preservar</h2>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <div class="toggle" id="pmetric"><button data-m="rutinas" class="on">Rutinas</button><button data-m="equipos">Equipos</button></div>
+    <div class="toggle" id="pmetric"><button data-m="rutinas" class="on">Rutinas</button><button data-m="equipos">Equipos</button><button data-m="valor">Valor $</button></div>
     <div class="toggle" id="phor"><button data-h="12" class="on">12 meses</button><button data-h="all">Todo el histórico</button></div>
   </div>
 </div>
@@ -452,45 +452,46 @@ function aggMonths(base,months){
   const pr={vencida:3,pendiente:2,ejecutada:1};
   base.forEach(a=>{const g=a.mes&&agg[a.mes]; if(!g)return; g.n[a.estado]++; g.esp[a.esp]=(g.esp[a.esp]||0)+1; g.acts.push(a.i);
     const key=a.eq>=0?'e'+a.eq:'c'+a.codigo; if(!g.eq[key]||pr[a.estado]>pr[g.eq[key]]) g.eq[key]=a.estado;});
-  Object.values(agg).forEach(g=>{g.e={ejecutada:0,pendiente:0,vencida:0};Object.values(g.eq).forEach(s=>g.e[s]++);g.ne=Object.keys(g.eq).length;g.na=g.acts.length;});
+  Object.values(agg).forEach(g=>{g.e={ejecutada:0,pendiente:0,vencida:0};g.v={ejecutada:0,pendiente:0,vencida:0};Object.entries(g.eq).forEach(([key,s])=>{g.e[s]++; if(key[0]==='e'){const q=EQ[+key.slice(1)]; g.v[s]+=q?(+q.valor||0):0;}});g.vt=g.v.ejecutada+g.v.pendiente+g.v.vencida;g.ne=Object.keys(g.eq).length;g.na=g.acts.length;});
   return agg;
 }
-function niceTop(mx){const st=[1,2,5,10,20,25,50,100,200].find(s=>Math.ceil(mx/s)<=5)||100;return {top:Math.max(st,Math.ceil(mx/st)*st),st};}
+function niceTop(mx){let st=[1,2,5,10,20,25,50,100,200].find(s=>Math.ceil(mx/s)<=5);if(!st){const p=Math.pow(10,Math.floor(Math.log10(mx/5)));st=[1,2,2.5,5,10].map(k=>k*p).find(s=>Math.ceil(mx/s)<=5)||10*p;}return {top:Math.max(st,Math.ceil(mx/st)*st),st};}
 function proj(){
   const base=actsNow('mes');
   H_MONTHS=phor==='12'?ALL_MONTHS.filter(m=>m>=addM(TM,-8)):ALL_MONTHS.slice();
   const months=H_MONTHS; AGG=aggMonths(base,ALL_MONTHS);
-  $('proj-t').textContent=pmetric==='equipos'?'Equipos con rutina programada por mes':'Rutinas programadas por mes';
-  const val=(m,s)=>pmetric==='equipos'?AGG[m].e[s]:AGG[m].n[s];
+  $('proj-t').textContent=pmetric==='valor'?'Valor de los equipos con rutina programada por mes (COP)':pmetric==='equipos'?'Equipos con rutina programada por mes':'Rutinas programadas por mes';
+  const val=(m,s)=>pmetric==='valor'?AGG[m].v[s]:pmetric==='equipos'?AGG[m].e[s]:AGG[m].n[s];
+  const fv=v=>pmetric==='valor'?S(v):N(v);
   const tot=m=>EST_ORD.reduce((s,k)=>s+val(m,k),0);
   const mx=Math.max(1,...months.map(tot)); const {top,st}=niceTop(mx);
-  const W=1200,H=330,pl=46,pr=14,pt=34,pb=44,n=months.length,slot=(W-pl-pr)/n,bw=Math.min(slot*.64,60);
+  const W=1200,H=330,pl=(pmetric==='valor'?92:46),pr=14,pt=34,pb=44,n=months.length,slot=(W-pl-pr)/n,bw=Math.min(slot*.64,60);
   const X=i=>pl+slot*i+slot/2, Y=v=>pt+(H-pt-pb)*(1-v/top);
   let s=`<svg viewBox="0 0 ${W} ${H}">`;
   // banda de proyección
   const fi=months.findIndex(m=>m>=TM);
   if(fi>=0){const x0=pl+slot*fi; s+=`<rect x="${x0}" y="${pt-18}" width="${W-pr-x0}" height="${H-pb-pt+18}" fill="rgba(0,229,255,.045)" rx="8"/><text x="${W-pr-8}" y="${pt-6}" text-anchor="end" fill="#00e5ff" font-size="11" font-weight="800" letter-spacing="1">PROYECCIÓN →</text>`;}
-  for(let v=0;v<=top;v+=st){s+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="rgba(255,255,255,.06)"/><text x="${pl-8}" y="${Y(v)+4}" text-anchor="end" fill="#a9b7d9" font-size="11">${v}</text>`;}
+  for(let v=0;v<=top;v+=st){s+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="rgba(255,255,255,.06)"/><text x="${pl-8}" y="${Y(v)+4}" text-anchor="end" fill="#a9b7d9" font-size="11">${pmetric==='valor'?(v>=1e9?(v/1e9).toFixed(1).replace('.',',')+' mil M':S(v)):v}</text>`;}
   TIPS=[];
   months.forEach((m,i)=>{
     const g=AGG[m], T=tot(m), on=state.mes===m; let y=Y(0);
     const esps=Object.entries(g.esp).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${espN(k)} ${v}`).join(' · ');
-    TIPS.push(`<div class="tt">${mll(m)}${m>=TM?' · <b>proyección</b>':''}</div>${tipRow('Equipos',N(g.ne))}${tipRow('Rutinas',N(g.na))}${EST_ORD.map(k=>tipRow(`<i class="dot" style="background:${EST_C[k]}"></i>${EST_N[k]}s`,N(val(m,k)))).join('')}<div class="tr" style="margin-top:4px"><span>${esps||'—'}</span></div><div class="tr"><span>Clic para ${on?'quitar el filtro':'filtrar este mes'}</span></div>`);
+    TIPS.push(`<div class="tt">${mll(m)}${m>=TM?' · <b>proyección</b>':''}</div>${tipRow('Equipos',N(g.ne))}${tipRow('Rutinas',N(g.na))}${tipRow('Valor de los equipos',S(g.vt))}${EST_ORD.map(k=>tipRow(`<i class="dot" style="background:${EST_C[k]}"></i>${EST_N[k]}s`,fv(val(m,k)))).join('')}<div class="tr" style="margin-top:4px"><span>${esps||'—'}</span></div><div class="tr"><span>Clic para ${on?'quitar el filtro':'filtrar este mes'}</span></div>`);
     s+=`<g class="mo" ${call('setF','mes',m)} onmousemove="tipShow(event,${i})" onmouseleave="tipHide()">`;
     s+=`<rect class="hit" x="${pl+slot*i}" y="${pt}" width="${slot}" height="${H-pt-pb}"/>`;
     EST_ORD.forEach(k=>{const v=val(m,k); if(!v)return; const h=Y(0)-Y(v); const gap=h>3?2:0; s+=`<rect class="bseg" x="${X(i)-bw/2}" y="${y-h+gap}" width="${bw}" height="${Math.max(h-gap,1)}" rx="3" fill="${EST_C[k]}" style="filter:drop-shadow(0 0 5px ${EST_C[k]}66)"/>`; y-=h;});
     if(on) s+=`<rect x="${X(i)-bw/2-4}" y="${Y(T)-4}" width="${bw+8}" height="${Y(0)-Y(T)+8}" rx="6" fill="none" stroke="#ffe600" stroke-width="2" style="filter:drop-shadow(0 0 6px #ffe600)"/>`;
-    if(T) s+=`<text x="${X(i)}" y="${Y(T)-7}" text-anchor="middle" fill="${on?'#ffe600':'#eef3ff'}" font-size="12" font-weight="700" font-family="Space Grotesk">${T}</text>`;
+    if(T) s+=`<text x="${X(i)}" y="${Y(T)-7}" text-anchor="middle" fill="${on?'#ffe600':'#eef3ff'}" font-size="12" font-weight="700" font-family="Space Grotesk">${pmetric==='valor'?S(T):T}</text>`;
     s+=`<text x="${X(i)}" y="${H-pb+18}" text-anchor="middle" fill="${m===TM?'#ffe600':on?'#ffe600':'#a9b7d9'}" font-size="11" font-weight="${m===TM||on?'800':'500'}">${ml(m)}</text></g>`;
   });
   // línea de corte
   const ti=months.indexOf(TM);
   if(ti>=0){const dim=new Date(+TM.slice(0,4),+TM.slice(5,7),0).getDate(); const xc=pl+slot*ti+slot*(+TODAY.slice(8,10)/dim);
     s+=`<line x1="${xc}" x2="${xc}" y1="${pt-6}" y2="${H-pb}" stroke="#ffe600" stroke-dasharray="5 4" stroke-width="1.5"/><text x="${xc+5}" y="${pt+4}" fill="#ffe600" font-size="10.5" font-weight="700">corte ${fd(TODAY)}</text>`;}
-  s+=`<text x="${(W+pl)/2}" y="${H-5}" text-anchor="middle" fill="#7385ad" font-size="11">${pmetric==='equipos'?'Equipos distintos con al menos una rutina programada en el mes (si tiene rutinas en varios estados, prima vencida › proyectada › ejecutada)':'Rutinas programadas en el mes, por estado'}</text></svg>`;
+  s+=`<text x="${(W+pl)/2}" y="${H-5}" text-anchor="middle" fill="#7385ad" font-size="11">${pmetric==='valor'?'Valor (COP) de los equipos distintos con al menos una rutina en el mes, por estado (un equipo cuenta una vez por mes; prima vencida › proyectada › ejecutada)':pmetric==='equipos'?'Equipos distintos con al menos una rutina programada en el mes (si tiene rutinas en varios estados, prima vencida › proyectada › ejecutada)':'Rutinas programadas en el mes, por estado'}</text></svg>`;
   $('proj').innerHTML=s;
   const distinct=k=>{const s=new Set(); months.forEach(m=>Object.entries(AGG[m].eq).forEach(([key,st])=>{if(st===k)s.add(key);})); return s.size;};
-  $('proj-leg').innerHTML=EST_ORD.map(k=>`<span class="lg ${state.estado===k?'on':''}" ${call('setF','estado',k)}><i class="dot" style="background:${EST_C[k]};box-shadow:0 0 8px ${EST_C[k]}"></i>${EST_N[k]}s · ${N(months.reduce((t,m)=>t+val(m,k),0))}${pmetric==='equipos'?` <small style="color:var(--muted)">suma de meses · ${N(distinct(k))} equipos distintos</small>`:' <small style="color:var(--muted)">rutinas</small>'}</span>`).join('')+`<span style="margin-left:auto">${state.mes?'Mes seleccionado: <b style="color:#ffe600">'+mll(state.mes)+'</b>':'Clic en una barra para filtrar'}</span>`;
+  $('proj-leg').innerHTML=EST_ORD.map(k=>`<span class="lg ${state.estado===k?'on':''}" ${call('setF','estado',k)}><i class="dot" style="background:${EST_C[k]};box-shadow:0 0 8px ${EST_C[k]}"></i>${EST_N[k]}s · ${fv(months.reduce((t,m)=>t+val(m,k),0))}${pmetric==='valor'?' <small style="color:var(--muted)">suma de meses (COP)</small>':pmetric==='equipos'?` <small style="color:var(--muted)">suma de meses · ${N(distinct(k))} equipos distintos</small>`:' <small style="color:var(--muted)">rutinas</small>'}</span>`).join('')+`<span style="margin-left:auto">${state.mes?'Mes seleccionado: <b style="color:#ffe600">'+mll(state.mes)+'</b>':'Clic en una barra para filtrar'}</span>`;
 }
 function carga(){
   const base=actsNow('mes'); const fut=ALL_MONTHS.filter(m=>m>=TM);
