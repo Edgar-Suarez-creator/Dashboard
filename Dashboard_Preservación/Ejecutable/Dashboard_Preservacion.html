@@ -314,6 +314,7 @@ const attr=s=>String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/</g
 const call=(fn,...a)=>`onclick='${attr(fn+'('+a.map(x=>JSON.stringify(x)).join(',')+')')}'`;
 const N=n=>Number(n||0).toLocaleString('es-CO',{maximumFractionDigits:0});
 const $$=n=>'$'+N(n);
+const Sv=n=>{n=Number(n||0);const a=Math.abs(n);if(a>=1e9)return '$'+(n/1e9).toFixed(1).replace('.',',')+' mil M';if(a>=1e6)return '$'+(n/1e6).toFixed(0)+' M';if(a>=1e3)return '$'+(n/1e3).toFixed(0)+' K';return '$'+n.toFixed(0);};
 const S=n=>{n=Number(n||0);const a=Math.abs(n);if(a>=1e9)return '$'+(n/1e9).toFixed(2).replace('.',',')+' mil M';if(a>=1e6)return '$'+(n/1e6).toFixed(1).replace('.',',')+' M';if(a>=1e3)return '$'+(n/1e3).toFixed(0)+' K';return '$'+n.toFixed(0);};
 const P=(a,b)=>b?(a/b*100).toFixed(1).replace('.',',')+'%':'0%';
 const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -462,7 +463,7 @@ function proj(){
   const months=H_MONTHS; AGG=aggMonths(base,ALL_MONTHS);
   $('proj-t').textContent=pmetric==='valor'?'Valor de los equipos con rutina programada por mes (COP)':pmetric==='equipos'?'Equipos con rutina programada por mes':'Rutinas programadas por mes';
   const val=(m,s)=>pmetric==='valor'?AGG[m].v[s]:pmetric==='equipos'?AGG[m].e[s]:AGG[m].n[s];
-  const fv=v=>pmetric==='valor'?S(v):N(v);
+  const fv=v=>pmetric==='valor'?Sv(v):N(v);
   const tot=m=>EST_ORD.reduce((s,k)=>s+val(m,k),0);
   const mx=Math.max(1,...months.map(tot)); const {top,st}=niceTop(mx);
   const W=1200,H=330,pl=(pmetric==='valor'?92:46),pr=14,pt=34,pb=44,n=months.length,slot=(W-pl-pr)/n,bw=Math.min(slot*.64,60);
@@ -471,17 +472,18 @@ function proj(){
   // banda de proyección
   const fi=months.findIndex(m=>m>=TM);
   if(fi>=0){const x0=pl+slot*fi; s+=`<rect x="${x0}" y="${pt-18}" width="${W-pr-x0}" height="${H-pb-pt+18}" fill="rgba(0,229,255,.045)" rx="8"/><text x="${W-pr-8}" y="${pt-6}" text-anchor="end" fill="#00e5ff" font-size="11" font-weight="800" letter-spacing="1">PROYECCIÓN →</text>`;}
-  for(let v=0;v<=top;v+=st){s+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="rgba(255,255,255,.06)"/><text x="${pl-8}" y="${Y(v)+4}" text-anchor="end" fill="#a9b7d9" font-size="11">${pmetric==='valor'?(v>=1e9?(v/1e9).toFixed(1).replace('.',',')+' mil M':S(v)):v}</text>`;}
+  for(let v=0;v<=top;v+=st){s+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="rgba(255,255,255,.06)"/><text x="${pl-8}" y="${Y(v)+4}" text-anchor="end" fill="#a9b7d9" font-size="11">${pmetric==='valor'?(v>=1e9?(v/1e9).toFixed(1).replace('.',',').replace(',0','')+' mil M':Sv(v)):v}</text>`;}
   TIPS=[];
   months.forEach((m,i)=>{
     const g=AGG[m], T=tot(m), on=state.mes===m; let y=Y(0);
     const esps=Object.entries(g.esp).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${espN(k)} ${v}`).join(' · ');
-    TIPS.push(`<div class="tt">${mll(m)}${m>=TM?' · <b>proyección</b>':''}</div>${tipRow('Equipos',N(g.ne))}${tipRow('Rutinas',N(g.na))}${tipRow('Valor de los equipos',S(g.vt))}${EST_ORD.map(k=>tipRow(`<i class="dot" style="background:${EST_C[k]}"></i>${EST_N[k]}s`,fv(val(m,k)))).join('')}<div class="tr" style="margin-top:4px"><span>${esps||'—'}</span></div><div class="tr"><span>Clic para ${on?'quitar el filtro':'filtrar este mes'}</span></div>`);
+    TIPS.push(`<div class="tt">${mll(m)}${m>=TM?' · <b>proyección</b>':''}</div>${tipRow('Equipos',N(g.ne))}${tipRow('Rutinas',N(g.na))}${tipRow('Valor de los equipos',Sv(g.vt))}${EST_ORD.map(k=>tipRow(`<i class="dot" style="background:${EST_C[k]}"></i>${EST_N[k]}s`,fv(val(m,k)))).join('')}<div class="tr" style="margin-top:4px"><span>${esps||'—'}</span></div><div class="tr"><span>Clic para ${on?'quitar el filtro':'filtrar este mes'}</span></div>`);
     s+=`<g class="mo" ${call('setF','mes',m)} onmousemove="tipShow(event,${i})" onmouseleave="tipHide()">`;
     s+=`<rect class="hit" x="${pl+slot*i}" y="${pt}" width="${slot}" height="${H-pt-pb}"/>`;
     EST_ORD.forEach(k=>{const v=val(m,k); if(!v)return; const h=Y(0)-Y(v); const gap=h>3?2:0; s+=`<rect class="bseg" x="${X(i)-bw/2}" y="${y-h+gap}" width="${bw}" height="${Math.max(h-gap,1)}" rx="3" fill="${EST_C[k]}" style="filter:drop-shadow(0 0 5px ${EST_C[k]}66)"/>`; y-=h;});
     if(on) s+=`<rect x="${X(i)-bw/2-4}" y="${Y(T)-4}" width="${bw+8}" height="${Y(0)-Y(T)+8}" rx="6" fill="none" stroke="#ffe600" stroke-width="2" style="filter:drop-shadow(0 0 6px #ffe600)"/>`;
-    if(T) s+=`<text x="${X(i)}" y="${Y(T)-7}" text-anchor="middle" fill="${on?'#ffe600':'#eef3ff'}" font-size="12" font-weight="700" font-family="Space Grotesk">${pmetric==='valor'?S(T):T}</text>`;
+    if(T&&pmetric==='valor'){const lab=Sv(T), hb=Y(0)-Y(T), need=lab.length*6.8+14; if(hb>=need) s+=`<text transform="translate(${X(i)+4.5},${Y(0)-7}) rotate(-90)" text-anchor="start" fill="#05070f" font-size="12.5" font-weight="800" font-family="Space Grotesk" style="pointer-events:none">${lab}</text>`; else s+=`<text transform="translate(${X(i)+4.5},${Y(T)-6}) rotate(-90)" text-anchor="start" fill="${on?'#ffe600':'#eef3ff'}" font-size="12" font-weight="700" font-family="Space Grotesk" style="pointer-events:none">${lab}</text>`;}
+    else if(T) s+=`<text x="${X(i)}" y="${Y(T)-7}" text-anchor="middle" fill="${on?'#ffe600':'#eef3ff'}" font-size="12" font-weight="700" font-family="Space Grotesk">${T}</text>`;
     s+=`<text x="${X(i)}" y="${H-pb+18}" text-anchor="middle" fill="${m===TM?'#ffe600':on?'#ffe600':'#a9b7d9'}" font-size="11" font-weight="${m===TM||on?'800':'500'}">${ml(m)}</text></g>`;
   });
   // línea de corte
