@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tracking de Equipos · CSE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.45.2/apexcharts.min.js"></script>
+<style>
+/*__CSS__*/
+.kpis{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.kpis{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.wl{grid-template-columns:repeat(5,1fr)}
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.clc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;transition:.18s;position:relative;overflow:hidden}
+.clc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c);box-shadow:0 0 14px var(--c)}
+.clc:hover{transform:translateY(-3px);border-color:var(--c);box-shadow:0 0 22px -6px var(--c)}
+.clc h4{margin:0;font:700 19px Rajdhani;letter-spacing:.6px;display:flex;justify-content:space-between;align-items:center}
+.clc .meta{color:var(--text2);font-size:11.5px;margin:2px 0 8px}
+.clc .row{display:flex;justify-content:space-between;font-size:12px;padding:2px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
+.clc .row b{font-weight:700}
+.clc .pb{height:6px;border-radius:6px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:8px;display:flex}
+.clc .pb i{display:block;height:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--text2);margin:0 0 12px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.note{color:var(--muted);font-size:11.5px;margin:-4px 0 12px}
+.warnbox{border:1px solid rgba(255,159,28,.45);background:rgba(255,159,28,.08);color:#ffd08a;border-radius:12px;padding:8px 14px;font-size:12px;margin-bottom:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>TRACKING DE EQUIPOS · CAÑO SUR ESTE</h1>
+      <div class="sub"><b>Solo equipos</b> (transformadores, skids/E-House, tableros, variadores, bombas, recipientes) · sin cables, accesorios, tubería ni válvulas &nbsp;·&nbsp; <b>Exteriores</b> y <b>Estaciones</b> · Módulos 3, 4 y 5</div>
+    </div>
+    <div class="stamp"><span class="pill"><i></i>Actualizado <span id="gen-at"></span></span><div class="sub" style="margin-top:8px" id="fuentes"></div></div>
+  </div>
+  <div id="warn"></div>
+
+  <div class="fbar">
+    <div class="fg"><label>Zona</label><select id="f-zona"></select></div>
+    <div class="fg"><label>Módulo</label><select id="f-mod"></select></div>
+    <div class="fg"><label>Categoría</label><select id="f-cat"></select></div>
+    <div class="fg"><label>Llegada</label><select id="f-lleg"></select></div>
+    <div class="fg"><label>Proveedor</label><select id="f-prov"></select></div>
+    <div class="fg"><label>Ubicación</label><select id="f-loc"></select></div>
+    <div class="fg"><label>Ver</label><select id="f-ver"><option value="pend">Solo pendientes</option><option value="all">Todo (incluye recibidos)</option></select></div>
+    <div class="fg grow"><label>Buscar</label><input id="f-q" placeholder="TAG, ODB, clúster, equipo, proveedor…"></div>
+    <button class="btn" onclick="resetF()">Limpiar</button>
+  </div>
+  <div class="chips" id="chips"></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="tabs">
+    <div class="tab on" data-v="res" onclick="goTab('res')">Resumen</div>
+    <div class="tab" data-v="cal" onclick="goTab('cal')">Próximas llegadas <span class="ct" id="ct-cal"></span></div>
+    <div class="tab" data-v="tal" onclick="goTab('tal')">Equipos vs taladro <span class="ct" id="ct-tal"></span></div>
+    <div class="tab" data-v="det" onclick="goTab('det')">Detalle <span class="ct" id="ct-det"></span></div>
+  </div>
+
+  <div class="view on" id="v-res">
+    <div class="grid g21">
+      <div class="card"><h3>¿Cuándo llegan los equipos?</h3><div class="d">Unidades pendientes por mes de llegada (fecha proyectada en sitio). Clic en una barra para ver los equipos.</div><div id="c-mes"></div></div>
+      <div class="card"><h3>Estado de llegada</h3><div class="d">Unidades por estado · clic para filtrar</div><div id="c-lleg"></div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h3>Avance por categoría de equipo</h3><div class="d">Unidades recibidas, por llegar y sin compra</div><div id="c-cat"></div></div>
+      <div class="card"><h3>Proveedores con equipos pendientes</h3><div class="d">Unidades pendientes con proveedor asignado (no incluye lo que aún no tiene compra) · clic para filtrar</div><div id="c-prov"></div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h3>Exteriores vs Estaciones</h3><div class="d">Unidades recibidas y pendientes por zona</div><div id="c-zona"></div></div>
+      <div class="card"><h3>Ubicaciones con más pendientes</h3><div class="d">Clúster, locación o sistema · clic para filtrar</div><div id="c-loc"></div></div>
+    </div>
+  </div>
+
+  <div class="view" id="v-cal">
+    <div class="note">Equipos pendientes agrupados por la fecha proyectada de llegada a sitio. Clic en un equipo para ver su ficha.</div>
+    <div class="wl" id="wl"></div>
+    <div class="sec">Sin fecha de llegada</div>
+    <div class="wl" id="wl2" style="grid-template-columns:1fr 1fr"></div>
+  </div>
+
+  <div class="view" id="v-tal">
+    <div class="note">Para cada clúster de la ruta del taladro (RyC): cuándo llega el taladro y si sus equipos estarán en sitio. Listo = todo recibido · En riesgo = pendientes que llegan antes del taladro · Crítico = llegan después del taladro, sin fecha o sin compra.</div>
+    <div class="card" style="margin-bottom:14px"><h3>Taladro vs llegada de equipos por clúster</h3><div class="d">Azul = periodo del taladro en la locación · amarillo/rojo = ventana de llegada de los equipos pendientes con fecha (rojo si termina después de que llega el taladro)</div><div id="c-tal"></div></div>
+    <div class="cl-grid" id="clgrid"></div>
+  </div>
+
+  <div class="view" id="v-det">
+    <div class="tcard">
+      <div class="thead"><div class="info" id="det-info"></div><button class="btn cy" onclick="exportCSV()">Descargar CSV</button></div>
+      <div class="tw"><table><thead><tr id="det-h"></tr></thead><tbody id="det-b"></tbody></table></div>
+      <div class="more" id="det-more"></div>
+    </div>
+  </div>
+
+  <footer>Fuente: tracking de materiales ECU17049 (M3), ECU21212 (M4-E) y ECU24091 (M5) · ruta del taladro RyC · ATIP Applus+ / Ecopetrol · Caño Sur Este</footer>
+</div>
+
+<div class="mback" id="mback" onclick="closeM()"></div>
+<div class="modal" id="modal"><div class="mhead"><div><h2 id="m-t"></h2><div class="ms" id="m-s"></div><div class="chipsm" id="m-c"></div></div><button class="x" onclick="closeM()">✕</button></div><div class="mbody" id="m-b"></div></div>
+
+<script>
+const DATA = __DATA__;
+const HOY = DATA.hoy;
+const C = {cy:'#00e5ff',mg:'#ff2bd6',lm:'#39ff88',yl:'#ffe14d',rd:'#ff3d71',or:'#ff9f1c',vi:'#b46bff',bl:'#4d7cff',tx:'#9fb3d9'};
+const LLEG = ['ETA vencida','Llega ≤30 días','Llega 31–90 días','Llega >90 días','Sin fecha','Sin compra','Recibido'];
+const LCOL = {'ETA vencida':C.rd,'Llega ≤30 días':C.or,'Llega 31–90 días':C.yl,'Llega >90 días':C.cy,'Sin fecha':C.mg,'Sin compra':C.vi,'Recibido':C.lm};
+const LBADGE = {'ETA vencida':'b-bd','Llega ≤30 días':'b-wa','Llega 31–90 días':'b-wa','Llega >90 días':'b-in','Sin fecha':'b-vi','Sin compra':'b-vi','Recibido':'b-ok'};
+const CATS = ['Transformadores','Skids VFD/SUT y E-House','Tableros y celdas','Variadores','Otros eléctricos','Bombas y rotativos','Recipientes y estáticos'];
+const CCOL = [C.cy,C.mg,C.lm,C.yl,C.or,C.vi,C.bl];
+const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const fd = s => s ? (+s.slice(8,10))+'-'+MES[+s.slice(5,7)-1]+'-'+s.slice(2,4) : '—';
+const nf = n => (Math.round(n*10)/10).toLocaleString('es-CO');
+const dd = (a,b) => Math.round((new Date(a)-new Date(b))/864e5);
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+DATA.items.forEach((x,i)=>x.i=i);
+let F = {zona:'',mod:'',cat:'',lleg:'',prov:'',loc:'',ver:'pend',q:''};
+let TAB='res', CH={}, detSort={k:'eta',d:1}, detN=200;
+
+function base(){ // filtros sin "ver"
+  const q=F.q.toLowerCase();
+  return DATA.items.filter(x=>(!F.zona||x.zona===F.zona)&&(!F.mod||x.mod===F.mod)&&(!F.cat||x.cat===F.cat)&&(!F.lleg||x.lleg===F.lleg)&&(!F.prov||x.prov===F.prov)&&(!F.loc||x.loc===F.loc)
+    &&(!q||[x.tag,x.odb,x.loc,x.tipo,x.desc,x.prov,x.a1,x.a2,x.cat].join(' ').toLowerCase().includes(q)));
+}
+function rows(){ const b=base(); return F.ver==='pend'&&!F.lleg ? b.filter(x=>!x.recibido) : b; }
+const U = a => a.reduce((s,x)=>s+x.cant,0);
+
+function fillSel(id,key,vals){
+  const el=document.getElementById(id), cur=F[key];
+  el.innerHTML='<option value="">Todos</option>'+vals.map(v=>`<option ${v===cur?'selected':''}>${esc(v)}</option>`).join('');
+  el.onchange=()=>{F[key]=el.value;render()};
+}
+function initF(){
+  const u=k=>[...new Set(DATA.items.map(x=>x[k]))].filter(Boolean).sort((a,b)=>a.localeCompare(b,'es'));
+  fillSel('f-zona','zona',u('zona'));fillSel('f-mod','mod',u('mod'));fillSel('f-cat','cat',CATS);fillSel('f-lleg','lleg',LLEG);
+  fillSel('f-prov','prov',u('prov'));fillSel('f-loc','loc',u('loc'));
+  document.getElementById('f-ver').onchange=e=>{F.ver=e.target.value;render()};
+  let t;document.getElementById('f-q').oninput=e=>{clearTimeout(t);t=setTimeout(()=>{F.q=e.target.value;render()},250)};
+}
+function setF(k,v){F[k]=F[k]===v?'':v;['zona','mod','cat','lleg','prov','loc'].forEach(k=>document.getElementById('f-'+k).value=F[k]);render()}
+function resetF(){F={zona:'',mod:'',cat:'',lleg:'',prov:'',loc:'',ver:'pend',q:''};document.getElementById('f-q').value='';document.getElementById('f-ver').value='pend';initF();render()}
+function chips(){
+  const lb={zona:'Zona',mod:'Módulo',cat:'Categoría',lleg:'Llegada',prov:'Proveedor',loc:'Ubicación'};
+  document.getElementById('chips').innerHTML=Object.keys(lb).filter(k=>F[k]).map(k=>`<span class="chip" onclick="setF('${k}','${esc(F[k])}')">${lb[k]}: ${esc(F[k])} ✕</span>`).join('');
+}
+
+function kpis(){
+  const b=base(), p=b.filter(x=>!x.recibido), rec=b.filter(x=>x.recibido);
+  const late=p.filter(x=>x.alertas.some(a=>a.includes('después')||a.includes('taladro llega')));
+  const K=[
+    ['Equipos (unidades)',nf(U(b)),`${b.length} líneas de tracking`,C.cy,()=>{F.ver='all';document.getElementById('f-ver').value='all';setF('lleg','')}],
+    ['Recibidos en sitio',nf(U(rec)),`${b.length?Math.round(100*U(rec)/U(b)):0}% de las unidades`,C.lm,()=>setF('lleg','Recibido'),U(b)?U(rec)/U(b):0],
+    ['Pendientes',nf(U(p)),`${p.length} líneas por llegar`,C.mg,()=>{F.ver='pend';setF('lleg','')}],
+    ['Llegan ≤30 días',nf(U(p.filter(x=>x.lleg==='Llega ≤30 días'))),'preparar recibo y montaje',C.or,()=>setF('lleg','Llega ≤30 días')],
+    ['ETA vencida',nf(U(p.filter(x=>x.lleg==='ETA vencida'))),'la fecha ya pasó y no ha llegado',C.rd,()=>setF('lleg','ETA vencida')],
+    ['Tarde vs taladro',nf(U(late)),'llegan después del taladro o sin fecha',C.rd,()=>goTab('tal')],
+    ['Sin fecha (con ODB)',nf(U(p.filter(x=>x.lleg==='Sin fecha'))),'pedir fecha al proveedor',C.mg,()=>setF('lleg','Sin fecha')],
+    ['Sin compra',nf(U(p.filter(x=>x.lleg==='Sin compra'))),'en planeación, sin ODB',C.vi,()=>setF('lleg','Sin compra')],
+  ];
+  const el=document.getElementById('kpis');
+  el.innerHTML=K.map((k,i)=>`<div class="kpi" style="--c:${k[3]}" data-i="${i}"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div>${k[5]!=null?`<div class="bar"><i style="width:${Math.round(k[5]*100)}%"></i></div>`:''}</div>`).join('');
+  el.querySelectorAll('.kpi').forEach(d=>d.onclick=()=>K[+d.dataset.i][4]());
+}
+
+const AX={labels:{style:{colors:C.tx,fontSize:'11px'}},axisBorder:{color:'rgba(255,255,255,.1)'},axisTicks:{color:'rgba(255,255,255,.1)'}};
+const SHOT=location.hash.includes('shot');
+const baseOpt=()=>({chart:{background:'transparent',foreColor:C.tx,toolbar:{show:false},fontFamily:'Inter',animations:{enabled:!SHOT,speed:450}},theme:{mode:'dark'},grid:{borderColor:'rgba(255,255,255,.06)',strokeDashArray:3},dataLabels:{enabled:false},legend:{labels:{colors:C.tx},fontSize:'11.5px'},tooltip:{theme:'dark'}});
+function mk(id,o){if(CH[id])CH[id].destroy();CH[id]=new ApexCharts(document.getElementById(id),o);CH[id].render()}
+
+function resView(){
+  const b=base(), p=b.filter(x=>!x.recibido);
+  // por mes
+  const months=[];let yy=+HOY.slice(0,4),mm=+HOY.slice(5,7);
+  for(let i=0;i<13;i++){months.push(yy+'-'+String(mm).padStart(2,'0'));mm++;if(mm>12){mm=1;yy++}}
+  const lastM=months[months.length-1];
+  const cats=['ETA vencida',...months.map(m=>MES[+m.slice(5)-1]+' '+m.slice(2,4)),'Después'];
+  const keyOf=x=>!x.eta?null:(x.eta<HOY?0:(x.eta.slice(0,7)>lastM?cats.length-1:1+months.indexOf(x.eta.slice(0,7))));
+  const ser=CATS.map((c,ci)=>({name:c,data:cats.map((_,k)=>U(p.filter(x=>x.cat===c&&keyOf(x)===k)))}));
+  mk('c-mes',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:330,stacked:true,events:{dataPointSelection:(e,c,o)=>{const k=o.dataPointIndex;openList(`Llegadas · ${cats[k]}`,p.filter(x=>keyOf(x)===k))}}},
+    series:ser,colors:CCOL,xaxis:{categories:cats,...AX},yaxis:{labels:{style:{colors:C.tx}},title:{text:'unidades',style:{color:C.tx}}},
+    plotOptions:{bar:{columnWidth:'62%',borderRadius:3}},dataLabels:{enabled:false},legend:{position:'top',labels:{colors:C.tx}},
+    annotations:{xaxis:[{x:cats[1],borderColor:C.cy,label:{text:'mes actual',style:{background:'#0b1230',color:C.cy}}}]}});
+  // estado llegada (donut)
+  const lv=LLEG.map(l=>U(b.filter(x=>x.lleg===l)));
+  mk('c-lleg',{...baseOpt(),chart:{...baseOpt().chart,type:'donut',height:330,events:{dataPointSelection:(e,c,o)=>setF('lleg',LLEG[o.dataPointIndex])}},series:lv,labels:LLEG,colors:LLEG.map(l=>LCOL[l]),
+    stroke:{colors:['#04060d'],width:2},legend:{position:'bottom',labels:{colors:C.tx}},
+    plotOptions:{pie:{donut:{size:'64%',labels:{show:true,value:{color:'#fff',fontSize:'26px',fontFamily:'Rajdhani',formatter:v=>nf(+v)},total:{show:true,label:'unidades',color:C.tx,formatter:()=>nf(U(b))}}}}}});
+  // por categoría
+  const grp=[['Recibido',x=>x.recibido,C.lm],['Por llegar (con fecha)',x=>!x.recibido&&x.eta,C.cy],['Sin fecha',x=>x.lleg==='Sin fecha',C.mg],['Sin compra',x=>x.lleg==='Sin compra',C.vi]];
+  mk('c-cat',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:320,stacked:true,events:{dataPointSelection:(e,c,o)=>setF('cat',CATS[o.dataPointIndex])}},
+    series:grp.map(g=>({name:g[0],data:CATS.map(c=>U(b.filter(x=>x.cat===c&&g[1](x))))})),colors:grp.map(g=>g[2]),
+    plotOptions:{bar:{horizontal:true,barHeight:'62%',borderRadius:3}},xaxis:{categories:CATS,...AX},yaxis:{labels:{style:{colors:C.tx},maxWidth:190}},legend:{position:'top',labels:{colors:C.tx}}});
+  // proveedores
+  const pv={};p.filter(x=>x.prov!=='—').forEach(x=>pv[x.prov]=(pv[x.prov]||0)+x.cant);
+  const top=Object.entries(pv).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  mk('c-prov',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:320,events:{dataPointSelection:(e,c,o)=>setF('prov',top[o.dataPointIndex][0])}},series:[{name:'Unidades pendientes',data:top.map(t=>t[1])}],
+    colors:[C.mg],plotOptions:{bar:{horizontal:true,barHeight:'62%',borderRadius:4,distributed:false}},dataLabels:{enabled:true,style:{colors:['#fff']},formatter:v=>nf(v)},
+    xaxis:{categories:top.map(t=>t[0].length>34?t[0].slice(0,33)+'…':t[0]),...AX},yaxis:{labels:{style:{colors:C.tx},maxWidth:260}}});
+  // zona
+  const Z=['Exteriores','Estaciones'];
+  mk('c-zona',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:300,stacked:true,events:{dataPointSelection:(e,c,o)=>setF('zona',Z[o.dataPointIndex])}},
+    series:[{name:'Recibido',data:Z.map(z=>U(b.filter(x=>x.zona===z&&x.recibido)))},{name:'Pendiente',data:Z.map(z=>U(b.filter(x=>x.zona===z&&!x.recibido)))}],
+    colors:[C.lm,C.mg],plotOptions:{bar:{columnWidth:'42%',borderRadius:4}},dataLabels:{enabled:true,style:{colors:['#04060d']},formatter:v=>v?nf(v):''},xaxis:{categories:Z,...AX},legend:{position:'top',labels:{colors:C.tx}}});
+  // ubicaciones
+  const lc={};p.filter(x=>x.loc!=='—').forEach(x=>lc[x.loc]=(lc[x.loc]||0)+x.cant);
+  const tl=Object.entries(lc).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  mk('c-loc',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:300,events:{dataPointSelection:(e,c,o)=>setF('loc',tl[o.dataPointIndex][0])}},series:[{name:'Unidades pendientes',data:tl.map(t=>t[1])}],
+    colors:[C.cy],plotOptions:{bar:{columnWidth:'55%',borderRadius:4}},dataLabels:{enabled:true,style:{colors:['#04060d']},formatter:v=>nf(v)},
+    xaxis:{categories:tl.map(t=>t[0].length>18?t[0].slice(0,17)+'…':t[0]),...AX,labels:{rotate:-40,style:{colors:C.tx,fontSize:'10.5px'}}}});
+}
+
+function li(x){return `<li onclick="openItem(${x.i})"><b>${esc(x.tipo)}</b> · ${esc(x.loc)}<small>${fd(x.eta)} · ${esc(x.prov)} · ${nf(x.cant)} ${esc(x.und)}${x.alertas.length?' · <span style="color:#ff8fae">'+esc(x.alertas[0])+'</span>':''}</small></li>`}
+function calView(){
+  const p=base().filter(x=>!x.recibido);
+  const B=[['ETA vencida',x=>x.eta&&x.eta<HOY,C.rd],['Próximos 30 días',x=>x.eta&&x.eta>=HOY&&dd(x.eta,HOY)<=30,C.or],['31 a 90 días',x=>x.eta&&dd(x.eta,HOY)>30&&dd(x.eta,HOY)<=90,C.yl],['91 a 180 días',x=>x.eta&&dd(x.eta,HOY)>90&&dd(x.eta,HOY)<=180,C.cy],['Más de 180 días',x=>x.eta&&dd(x.eta,HOY)>180,C.bl]];
+  document.getElementById('wl').innerHTML=B.map(b=>{const a=p.filter(b[1]).sort((x,y)=>x.eta.localeCompare(y.eta));return `<div class="wbox" style="--c:${b[2]}"><h4>${b[0]} <b>${nf(U(a))}</b></h4><ul>${a.map(li).join('')||'<div class="empty">Sin equipos</div>'}</ul></div>`}).join('');
+  const N=[['Con ODB, sin fecha de llegada',x=>x.lleg==='Sin fecha',C.mg],['Sin compra (en planeación, sin ODB)',x=>x.lleg==='Sin compra',C.vi]];
+  document.getElementById('wl2').innerHTML=N.map(b=>{const a=p.filter(b[1]);return `<div class="wbox" style="--c:${b[2]}"><h4>${b[0]} <b>${nf(U(a))}</b></h4><ul>${a.map(li).join('')||'<div class="empty">Sin equipos</div>'}</ul></div>`}).join('');
+  document.getElementById('ct-cal').textContent=p.filter(x=>x.eta).length;
+}
+
+function clusters(){
+  const b=base(), out=[];
+  Object.entries(DATA.taladro).forEach(([c,t])=>{
+    if(!t.ini||!/^(CASE|CUMA|EMBR|WDCS)-/.test(c))return;
+    const eq=b.filter(x=>x.loc===c); if(!eq.length && (t.fin||'')<HOY) return;
+    const p=eq.filter(x=>!x.recibido);
+    const etas=p.map(x=>x.eta).filter(Boolean).sort(); const last=etas[etas.length-1]||null;
+    const late=p.filter(x=>(x.eta&&x.eta>t.ini)||!x.eta);
+    const yaEsta=t.ini<=HOY;
+    let st,col;
+    if(!eq.length){st='Sin equipos en tracking';col=C.tx}
+    else if(!p.length){st='Listo';col=C.lm}
+    else if(late.length){st='Crítico';col=C.rd}
+    else {st='En riesgo';col=C.yl}
+    out.push({c,t,eq,p,last,late,st,col,yaEsta});
+  });
+  return out.sort((a,b)=>a.t.ini.localeCompare(b.t.ini));
+}
+function talView(){
+  const L=clusters().filter(x=>(x.t.fin||'')>=HOY);
+  document.getElementById('ct-tal').textContent=L.filter(x=>x.st==='Crítico').length+' críticos';
+  document.getElementById('clgrid').innerHTML=L.map(x=>{
+    const n=U(x.eq),r=U(x.eq.filter(e=>e.recibido)),pe=U(x.p);
+    const dT=dd(x.t.ini,HOY);
+    return `<div class="clc" style="--c:${x.col}" onclick="setF('loc','${x.c}');goTab('det')">
+      <h4>${x.c}<span class="b ${x.st==='Listo'?'b-ok':x.st==='Crítico'?'b-bd':x.st==='En riesgo'?'b-wa':'b-nt'}">${x.st}</span></h4>
+      <div class="meta">${esc(x.t.taladro.join(', '))} · taladro ${x.yaEsta?'en sitio desde':'llega'} <b style="color:#fff">${fd(x.t.ini)}</b>${x.yaEsta?'':` (en ${dT} días)`} · 1er completamiento ${fd(x.t.comp1)}</div>
+      <div class="row"><span>Equipos</span><b>${nf(n)}</b></div>
+      <div class="row"><span>Recibidos</span><b style="color:${C.lm}">${nf(r)}</b></div>
+      <div class="row"><span>Pendientes</span><b style="color:${pe?C.mg:C.tx}">${nf(pe)}</b></div>
+      <div class="row"><span>Última llegada pendiente</span><b>${fd(x.last)}</b></div>
+      <div class="row"><span>Llegan después del taladro</span><b style="color:${x.p.some(e=>e.eta&&e.eta>x.t.ini)?C.rd:C.tx}">${nf(U(x.p.filter(e=>e.eta&&e.eta>x.t.ini)))}</b></div>
+      <div class="row"><span>Sin fecha / sin compra</span><b style="color:${x.p.some(e=>!e.eta)?C.vi:C.tx}">${nf(U(x.p.filter(e=>e.lleg==='Sin fecha')))} / ${nf(U(x.p.filter(e=>e.lleg==='Sin compra')))}</b></div>
+      <div class="pb"><i style="width:${n?100*r/n:0}%;background:${C.lm}"></i><i style="width:${n?100*(pe-U(x.late))/n:0}%;background:${C.yl}"></i><i style="width:${n?100*U(x.late)/n:0}%;background:${C.rd}"></i></div>
+    </div>`}).join('')||'<div class="empty">No hay clústeres de la ruta del taladro con los filtros actuales</div>';
+  const S=L.filter(x=>x.eq.length), T=d=>new Date(d+'T00:00:00').getTime();
+  const sd=[], se=[];
+  S.forEach(x=>{sd.push({x:x.c,y:[T(x.t.ini),T(x.t.fin||x.t.ini)],fillColor:'#00b8d4'});
+    const e=x.p.map(p=>p.eta).filter(Boolean).sort();
+    if(e.length) se.push({x:x.c,y:[T(e[0]),T(e[e.length-1])+864e5*4],fillColor:e[e.length-1]>x.t.ini?C.rd:C.yl});});
+  mk('c-tal',{...baseOpt(),chart:{...baseOpt().chart,type:'rangeBar',height:Math.max(240,S.length*44+90)},
+    series:[{name:'Taladro en la locación',data:sd},{name:'Llegada de equipos pendientes (con fecha)',data:se}],
+    plotOptions:{bar:{horizontal:true,barHeight:'72%',borderRadius:4,rangeBarGroupRows:false}},colors:['#00b8d4',C.rd],
+    xaxis:{type:'datetime',min:T(HOY)-864e5*45,...AX,labels:{style:{colors:C.tx},datetimeFormatter:{month:"MMM 'yy"}}},yaxis:{labels:{style:{colors:C.tx}}},
+    annotations:{xaxis:[{x:T(HOY),borderColor:C.mg,label:{text:'hoy',style:{background:'#0b1230',color:C.mg}}}]},
+    tooltip:{theme:'dark',custom:({seriesIndex,dataPointIndex,w})=>{const d=w.config.series[seriesIndex].data[dataPointIndex];const x=S.find(z=>z.c===d.x);return `<div style="padding:8px 10px"><b>${x.c}</b> · ${x.st}<br>Taladro: ${fd(x.t.ini)} → ${fd(x.t.fin)}<br>Equipos pendientes: ${nf(U(x.p))} · con fecha: ${x.p.filter(p=>p.eta).length}<br>Última llegada: ${fd(x.last)}</div>`}},
+    legend:{show:true,position:'top',labels:{colors:C.tx}}});
+}
+
+const COLS=[['eta','Llegada',x=>`<span class="b ${LBADGE[x.lleg]}">${x.recibido?'Recibido':fd(x.eta)}</span>`],['zona','Zona'],['mod','Mód.'],['loc','Ubicación'],['cat','Categoría'],['tipo','Equipo'],['tag','TAG'],['cant','Cant.',x=>nf(x.cant)],
+  ['prov','Proveedor'],['odb','ODB'],['est','Estado aprov.'],['req','Requerido',x=>fd(x.req)],['holgura','Holgura (días)',x=>x.holgura==null?'—':`<b style="color:${x.holgura<0?C.rd:x.holgura<15?C.yl:C.lm}">${x.holgura}</b>`],['alertas','Alertas',x=>esc(x.alertas.join(' · '))]];
+function detView(){
+  let a=rows().slice();const k=detSort.k,d=detSort.d;
+  a.sort((x,y)=>{let p=x[k],q=y[k];if(k==='eta'){p=x.recibido?'0':(x.eta||'9');q=y.recibido?'0':(y.eta||'9')}if(Array.isArray(p)){p=p.length;q=q.length}return (p>q?1:p<q?-1:0)*d});
+  document.getElementById('det-h').innerHTML=COLS.map(c=>`<th onclick="sortBy('${c[0]}')">${c[1]}<span class="ar">${detSort.k===c[0]?(d>0?'▲':'▼'):''}</span></th>`).join('');
+  document.getElementById('det-b').innerHTML=a.slice(0,detN).map(x=>`<tr onclick="openItem(${x.i})">${COLS.map(c=>`<td>${c[2]?c[2](x):esc(x[c[0]]??'—')}</td>`).join('')}</tr>`).join('');
+  document.getElementById('det-info').innerHTML=`<b>${a.length}</b> líneas · <b>${nf(U(a))}</b> unidades`;
+  document.getElementById('det-more').innerHTML=a.length>detN?`<button class="btn cy" onclick="detN+=300;detView()">Ver más (${a.length-detN})</button>`:'';
+  document.getElementById('ct-det').textContent=a.length;
+}
+function sortBy(k){detSort={k,d:detSort.k===k?-detSort.d:1};detView()}
+function exportCSV(){
+  const a=rows(),H=['Zona','Módulo','Ubicación','Categoría','Equipo','Descripción','TAG','Cantidad','Unidad','Proveedor','ODB','Ítem OC','Estado aprov.','Llegada','Fecha llegada','Recibido','Pendiente','Requerido','Fuente requerido','Taladro','Alertas'];
+  const L=a.map(x=>[x.zona,x.mod,x.loc,x.cat,x.tipo,x.desc,x.tag,x.cant,x.und,x.prov,x.odb,x.item_oc,x.est,x.lleg,x.eta,x.rec,x.pend,x.req,x.req_src,x.taladro,x.alertas.join(' | ')].map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';'));
+  const bl=new Blob(['﻿'+[H.join(';'),...L].join('\n')],{type:'text/csv'});const u=URL.createObjectURL(bl);const e=document.createElement('a');e.href=u;e.download='tracking_equipos_CSE.csv';e.click();
+}
+
+function openList(t,a){
+  document.getElementById('m-t').textContent=t;document.getElementById('m-s').textContent=`${a.length} líneas · ${nf(U(a))} unidades`;document.getElementById('m-c').innerHTML='';
+  document.getElementById('m-b').innerHTML=`<div class="tw"><table><thead><tr><th>Llegada</th><th>Ubicación</th><th>Equipo</th><th>Cant.</th><th>Proveedor</th><th>ODB</th><th>Alertas</th></tr></thead><tbody>${a.sort((x,y)=>(x.eta||'9').localeCompare(y.eta||'9')).map(x=>`<tr onclick="openItem(${x.i},true)"><td><span class="b ${LBADGE[x.lleg]}">${fd(x.eta)}</span></td><td>${esc(x.loc)}</td><td>${esc(x.tipo)}</td><td>${nf(x.cant)}</td><td>${esc(x.prov)}</td><td>${esc(x.odb||'—')}</td><td>${esc(x.alertas.join(' · '))}</td></tr>`).join('')}</tbody></table></div>`;
+  showM();
+}
+function openItem(i){
+  const x=DATA.items[i];
+  document.getElementById('m-t').textContent=x.tipo;
+  document.getElementById('m-s').textContent=`${x.loc} · ${x.zona} · ${x.mod} · ${x.cat}`;
+  document.getElementById('m-c').innerHTML=`<span class="b ${LBADGE[x.lleg]}">${x.lleg}</span> `+x.alertas.map(a=>`<span class="b b-bd">${esc(a)}</span>`).join(' ');
+  const steps=[['Fecha requerida',x.f_req_proj],['Entrega OC',x.f_oc],['Liberación',x.f_lib],['Llegada a sitio',x.eta],['Recibo SAP',x.f_sap]];
+  const f=(k,v,hi)=>`<div class="fld ${hi?'hi':''}"><div class="k">${k}</div><div class="v">${esc(v||'—')}</div></div>`;
+  document.getElementById('m-b').innerHTML=`<div class="fgrid">
+    <div class="timeline">${steps.map(s=>`<div class="tl ${s[1]&&s[1]<=HOY?'ok':''}"><i></i><b>${s[0]}</b>${fd(s[1])}</div>`).join('')}</div>
+    <div class="fsec">Equipo</div>${f('Descripción',x.desc,1)}${f('TAG',x.tag)}${f('Cantidad',nf(x.cant)+' '+x.und)}${f('Tipología',x.tipologia)}${f('Ubicación (área 1)',x.a1)}${f('Área 2 / sub-sistema',x.a2)}${f('Sub proyecto',x.sub)}${f('Código MR',x.mr)}
+    <div class="fsec">Compra y fabricación</div>${f('Proveedor',x.prov,1)}${f('ODB',x.odb,1)}${f('Ítem OC',x.item_oc)}${f('Estado aprovisionamiento',x.est)}${f('Estado planeación ODB',x.est_plan)}${f('Inspección',x.insp)}${f('Estado de la ODB',x.est_odb)}${f('Observaciones compra',x.obs)}
+    <div class="fsec">Llegada y planeación</div>${f('Llegada proyectada / real',fd(x.eta),1)}${f('Recibido en SAP',fd(x.f_sap))}${f('Cantidad recibida',nf(x.rec))}${f('Pendiente por recibir',nf(x.pend))}${f('Requerido en sitio',fd(x.req)+(x.req_src?' · '+x.req_src:''),1)}${f('Holgura (días)',x.holgura??'—')}${f('Taladro',x.taladro)}${f('Llegada del taladro / 1er completamiento',fd(x.tal_ini)+' / '+fd(x.comp1))}${f('Observaciones bodega',x.obs_bod)}
+  </div>`;
+  showM();
+}
+function showM(){document.getElementById('mback').classList.add('on');document.getElementById('modal').classList.add('on')}
+function closeM(){document.getElementById('mback').classList.remove('on');document.getElementById('modal').classList.remove('on')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+
+function goTab(t){TAB=t;document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('on',e.dataset.v===t));document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+t));renderTab()}
+function renderTab(){if(TAB==='res')resView();if(TAB==='cal')calView();if(TAB==='tal')talView();if(TAB==='det')detView()}
+function render(){chips();kpis();calView();detView();document.getElementById('ct-tal').textContent=clusters().filter(x=>x.st==='Crítico'&&(x.t.fin||'')>=HOY).length+' críticos';renderTab()}
+
+document.getElementById('gen-at').textContent=fd(DATA.hoy);
+document.getElementById('fuentes').innerHTML='Tracking: '+Object.entries(DATA.fuentes).map(([m,f])=>`<b>${m}</b> ${fd(f.fecha)}`).join(' · ')+(DATA.corte_ryc?` · Ruta taladro RyC <b>${fd(DATA.corte_ryc)}</b>`:'');
+const old=Object.entries(DATA.fuentes).filter(([m,f])=>dd(DATA.hoy,f.fecha)>14);
+if(old.length)document.getElementById('warn').innerHTML=`<div class="warnbox">⚠ El tracking de ${old.map(([m,f])=>`<b>${m}</b> (${f.archivo}, ${fd(f.fecha)})`).join(', ')} tiene más de 2 semanas: actualizar el archivo para que las fechas de llegada sean confiables.</div>`;
+window.onerror=(m,u,l)=>{document.body.insertAdjacentHTML('afterbegin','<div style="background:#f00;color:#fff;padding:8px;font:14px monospace">JS ERROR: '+m+' @'+l+'</div>')};
+initF();render();if(location.hash)goTab(location.hash.slice(1).replace('-shot',''));
+</script>
+</body>
+</html>
