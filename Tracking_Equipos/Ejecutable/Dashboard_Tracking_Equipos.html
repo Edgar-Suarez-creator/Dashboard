@@ -469,5 +469,6 @@ if(old.length)document.getElementById('warn').innerHTML=`<div class="warnbox">âš
 window.onerror=(m,u,l)=>{document.body.insertAdjacentHTML('afterbegin','<div style="background:#f00;color:#fff;padding:8px;font:14px monospace">JS ERROR: '+m+' @'+l+'</div>')};
 initF();render();if(location.hash)goTab(location.hash.slice(1).replace('-shot',''));
 </script>
+<a id="home-btn" href="../../index.html" title="Volver al tablero principal" style="position:fixed;left:18px;bottom:18px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:9px 16px 9px 12px;border-radius:999px;background:rgba(6,10,24,.88);border:1px solid rgba(0,229,255,.65);color:#bff8ff;font:700 13px/1 Inter,'Segoe UI',system-ui,sans-serif;letter-spacing:.4px;text-decoration:none;box-shadow:0 0 18px rgba(0,229,255,.35),inset 0 0 12px rgba(255,43,214,.15);backdrop-filter:blur(6px);transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 0 26px rgba(0,229,255,.6),inset 0 0 12px rgba(255,43,214,.25)'" onmouseout="this.style.transform='';this.style.boxShadow='0 0 18px rgba(0,229,255,.35),inset 0 0 12px rgba(255,43,214,.15)'"><span style="font-size:16px">&#8962;</span>Inicio</a>
 </body>
 </html>
