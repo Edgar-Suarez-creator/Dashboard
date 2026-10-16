@@ -156,7 +156,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
 <div class="wrap">
   <div class="hero">
     <div>
-      <h1>CONTROL DE DOSSIERES · CAÑO SUR ESTE</h1>
+      <h1>CONTROL DE DOSSIERES · CAÑO SUR ESTE<a class="home-link" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:7px;vertical-align:middle;margin-left:18px;padding:7px 14px 7px 11px;border-radius:999px;border:1px solid rgba(0,229,255,.6);background:rgba(0,229,255,.1);color:#9ff6ff;-webkit-text-fill-color:#9ff6ff;background-clip:padding-box;-webkit-background-clip:padding-box;filter:none;animation:none;font:600 13px/1 Inter,'Segoe UI',system-ui,sans-serif;letter-spacing:.2px;text-transform:none;text-decoration:none;white-space:nowrap;box-shadow:0 0 14px rgba(0,229,255,.28);text-shadow:none;transition:box-shadow .15s,transform .15s" onmouseover="this.style.boxShadow='0 0 22px rgba(0,229,255,.65)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='0 0 14px rgba(0,229,255,.28)';this.style.transform=''"><span style="font-size:17px;line-height:1">&#8962;</span>Volver al tablero principal</a></h1>
       <div class="sub"><b>HC1</b> RSPA-Arranque &nbsp;·&nbsp; <b>AC1</b> Subsistemas &nbsp;·&nbsp; <b>Dossieres</b> CIT &nbsp;·&nbsp; Módulos 3, 4 y 5</div>
     </div>
     <div class="stamp"><span class="pill"><i></i>Corte <span id="gen-at"></span></span><div class="sub" style="margin-top:8px">Fuente: BD GENERAL · CSE · PAD2 y Exteriores (oficial)</div></div>
@@ -184,7 +184,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <div class="fg"><label>Estado arranque</label><select id="hc1-arr"></select></div>
       <div class="fg"><label>Estatus dossier</label><select id="hc1-dos"></select></div>
       <div class="fg grow"><label>Buscar</label><input id="hc1-q" placeholder="ID HC1, sistema, subproyecto, responsable…"></div>
-      <a class="home-inline" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:6px;align-self:flex-end;height:34px;padding:0 14px;border-radius:9px;border:1px solid rgba(0,229,255,.55);background:rgba(0,229,255,.12);color:#8ff3ff;font:700 12.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 12px rgba(0,229,255,.25);margin-right:6px" onmouseover="this.style.boxShadow='0 0 18px rgba(0,229,255,.6)'" onmouseout="this.style.boxShadow='0 0 12px rgba(0,229,255,.25)'">&#8962; Inicio</a><button class="btn" onclick="clearF('hc1')">Limpiar</button>
+      <button class="btn" onclick="clearF('hc1')">Limpiar</button>
     </div>
     <div class="chips" id="hc1-chips"></div>
     <div class="kpis" id="hc1-kpis"></div>
@@ -212,7 +212,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <div class="fg"><label>Estado arranque</label><select id="ac1-arr"></select></div>
       <div class="fg"><label>Estatus AC1</label><select id="ac1-est"></select></div>
       <div class="fg grow"><label>Buscar</label><input id="ac1-q" placeholder="Subsistema, ID certificado, RSPA…"></div>
-      <a class="home-inline" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:6px;align-self:flex-end;height:34px;padding:0 14px;border-radius:9px;border:1px solid rgba(0,229,255,.55);background:rgba(0,229,255,.12);color:#8ff3ff;font:700 12.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 12px rgba(0,229,255,.25);margin-right:6px" onmouseover="this.style.boxShadow='0 0 18px rgba(0,229,255,.6)'" onmouseout="this.style.boxShadow='0 0 12px rgba(0,229,255,.25)'">&#8962; Inicio</a><button class="btn" onclick="clearF('ac1')">Limpiar</button>
+      <button class="btn" onclick="clearF('ac1')">Limpiar</button>
     </div>
     <div class="chips" id="ac1-chips"></div>
     <div class="kpis" id="ac1-kpis"></div>
@@ -242,7 +242,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <div class="fg"><label>Estatus dossier</label><select id="dos-est"></select></div>
       <div class="fg"><label>Responsable</label><select id="dos-resp"></select></div>
       <div class="fg grow"><label>Buscar</label><input id="dos-q" placeholder="ID HC1, sistema, responsable, DataBook…"></div>
-      <a class="home-inline" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:6px;align-self:flex-end;height:34px;padding:0 14px;border-radius:9px;border:1px solid rgba(0,229,255,.55);background:rgba(0,229,255,.12);color:#8ff3ff;font:700 12.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 12px rgba(0,229,255,.25);margin-right:6px" onmouseover="this.style.boxShadow='0 0 18px rgba(0,229,255,.6)'" onmouseout="this.style.boxShadow='0 0 12px rgba(0,229,255,.25)'">&#8962; Inicio</a><button class="btn" onclick="clearF('dos')">Limpiar</button>
+      <button class="btn" onclick="clearF('dos')">Limpiar</button>
     </div>
     <div class="chips" id="dos-chips"></div>
     <div class="kpis" id="dos-kpis"></div>
