@@ -159,7 +159,7 @@ footer{margin-top:34px;color:var(--muted);font-size:12px;text-align:center}
   <div class="fg"><label>Sistema</label><select id="f-sistema"></select></div>
   <div class="fg"><label>Tipo</label><select id="f-tipo"></select></div>
   <div class="fg grow"><label>Buscar</label><input id="f-buscar" type="search" placeholder="Material, descripción, PEP, TAG…"></div>
-  <button class="btn clear" onclick="clearAll()">Limpiar filtros</button>
+  <a class="home-inline" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:6px;align-self:flex-end;height:34px;padding:0 14px;border-radius:9px;border:1px solid rgba(0,229,255,.55);background:rgba(0,229,255,.12);color:#8ff3ff;font:700 12.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 12px rgba(0,229,255,.25);margin-right:6px" onmouseover="this.style.boxShadow='0 0 18px rgba(0,229,255,.6)'" onmouseout="this.style.boxShadow='0 0 12px rgba(0,229,255,.25)'">&#8962; Inicio</a><button class="btn clear" onclick="clearAll()">Limpiar filtros</button>
 </div>
 <div class="chips" id="chips"></div>
 
@@ -425,6 +425,5 @@ $('fuente').textContent=typeof PREV!=='undefined'?PREV.fuente_act:'';
 $('ftr').textContent=`APPLUS+ Colombia · Dashboard de Inventarios CSE · datos generados ${DATA.generated_at}`;
 cambios(); render();
 </script>
-<a id="home-btn" href="../../index.html" title="Volver al tablero principal" style="position:fixed;left:18px;bottom:18px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:9px 16px 9px 12px;border-radius:999px;background:rgba(6,10,24,.88);border:1px solid rgba(0,229,255,.65);color:#bff8ff;font:700 13px/1 Inter,'Segoe UI',system-ui,sans-serif;letter-spacing:.4px;text-decoration:none;box-shadow:0 0 18px rgba(0,229,255,.35),inset 0 0 12px rgba(255,43,214,.15);backdrop-filter:blur(6px);transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 0 26px rgba(0,229,255,.6),inset 0 0 12px rgba(255,43,214,.25)'" onmouseout="this.style.transform='';this.style.boxShadow='0 0 18px rgba(0,229,255,.35),inset 0 0 12px rgba(255,43,214,.15)'"><span style="font-size:16px">&#8962;</span>Inicio</a>
 </body>
 </html>

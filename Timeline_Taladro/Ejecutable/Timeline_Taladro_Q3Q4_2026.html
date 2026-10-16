@@ -283,7 +283,7 @@ footer{margin-top:26px;font-size:10.5px;color:var(--muted);text-align:center;let
   <button class="btn" id="bHoy">&#9673; HOY</button>
   <button class="btn" id="bExp" title="Expandir todos los cl&uacute;steres">&#8862;</button>
   <button class="btn" id="bCol" title="Contraer todos los cl&uacute;steres">&#8863;</button>
-  <button class="btn hot" id="bReset">&#8634; Limpiar</button>
+  <a class="home-inline" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:6px;align-self:flex-end;height:34px;padding:0 14px;border-radius:9px;border:1px solid rgba(0,229,255,.55);background:rgba(0,229,255,.12);color:#8ff3ff;font:700 12.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 12px rgba(0,229,255,.25);margin-right:6px" onmouseover="this.style.boxShadow='0 0 18px rgba(0,229,255,.6)'" onmouseout="this.style.boxShadow='0 0 12px rgba(0,229,255,.25)'">&#8962; Inicio</a><button class="btn hot" id="bReset">&#8634; Limpiar</button>
 </div>
 <div class="legend">
   <span><i class="sw" style="background:var(--e-mov);box-shadow:0 0 8px var(--e-mov)"></i>Movilizaci&oacute;n</span>
@@ -614,5 +614,4 @@ function renderAll(){ renderNow(); renderRoute(); renderCards(); renderPanels();
 let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(renderRoute, 120); });
 renderKPIs(); markZ(); renderAll();
 </script>
-<a id="home-btn" href="../../index.html" title="Volver al tablero principal" style="position:fixed;left:18px;bottom:18px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:9px 16px 9px 12px;border-radius:999px;background:rgba(6,10,24,.88);border:1px solid rgba(0,229,255,.65);color:#bff8ff;font:700 13px/1 Inter,'Segoe UI',system-ui,sans-serif;letter-spacing:.4px;text-decoration:none;box-shadow:0 0 18px rgba(0,229,255,.35),inset 0 0 12px rgba(255,43,214,.15);backdrop-filter:blur(6px);transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 0 26px rgba(0,229,255,.6),inset 0 0 12px rgba(255,43,214,.25)'" onmouseout="this.style.transform='';this.style.boxShadow='0 0 18px rgba(0,229,255,.35),inset 0 0 12px rgba(255,43,214,.15)'"><span style="font-size:16px">&#8962;</span>Inicio</a>
 </body></html>

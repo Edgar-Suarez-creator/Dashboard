@@ -150,6 +150,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
 @media(max-width:1200px){.gauges{grid-template-columns:repeat(2,1fr)}.g3,.wl{grid-template-columns:1fr 1fr}.g21,.g12{grid-template-columns:1fr}}
 @media(max-width:760px){.gauges,.g2,.g3,.wl{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.stamp{text-align:left}}
 </style>
+<style>.fbar{position:sticky;top:0;z-index:60;background:rgba(8,12,28,.95)}</style>
 </head>
 <body>
 <div class="wrap">
@@ -183,7 +184,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <div class="fg"><label>Estado arranque</label><select id="hc1-arr"></select></div>
       <div class="fg"><label>Estatus dossier</label><select id="hc1-dos"></select></div>
       <div class="fg grow"><label>Buscar</label><input id="hc1-q" placeholder="ID HC1, sistema, subproyecto, responsable…"></div>
-      <button class="btn" onclick="clearF('hc1')">Limpiar</button>
+      <a class="home-inline" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:6px;align-self:flex-end;height:34px;padding:0 14px;border-radius:9px;border:1px solid rgba(0,229,255,.55);background:rgba(0,229,255,.12);color:#8ff3ff;font:700 12.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 12px rgba(0,229,255,.25);margin-right:6px" onmouseover="this.style.boxShadow='0 0 18px rgba(0,229,255,.6)'" onmouseout="this.style.boxShadow='0 0 12px rgba(0,229,255,.25)'">&#8962; Inicio</a><button class="btn" onclick="clearF('hc1')">Limpiar</button>
     </div>
     <div class="chips" id="hc1-chips"></div>
     <div class="kpis" id="hc1-kpis"></div>
@@ -211,7 +212,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <div class="fg"><label>Estado arranque</label><select id="ac1-arr"></select></div>
       <div class="fg"><label>Estatus AC1</label><select id="ac1-est"></select></div>
       <div class="fg grow"><label>Buscar</label><input id="ac1-q" placeholder="Subsistema, ID certificado, RSPA…"></div>
-      <button class="btn" onclick="clearF('ac1')">Limpiar</button>
+      <a class="home-inline" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:6px;align-self:flex-end;height:34px;padding:0 14px;border-radius:9px;border:1px solid rgba(0,229,255,.55);background:rgba(0,229,255,.12);color:#8ff3ff;font:700 12.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 12px rgba(0,229,255,.25);margin-right:6px" onmouseover="this.style.boxShadow='0 0 18px rgba(0,229,255,.6)'" onmouseout="this.style.boxShadow='0 0 12px rgba(0,229,255,.25)'">&#8962; Inicio</a><button class="btn" onclick="clearF('ac1')">Limpiar</button>
     </div>
     <div class="chips" id="ac1-chips"></div>
     <div class="kpis" id="ac1-kpis"></div>
@@ -241,7 +242,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <div class="fg"><label>Estatus dossier</label><select id="dos-est"></select></div>
       <div class="fg"><label>Responsable</label><select id="dos-resp"></select></div>
       <div class="fg grow"><label>Buscar</label><input id="dos-q" placeholder="ID HC1, sistema, responsable, DataBook…"></div>
-      <button class="btn" onclick="clearF('dos')">Limpiar</button>
+      <a class="home-inline" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:6px;align-self:flex-end;height:34px;padding:0 14px;border-radius:9px;border:1px solid rgba(0,229,255,.55);background:rgba(0,229,255,.12);color:#8ff3ff;font:700 12.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 12px rgba(0,229,255,.25);margin-right:6px" onmouseover="this.style.boxShadow='0 0 18px rgba(0,229,255,.6)'" onmouseout="this.style.boxShadow='0 0 12px rgba(0,229,255,.25)'">&#8962; Inicio</a><button class="btn" onclick="clearF('dos')">Limpiar</button>
     </div>
     <div class="chips" id="dos-chips"></div>
     <div class="kpis" id="dos-kpis"></div>
@@ -585,6 +586,5 @@ let RT=null;
 function render(){ clearTimeout(RT); RT=setTimeout(()=>{ ({hc1:renderHC1,ac1:renderAC1,dos:renderDOS,cmp:renderCMP})[S.view](); },30); }
 renderGauges(); render();
 </script>
-<a id="home-btn" href="../../index.html" title="Volver al tablero principal" style="position:fixed;left:18px;bottom:18px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:9px 16px 9px 12px;border-radius:999px;background:rgba(6,10,24,.88);border:1px solid rgba(0,229,255,.65);color:#bff8ff;font:700 13px/1 Inter,'Segoe UI',system-ui,sans-serif;letter-spacing:.4px;text-decoration:none;box-shadow:0 0 18px rgba(0,229,255,.35),inset 0 0 12px rgba(255,43,214,.15);backdrop-filter:blur(6px);transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 0 26px rgba(0,229,255,.6),inset 0 0 12px rgba(255,43,214,.25)'" onmouseout="this.style.transform='';this.style.boxShadow='0 0 18px rgba(0,229,255,.35),inset 0 0 12px rgba(255,43,214,.15)'"><span style="font-size:16px">&#8962;</span>Inicio</a>
 </body>
 </html>
