@@ -489,7 +489,7 @@ function proj(){
   // línea de corte
   const ti=months.indexOf(TM);
   if(ti>=0){const dim=new Date(+TM.slice(0,4),+TM.slice(5,7),0).getDate(); const xc=pl+slot*ti+slot*(+TODAY.slice(8,10)/dim);
-    s+=`<line x1="${xc}" x2="${xc}" y1="${pt-6}" y2="${H-pb}" stroke="#ffe600" stroke-dasharray="5 4" stroke-width="1.5"/><text x="${xc+5}" y="${pt+4}" fill="#ffe600" font-size="10.5" font-weight="700">corte ${fd(TODAY)}</text>`;}
+    s+=`<line x1="${xc}" x2="${xc}" y1="${pt-26}" y2="${H-pb}" stroke="#ffe600" stroke-dasharray="5 4" stroke-width="1.5"/><text x="${xc+5}" y="${pt-22}" fill="#ffe600" font-size="10.5" font-weight="700">corte ${fd(TODAY)}</text>`;}
   s+=`<text x="${(W+pl)/2}" y="${H-5}" text-anchor="middle" fill="#7385ad" font-size="11">${pmetric==='valor'?'Valor (COP) de los equipos distintos con al menos una rutina en el mes, por estado (un equipo cuenta una vez por mes; prima vencida › proyectada › ejecutada)':pmetric==='equipos'?'Equipos distintos con al menos una rutina programada en el mes (si tiene rutinas en varios estados, prima vencida › proyectada › ejecutada)':'Rutinas programadas en el mes, por estado'}</text></svg>`;
   $('proj').innerHTML=s;
   const distinct=k=>{const s=new Set(); months.forEach(m=>Object.entries(AGG[m].eq).forEach(([key,st])=>{if(st===k)s.add(key);})); return s.size;};
