@@ -135,7 +135,7 @@ td.n,th.n{text-align:right;font-family:'Space Grotesk',Inter;font-variant-numeri
     <h1><span>Garantías</span> · Caño Sur Este<a class="home-link" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:7px;vertical-align:middle;margin-left:18px;padding:7px 14px 7px 11px;border-radius:999px;border:1px solid rgba(0,229,255,.6);background:rgba(0,229,255,.1);color:#9ff6ff;-webkit-text-fill-color:#9ff6ff;background-clip:padding-box;-webkit-background-clip:padding-box;filter:none;animation:none;font:600 13px/1 Inter,'Segoe UI',system-ui,sans-serif;letter-spacing:.2px;text-transform:none;text-decoration:none;white-space:nowrap;box-shadow:0 0 14px rgba(0,229,255,.28);text-shadow:none;transition:box-shadow .15s,transform .15s" onmouseover="this.style.boxShadow='0 0 22px rgba(0,229,255,.65)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='0 0 14px rgba(0,229,255,.28)';this.style.transform=''"><span style="font-size:17px;line-height:1">&#8962;</span>Volver al tablero principal</a></h1>
     <div class="sub">Seguimiento a garantías con proveedores · Módulos M3 · M4 &nbsp;|&nbsp; <b id="corte"></b></div>
   </div>
-  <div class="hero-r"><div class="big" id="hero-val">0</div><div class="lbl" id="hero-lbl">Garantías abiertas</div></div>
+  <div class="hero-r"><div class="big" id="hero-val">0</div></div>
 </div>
 
 <div class="filters">
@@ -467,7 +467,7 @@ function cambios(){
 function render(){
   fillSelects(); chips();
   const rows=rowsNow(), ab=rows.filter(r=>r.estado==='ABIERTA');
-  $('hero-val').textContent=N(ab.length); $('hero-lbl').textContent=`Garantías abiertas · ${N(rows.length)} registradas · ${N(rows.filter(r=>r.estado==='CERRADA').length)} cerradas`;
+  $('hero-val').textContent=N(ab.length);
   kpis(rows); flow(); backlog(rows); strip(rows); discs(); prov(rows); heat(rows);
   bars('b-nivel',group(rows,'nivel',0,NIV_ORD),'nivel',k=>NIV_C[k]||'#7385ad');
   bars('b-vig',group(rows,'vig',0,['VIGENTE','EXPIRADA','Sin registro']),'vig',k=>VIG_C[k]||'#7385ad',k=>k==='Sin registro'?k:k.charAt(0)+k.slice(1).toLowerCase());
