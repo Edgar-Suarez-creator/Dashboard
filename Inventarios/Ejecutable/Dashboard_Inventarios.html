@@ -230,9 +230,11 @@ const almName=v=>ALM_NAME[v]||v||'(sin dato)';
 const UMB={M:'metros',UN:'unidades',KIT:'kits',TF:'tramos',SK:'skids',JT:'juegos',SET:'sets'};const umbName=u=>UMB[u]||u;
 const dia=d=>(!d||d==='0')?'—':esc(d);
 
-const state={mod:'',denom:'',clas1:'',clas2:'',sistema:'',tipo:'',buscar:''};
-const DIM={mod:'mod',denom:'denom_alm',clas1:'clas1',clas2:'clas2',sistema:'sistema',tipo:'tipo'};
-const LBL={mod:'Módulo',denom:'Almacén',clas1:'Clasificación 1',clas2:'Clasificación 2',sistema:'Sistema',tipo:'Tipo',buscar:'Búsqueda'};
+const GRP1="TRONCALES Y PAD'S";
+DATA.items.forEach(r=>{ r.clas1g=(r.clas1==='CLUSTER'||r.clas1==='ESTACION CENTAUROS - EP1'||!r.clas1)?r.clas1:GRP1; });
+const state={mod:'',denom:'',clas1:'',clas1d:'',clas2:'',sistema:'',tipo:'',buscar:''};
+const DIM={mod:'mod',denom:'denom_alm',clas1:'clas1g',clas1d:'clas1',clas2:'clas2',sistema:'sistema',tipo:'tipo'};
+const LBL={mod:'Módulo',denom:'Almacén',clas1:'Clasificación 1',clas1d:'Troncal / PAD',clas2:'Clasificación 2',sistema:'Sistema',tipo:'Tipo',buscar:'Búsqueda'};
 let metric='valor';
 
 function hay(r){return [r.material,r.texto_breve,r.texto_ext,r.pep,r.mascara,r.sistema,r.clas1,r.clas2,r.tag].filter(Boolean).join(' ').toLowerCase();}
@@ -245,12 +247,12 @@ const rowsNow=()=>DATA.items.filter(r=>pass(r));
 
 function fillSelects(){
   for(const k in DIM){
-    const el=$('f-'+k); const opts=[...new Set(DATA.items.filter(r=>pass(r,k)).map(r=>r[DIM[k]]).filter(Boolean))].sort();
+    const el=$('f-'+k); if(!el) continue; const opts=[...new Set(DATA.items.filter(r=>pass(r,k)).map(r=>r[DIM[k]]).filter(Boolean))].sort();
     el.innerHTML=`<option value="">${k==='clas1'||k==='clas2'?'Todas':'Todos'}</option>`+opts.map(o=>`<option value="${esc(o)}">${esc(k==='denom'?almName(o):o)}</option>`).join('');
     el.value=state[k];
   }
 }
-function setF(k,v){ state[k]=(state[k]===v?'':v); if(k==='buscar') $('f-buscar').value=state.buscar; render(); }
+function setF(k,v){ state[k]=(state[k]===v?'':v); if(k==='clas1'&&state.clas1!==GRP1) state.clas1d=''; if(k==='buscar') $('f-buscar').value=state.buscar; render(); }
 function clearAll(){ Object.keys(state).forEach(k=>state[k]=''); $('f-buscar').value=''; render(); }
 function chips(){
   const act=Object.entries(state).filter(([,v])=>v);
@@ -408,7 +410,7 @@ function render(){
   $('hero-val').textContent=S(v); $('hero-val').title=$$(v);
   $('hero-lbl').textContent=`Valor en bodega (COP) · ${N(rows.length)} ítems`;
   kpis(rows); mods(rows);
-  bars('b-clas1',group(rows,'clas1'),'clas1',NEON);
+  if(state.clas1===GRP1) bars('b-clas1',group(rows,'clas1'),'clas1d',NEON); else bars('b-clas1',group(rows,'clas1g'),'clas1',NEON);
   donut('d-alm',group(rows,'denom_alm'));
   bars('b-sistema',group(rows,'sistema',10),'sistema','#00e5ff');
   bars('b-tipo',group(rows,'tipo',10),'tipo','#ff2bd6');
@@ -416,7 +418,7 @@ function render(){
   bars('b-tipol',group(rows,'texto_breve',12),'buscar','#a6ff00');
   pareto(rows); table(rows);
 }
-Object.keys(DIM).forEach(k=>$('f-'+k).addEventListener('change',e=>{state[k]=e.target.value;render();}));
+Object.keys(DIM).forEach(k=>{const el=$('f-'+k); if(el) el.addEventListener('change',e=>{state[k]=e.target.value; if(k==='clas1'&&state.clas1!==GRP1) state.clas1d=''; render();});});
 let tq; $('f-buscar').addEventListener('input',e=>{clearTimeout(tq);tq=setTimeout(()=>{state.buscar=e.target.value.trim();render();},200);});
 document.querySelectorAll('#metric button').forEach(b=>b.addEventListener('click',()=>{metric=b.dataset.m;document.querySelectorAll('#metric button').forEach(x=>x.classList.toggle('on',x===b));render();}));
 
