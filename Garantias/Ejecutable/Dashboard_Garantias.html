@@ -125,6 +125,7 @@ td.n,th.n{text-align:right;font-family:'Space Grotesk',Inter;font-variant-numeri
 .f .fl{font-size:10.5px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.4px} .f .fv{font-size:13.5px;word-break:break-word;margin-top:2px}
 .f.wide{grid-column:1/-1} .f pre{white-space:pre-wrap;font:13px/1.55 Inter;margin:4px 0 0;color:var(--text);max-height:360px;overflow:auto}
 .bit{margin-top:4px} .bit .e{display:grid;grid-template-columns:92px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px} .bit .e b{color:var(--cyan);font-family:'Space Grotesk'} .bit .e:first-child b{color:var(--yellow)}
+.card.kpi{cursor:pointer}.card.kpi.act{box-shadow:0 0 0 2px var(--c),0 0 28px -6px var(--c)!important}
 </style>
 </head>
 <body>
@@ -250,16 +251,17 @@ const VIG_C={'VIGENTE':'#a6ff00','EXPIRADA':'#ff3b6b','Sin registro':'#7385ad'};
 const NEON=['#00e5ff','#ff2bd6','#a6ff00','#ffe600','#ff8a00','#9d7bff','#00ffa3','#ff3b6b','#3d8bff','#ffb3f0','#7dfff2','#d4ff6e'];
 const ALL_MONTHS=(()=>{const s=new Set();G.forEach(r=>{if(r.mes_apertura)s.add(r.mes_apertura);if(r.mes_cierre)s.add(r.mes_cierre);});const a=[...s].sort();const out=[];for(let m=a[0];m<=TM;m=addM(m,1))out.push(m);return out;})();
 
-const state={mod:'',proveedor:'',disc:'',estado:'',grupo:'',nivel:'',aging:'',mes:'',durb:'',vig:'',buscar:''};
+const state={mod:'',proveedor:'',disc:'',estado:'',grupo:'',nivel:'',aging:'',mes:'',durb:'',vig:'',crit:'',buscar:''};
 const DIMS=['mod','proveedor','disc','estado','grupo','nivel','aging','mes','durb','vig'];
-const LBL={mod:'Módulo',proveedor:'Proveedor',disc:'Disciplina',estado:'Estado',grupo:'Grupo',nivel:'Nivel',aging:'Antigüedad',mes:'Mes',durb:'Tiempo de cierre',vig:'Vigencia',buscar:'Búsqueda'};
-const lblV=(k,v)=>k==='mes'?mll(v):k==='mod'?'Módulo '+v.slice(1):k==='estado'?v.charAt(0)+v.slice(1).toLowerCase():v;
+const LBL={crit:'Abiertas críticas',mod:'Módulo',proveedor:'Proveedor',disc:'Disciplina',estado:'Estado',grupo:'Grupo',nivel:'Nivel',aging:'Antigüedad',mes:'Mes',durb:'Tiempo de cierre',vig:'Vigencia',buscar:'Búsqueda'};
+const lblV=(k,v)=>k==='crit'?'Sí':k==='mes'?mll(v):k==='mod'?'Módulo '+v.slice(1):k==='estado'?v.charAt(0)+v.slice(1).toLowerCase():v;
 let phor='12', pmetric='all'; const sortSt={k:'dias',d:-1};
 function hay(r){return r._h||(r._h=[r.odb,r.reporte,r.proveedor,r.tag,r.tipo,r.ubic,r.sistema,r.subsistema,r.cod_material,r.descripcion,r.bitacora,r.obs,r.contacto,r.cerrado_por].filter(Boolean).join(' ').toLowerCase());}
 function pass(r,skip){
   for(const k of DIMS){ if(k===skip||!state[k]) continue;
     if(k==='mes'){ if(r.mes_apertura!==state.mes&&r.mes_cierre!==state.mes) return false; }
     else if((r[k]||'')!==state[k]) return false; }
+  if(state.crit&&skip!=='crit'&&!(r.estado==='ABIERTA'&&((r.dias||0)>180||['ALTO','CRÍTICO'].includes(r.nivel)))) return false;
   if(state.buscar&&!hay(r).includes(state.buscar.toLowerCase())) return false;
   return true;
 }
@@ -288,12 +290,12 @@ function kpis(rows){
   const stackE=`<div class="stack">${EST_ORD.map(k=>`<i style="width:${rows.length?rows.filter(r=>r.estado===k).length/rows.length*100:0}%;background:${EST_C[k]}"></i>`).join('')}</div><div class="legend">${EST_ORD.filter(k=>rows.some(r=>r.estado===k)).map(k=>`<span><i class="dot" style="background:${EST_C[k]}"></i>${lblV('estado',k)} ${N(rows.filter(r=>r.estado===k).length)}</span>`).join('')}</div>`;
   const stackA=`<div class="stack">${AG_ORD.map(k=>`<i style="width:${ab.length?ab.filter(r=>r.aging===k).length/ab.length*100:0}%;background:${AG_C[k]}"></i>`).join('')}</div><div class="legend">${AG_ORD.filter(k=>ab.some(r=>r.aging===k)).map(k=>`<span><i class="dot" style="background:${AG_C[k]}"></i>${k.replace(' días','')} ${N(ab.filter(r=>r.aging===k).length)}</span>`).join('')}</div>`;
   $('kpis').innerHTML=[
-    {c:'var(--cyan)',t:'Garantías registradas',kv:N(rows.length),s:`<b>${N(new Set(rows.map(r=>r.proveedor)).size)}</b> proveedores · M3 <b>${N(rows.filter(r=>r.mod==='M3').length)}</b> · M4 <b>${N(rows.filter(r=>r.mod==='M4').length)}</b>`,x:stackE,on:"openList('Garantías del filtro','Todas las garantías que cumplen los filtros',rowsNow())"},
-    {c:'var(--pink)',t:'Abiertas',kv:N(ab.length),s:`Antigüedad media <b>${dias.length?N(sum(dias,d=>d)/dias.length):'—'}</b> días · <b>${N(new Set(ab.map(r=>r.proveedor)).size)}</b> proveedores`,x:stackA,on:"setF('estado','ABIERTA')"},
-    {c:'var(--lime)',t:'Cerradas · % de cierre',kv:P(ce.length,rows.length),s:`<b>${N(ce.length)}</b> cerradas de <b>${N(rows.length)}</b>`,x:'',on:"setF('estado','CERRADA')"},
-    {c:'var(--yellow)',t:'Tiempo medio de cierre',kv:(dur.length?N(sum(dur,d=>d)/dur.length):'—')+'<small>días</small>',s:`Mediana <b>${dur.length?N(dur[Math.floor(dur.length/2)]):'—'}</b> · más rápida <b>${dur.length?N(dur[0]):'—'}</b> · más lenta <b>${dur.length?N(dur[dur.length-1]):'—'}</b>`,x:'',on:"openList('Garantías cerradas','Ordenadas por tiempo de cierre',rowsNow().filter(r=>r.estado==='CERRADA'),'duracion')"},
-    {c:'var(--red)',t:'Abiertas críticas',kv:N(crit.length)+`<small>de ${N(ab.length)}</small>`,s:`Más de 180 días abiertas o nivel alto/crítico · <b>${N(ab.filter(r=>(r.dias||0)>365).length)}</b> superan un año`,x:'',on:"openList('Garantías abiertas críticas','Más de 180 días desde la apertura o nivel de compromiso alto / crítico',rowsNow().filter(r=>r.estado==='ABIERTA'&&((r.dias||0)>180||['ALTO','CRÍTICO'].includes(r.nivel))),'dias')"},
-  ].map(k=>`<div class="card kpi" style="--c:${k.c}" onclick="${k.on}"><div class="t">${k.t}</div><div class="kv">${k.kv}</div><div class="s">${k.s}</div>${k.x}</div>`).join('');
+    {c:'var(--cyan)',t:'Garantías registradas',kv:N(rows.length),s:`<b>${N(new Set(rows.map(r=>r.proveedor)).size)}</b> proveedores · M3 <b>${N(rows.filter(r=>r.mod==='M3').length)}</b> · M4 <b>${N(rows.filter(r=>r.mod==='M4').length)}</b>`,x:stackE,on:"state.estado='';state.crit='';render()",act:!state.estado&&!state.crit},
+    {c:'var(--pink)',t:'Abiertas',kv:N(ab.length),s:`Antigüedad media <b>${dias.length?N(sum(dias,d=>d)/dias.length):'—'}</b> días · <b>${N(new Set(ab.map(r=>r.proveedor)).size)}</b> proveedores`,x:stackA,on:"state.crit='';setF('estado','ABIERTA')",act:state.estado==='ABIERTA'&&!state.crit},
+    {c:'var(--lime)',t:'Cerradas · % de cierre',kv:P(ce.length,rows.length),s:`<b>${N(ce.length)}</b> cerradas de <b>${N(rows.length)}</b>`,x:'',on:"state.crit='';setF('estado','CERRADA')",act:state.estado==='CERRADA'},
+    {c:'var(--yellow)',t:'Tiempo medio de cierre',kv:(dur.length?N(sum(dur,d=>d)/dur.length):'—')+'<small>días</small>',s:`Mediana <b>${dur.length?N(dur[Math.floor(dur.length/2)]):'—'}</b> · más rápida <b>${dur.length?N(dur[0]):'—'}</b> · más lenta <b>${dur.length?N(dur[dur.length-1]):'—'}</b>`,x:'',on:"state.crit='';state.estado='CERRADA';sortSt.k='duracion';sortSt.d=-1;render()",act:false},
+    {c:'var(--red)',t:'Abiertas críticas',kv:N(crit.length)+`<small>de ${N(ab.length)}</small>`,s:`Más de 180 días abiertas o nivel alto/crítico · <b>${N(ab.filter(r=>(r.dias||0)>365).length)}</b> superan un año`,x:'',on:"state.estado='';setF('crit','SI')",act:!!state.crit},
+  ].map(k=>`<div class="card kpi${k.act&&(state.estado||state.crit)?' act':''}" style="--c:${k.c}" onclick="${k.on}" title="Clic para filtrar el tablero"><div class="t">${k.t}</div><div class="kv">${k.kv}</div><div class="s">${k.s}</div>${k.x}</div>`).join('');
 }
 
 /* ---- flujo mensual ---- */
@@ -301,8 +303,9 @@ function niceTop(mx){const st=[1,2,5,10,20,25,50,100].find(s=>Math.ceil(mx/s)<=5
 function flow(){
   const base=rowsNow('mes'); const months=phor==='12'?ALL_MONTHS.filter(m=>m>=addM(TM,-11)):ALL_MONTHS.slice();
   const ap={},ci={}; base.forEach(r=>{if(r.mes_apertura)ap[r.mes_apertura]=(ap[r.mes_apertura]||0)+1; if(r.mes_cierre)ci[r.mes_cierre]=(ci[r.mes_cierre]||0)+1;});
-  const bl=months.map(m=>base.filter(r=>r.fecha_apertura&&r.fecha_apertura.slice(0,7)<=m&&!(r.fecha_cierre&&r.fecha_cierre.slice(0,7)<=m)).length);
-  const W=1200,H=330,pl=46,pr=16,pt=30,pb=44,n=months.length,slot=(W-pl-pr)/n,bw=Math.min(slot*.3,26);
+  const bl=months.map(m=>base.filter(r=>r.fecha_apertura&&r.fecha_apertura.slice(0,7)<=m&&!(r.fecha_cierre&&r.fecha_cierre.slice(0,7)<=m)&&!(r.estado==='CERRADA'&&!r.fecha_cierre)).length);
+  const sinAp=base.filter(r=>!r.fecha_apertura), ceB=base.filter(r=>r.estado==='CERRADA'), sinCi=ceB.filter(r=>!r.fecha_cierre), abSinAp=sinAp.filter(r=>r.estado==='ABIERTA').length;
+  const W=1200,H=360,pl=46,pr=16,pt=30,pb=74,n=months.length,slot=(W-pl-pr)/n,bw=Math.min(slot*.3,26);
   const mx=Math.max(1,...months.map(m=>Math.max(ap[m]||0,ci[m]||0)),...bl); const {top,st}=niceTop(mx);
   const X=i=>pl+slot*i+slot/2, Y=v=>pt+(H-pt-pb)*(1-v/top);
   let s=`<svg viewBox="0 0 ${W} ${H}">`;
@@ -314,13 +317,13 @@ function flow(){
     if(on) s+=`<rect x="${pl+slot*i+2}" y="${pt-4}" width="${slot-4}" height="${H-pt-pb+8}" rx="8" fill="rgba(255,230,0,.08)" stroke="#ffe600" stroke-width="1.5"/>`;
     if(a) s+=`<rect class="b" x="${X(i)-bw-1}" y="${Y(a)}" width="${bw}" height="${Y(0)-Y(a)}" rx="3" fill="#ff2bd6" style="filter:drop-shadow(0 0 5px #ff2bd666)"/><text x="${X(i)-bw/2-1}" y="${Y(a)-5}" text-anchor="middle" fill="#eef3ff" font-size="11" font-weight="700" font-family="Space Grotesk">${a}</text>`;
     if(c) s+=`<rect class="b" x="${X(i)+1}" y="${Y(c)}" width="${bw}" height="${Y(0)-Y(c)}" rx="3" fill="#a6ff00" style="filter:drop-shadow(0 0 5px #a6ff0066)"/><text x="${X(i)+bw/2+1}" y="${Y(c)-5}" text-anchor="middle" fill="#eef3ff" font-size="11" font-weight="700" font-family="Space Grotesk">${c}</text>`;
-    s+=`<text x="${X(i)}" y="${H-pb+18}" text-anchor="middle" fill="${m===TM||on?'#ffe600':'#a9b7d9'}" font-size="11" font-weight="${m===TM||on?'800':'500'}">${ml(m)}</text></g>`;});
+    s+=`<text transform="translate(${X(i)+4},${H-pb+10}) rotate(-90)" text-anchor="end" fill="${m===TM||on?'#ffe600':'#a9b7d9'}" font-size="11" font-weight="${m===TM||on?'800':'500'}">${ml(m)}</text></g>`;});
   const pts=months.map((m,i)=>`${X(i).toFixed(1)},${Y(bl[i]).toFixed(1)}`).join(' ');
   s+=`<polyline points="${pts}" fill="none" stroke="#00e5ff" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #00e5ff);pointer-events:none"/>`;
   months.forEach((m,i)=>{s+=`<circle cx="${X(i)}" cy="${Y(bl[i])}" r="4.5" fill="#00e5ff" stroke="#0f1730" stroke-width="2" style="pointer-events:none"/>`;});
-  s+=`<text x="${X(n-1)}" y="${Y(bl[n-1])-10}" text-anchor="middle" fill="#00e5ff" font-size="12" font-weight="800" style="pointer-events:none">${N(bl[n-1])} abiertas</text>`;
+  s+=`<text x="${X(n-1)-6}" y="${Y(bl[n-1])-12}" text-anchor="end" fill="#00e5ff" font-size="12" font-weight="800" style="pointer-events:none">${N(bl[n-1])} abiertas${abSinAp?` + ${abSinAp} sin fecha de apertura`:''}</text>`;
   s+='</svg>'; $('flow').innerHTML=s;
-  $('flow-leg').innerHTML=`<span class="lg ${state.estado==='ABIERTA'?'on':''}" ${call('setF','estado','ABIERTA')}><i class="dot" style="background:#ff2bd6;box-shadow:0 0 8px #ff2bd6"></i>Aperturas · ${N(months.reduce((t,m)=>t+(ap[m]||0),0))} en el horizonte</span><span class="lg ${state.estado==='CERRADA'?'on':''}" ${call('setF','estado','CERRADA')}><i class="dot" style="background:#a6ff00;box-shadow:0 0 8px #a6ff00"></i>Cierres · ${N(months.reduce((t,m)=>t+(ci[m]||0),0))}</span><span><i class="dot" style="background:#00e5ff;box-shadow:0 0 8px #00e5ff"></i>Saldo abierto al fin de mes</span><span style="margin-left:auto">${state.mes?'Mes seleccionado: <b style="color:#ffe600">'+mll(state.mes)+'</b>':'Clic en un mes para filtrar'}</span>`;
+  $('flow-leg').innerHTML=`<span class="lg ${state.estado==='ABIERTA'?'on':''}" ${call('setF','estado','ABIERTA')}><i class="dot" style="background:#ff2bd6;box-shadow:0 0 8px #ff2bd6"></i>Aperturas · ${N(months.reduce((t,m)=>t+(ap[m]||0),0))}${phor==='12'?' en los últimos 12 meses':''} <small style="opacity:.75">(de ${N(base.length)} registradas${sinAp.length?`; ${N(sinAp.length)} sin fecha de apertura`:''})</small></span><span class="lg ${state.estado==='CERRADA'?'on':''}" ${call('setF','estado','CERRADA')}><i class="dot" style="background:#a6ff00;box-shadow:0 0 8px #a6ff00"></i>Cierres · ${N(months.reduce((t,m)=>t+(ci[m]||0),0))}${phor==='12'?' en los últimos 12 meses':''} <small style="opacity:.75">(de ${N(ceB.length)} cerradas${sinCi.length?`; ${N(sinCi.length)} sin fecha de cierre`:''})</small></span><span><i class="dot" style="background:#00e5ff;box-shadow:0 0 8px #00e5ff"></i>Saldo abierto al fin de mes</span><span style="margin-left:auto">${state.mes?'Mes seleccionado: <b style="color:#ffe600">'+mll(state.mes)+'</b>':'Clic en un mes para filtrar'}</span>`;
 }
 function backlog(rows){
   const ab=rows.filter(r=>r.estado==='ABIERTA'); const arr=group(ab,'aging',0,AG_ORD).filter(o=>o.k!=='(sin dato)');
