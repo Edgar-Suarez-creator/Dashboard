@@ -42,9 +42,9 @@ body{margin:0;background:radial-gradient(1200px 600px at 85% -10%,rgba(255,43,21
 .sec p{margin:0;color:var(--text2);font-size:13px}
 .grid{display:grid;gap:14px}
 .g5{grid-template-columns:repeat(5,1fr)} .g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:1fr 1fr} .g21{grid-template-columns:2fr 1fr} .g12{grid-template-columns:1fr 2fr}
-@media(max-width:1300px){.g5{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1300px){.g5,.g6{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:1200px){.g4{grid-template-columns:1fr 1fr}.g3,.g21,.g12{grid-template-columns:1fr}}
-@media(max-width:760px){.g5,.g4,.g2{grid-template-columns:1fr}}
+@media(max-width:760px){.g5,.g6,.g4,.g2{grid-template-columns:1fr}}
 .card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;padding:18px 20px;min-width:0}
 .card h3{margin:0;font-size:14.5px;font-weight:700} .card .hint{color:var(--text2);font-size:12.5px;margin:3px 0 14px} .card .hint b{color:var(--yellow)}
 .ch{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
@@ -125,7 +125,12 @@ td.n,th.n{text-align:right;font-family:'Space Grotesk',Inter;font-variant-numeri
 .f .fl{font-size:10.5px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.4px} .f .fv{font-size:13.5px;word-break:break-word;margin-top:2px}
 .f.wide{grid-column:1/-1} .f pre{white-space:pre-wrap;font:13px/1.55 Inter;margin:4px 0 0;color:var(--text);max-height:360px;overflow:auto}
 .bit{margin-top:4px} .bit .e{display:grid;grid-template-columns:92px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px} .bit .e b{color:var(--cyan);font-family:'Space Grotesk'} .bit .e:first-child b{color:var(--yellow)}
-.card.kpi{cursor:pointer}.card.kpi.act{box-shadow:0 0 0 2px var(--c),0 0 28px -6px var(--c)!important}
+.card.kpi{cursor:pointer}.g6{grid-template-columns:repeat(6,1fr)}
+.mbars{display:flex;align-items:flex-end;gap:3px;height:34px;margin-top:8px}
+.mbars i{flex:1;border-radius:3px 3px 0 0;background:var(--c);opacity:.85;position:relative;min-height:2px}
+.mbars i.z{background:rgba(255,255,255,.08);opacity:1}
+.mlbl{display:flex;gap:3px;margin-top:3px}.mlbl span{flex:1;text-align:center;font-size:9.5px;color:var(--text2)}
+.card.kpi.act{box-shadow:0 0 0 2px var(--c),0 0 28px -6px var(--c)!important}
 </style>
 </head>
 <body>
@@ -155,7 +160,7 @@ td.n,th.n{text-align:right;font-family:'Space Grotesk',Inter;font-variant-numeri
 
 <!-- 1. Resumen -->
 <div class="sec"><h2>Resumen</h2><p>Todo cambia con los filtros. Haz clic en cualquier tarjeta, barra, mes o punto para profundizar.</p></div>
-<div class="grid g5" id="kpis"></div>
+<div class="grid g6" id="kpis"></div>
 
 <!-- 2. Flujo mensual -->
 <div class="sec"><h2>Flujo de garantías: aperturas, cierres y saldo abierto</h2>
@@ -251,16 +256,17 @@ const VIG_C={'VIGENTE':'#a6ff00','EXPIRADA':'#ff3b6b','Sin registro':'#7385ad'};
 const NEON=['#00e5ff','#ff2bd6','#a6ff00','#ffe600','#ff8a00','#9d7bff','#00ffa3','#ff3b6b','#3d8bff','#ffb3f0','#7dfff2','#d4ff6e'];
 const ALL_MONTHS=(()=>{const s=new Set();G.forEach(r=>{if(r.mes_apertura)s.add(r.mes_apertura);if(r.mes_cierre)s.add(r.mes_cierre);});const a=[...s].sort();const out=[];for(let m=a[0];m<=TM;m=addM(m,1))out.push(m);return out;})();
 
-const state={anio:'',mod:'',proveedor:'',disc:'',estado:'',grupo:'',nivel:'',aging:'',mes:'',durb:'',vig:'',crit:'',buscar:''};
+const state={cyr:'',anio:'',mod:'',proveedor:'',disc:'',estado:'',grupo:'',nivel:'',aging:'',mes:'',durb:'',vig:'',crit:'',buscar:''};
 const DIMS=['anio','mod','proveedor','disc','estado','grupo','nivel','aging','mes','durb','vig'];
-const LBL={anio:'Año de apertura',crit:'Abiertas críticas',mod:'Módulo',proveedor:'Proveedor',disc:'Disciplina',estado:'Estado',grupo:'Grupo',nivel:'Nivel',aging:'Antigüedad',mes:'Mes',durb:'Tiempo de cierre',vig:'Vigencia',buscar:'Búsqueda'};
-const lblV=(k,v)=>k==='crit'?'Sí':k==='mes'?mll(v):k==='mod'?'Módulo '+v.slice(1):k==='estado'?v.charAt(0)+v.slice(1).toLowerCase():v;
+const LBL={cyr:'Cerradas en',anio:'Año de apertura',crit:'Abiertas críticas',mod:'Módulo',proveedor:'Proveedor',disc:'Disciplina',estado:'Estado',grupo:'Grupo',nivel:'Nivel',aging:'Antigüedad',mes:'Mes',durb:'Tiempo de cierre',vig:'Vigencia',buscar:'Búsqueda'};
+const lblV=(k,v)=>k==='cyr'?v:k==='crit'?'Sí':k==='mes'?mll(v):k==='mod'?'Módulo '+v.slice(1):k==='estado'?v.charAt(0)+v.slice(1).toLowerCase():v;
 let phor='12', pmetric='all'; const sortSt={k:'dias',d:-1};
 function hay(r){return r._h||(r._h=[r.odb,r.reporte,r.proveedor,r.tag,r.tipo,r.ubic,r.sistema,r.subsistema,r.cod_material,r.descripcion,r.bitacora,r.obs,r.contacto,r.cerrado_por].filter(Boolean).join(' ').toLowerCase());}
 function pass(r,skip){
   for(const k of DIMS){ if(k===skip||!state[k]) continue;
     if(k==='mes'){ if(r.mes_apertura!==state.mes&&r.mes_cierre!==state.mes) return false; }
     else if((r[k]||'')!==state[k]) return false; }
+  if(state.cyr&&skip!=='cyr'&&!(r.estado==='CERRADA'&&(r.fecha_cierre||'').startsWith(state.cyr))) return false;
   if(state.crit&&skip!=='crit'&&!(r.estado==='ABIERTA'&&((r.dias||0)>180||['ALTO','CRÍTICO'].includes(r.nivel)))) return false;
   if(state.buscar&&!hay(r).includes(state.buscar.toLowerCase())) return false;
   return true;
@@ -290,12 +296,16 @@ function kpis(rows){
   const stackE=`<div class="stack">${EST_ORD.map(k=>`<i style="width:${rows.length?rows.filter(r=>r.estado===k).length/rows.length*100:0}%;background:${EST_C[k]}"></i>`).join('')}</div><div class="legend">${EST_ORD.filter(k=>rows.some(r=>r.estado===k)).map(k=>`<span><i class="dot" style="background:${EST_C[k]}"></i>${lblV('estado',k)} ${N(rows.filter(r=>r.estado===k).length)}</span>`).join('')}</div>`;
   const stackA=`<div class="stack">${AG_ORD.map(k=>`<i style="width:${ab.length?ab.filter(r=>r.aging===k).length/ab.length*100:0}%;background:${AG_C[k]}"></i>`).join('')}</div><div class="legend">${AG_ORD.filter(k=>ab.some(r=>r.aging===k)).map(k=>`<span><i class="dot" style="background:${AG_C[k]}"></i>${k.replace(' días','')} ${N(ab.filter(r=>r.aging===k).length)}</span>`).join('')}</div>`;
   $('kpis').innerHTML=[
-    {c:'var(--cyan)',t:'Garantías registradas',kv:N(rows.length),s:`<b>${N(new Set(rows.map(r=>r.proveedor)).size)}</b> proveedores · M3 <b>${N(rows.filter(r=>r.mod==='M3').length)}</b> · M4 <b>${N(rows.filter(r=>r.mod==='M4').length)}</b>`,x:stackE,on:"state.estado='';state.crit='';render()",act:!state.estado&&!state.crit},
+    {c:'var(--cyan)',t:'Garantías registradas',kv:N(rows.length),s:`<b>${N(new Set(rows.map(r=>r.proveedor)).size)}</b> proveedores · M3 <b>${N(rows.filter(r=>r.mod==='M3').length)}</b> · M4 <b>${N(rows.filter(r=>r.mod==='M4').length)}</b>`,x:stackE,on:"state.estado='';state.crit='';state.cyr='';render()",act:!state.estado&&!state.crit&&!state.cyr},
     {c:'var(--pink)',t:'Abiertas',kv:N(ab.length),s:`Antigüedad media <b>${dias.length?N(sum(dias,d=>d)/dias.length):'—'}</b> días · <b>${N(new Set(ab.map(r=>r.proveedor)).size)}</b> proveedores`,x:stackA,on:"state.crit='';setF('estado','ABIERTA')",act:state.estado==='ABIERTA'&&!state.crit},
     {c:'var(--lime)',t:'Cerradas · % de cierre',kv:P(ce.length,rows.length),s:`<b>${N(ce.length)}</b> cerradas de <b>${N(rows.length)}</b>`,x:'',on:"state.crit='';setF('estado','CERRADA')",act:state.estado==='CERRADA'},
+    (()=>{const Y=TODAY.slice(0,4), ceY=ce.filter(r=>(r.fecha_cierre||'').startsWith(Y)), sinF=ce.filter(r=>!r.fecha_cierre).length, upTo=+TODAY.slice(5,7);
+      const cnt=Array.from({length:12},(_,i)=>ceY.filter(r=>+r.fecha_cierre.slice(5,7)===i+1).length), mx=Math.max(1,...cnt);
+      const x=`<div class="mbars">${cnt.map((v,i)=>`<i class="${v?'':'z'}" style="height:${v?Math.max(12,100*v/mx):6}%;${i+1>upTo?'opacity:.25':''}" title="${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][i]} ${Y}: ${v}"></i>`).join('')}</div><div class="mlbl">${'EFMAMJJASOND'.split('').map(l=>`<span>${l}</span>`).join('')}</div>`;
+      return {c:'#00d1b2',t:'Cerradas en '+Y,kv:N(ceY.length),s:`Estado CERRADA y fecha de cierre en ${Y}${sinF?` · <b>${N(sinF)}</b> cerradas sin fecha de cierre no se cuentan`:''}`,x,on:"state.crit='';state.estado='';setF('cyr','"+Y+"')",act:!!state.cyr};})(),
     {c:'var(--yellow)',t:'Tiempo medio de cierre',kv:(dur.length?N(sum(dur,d=>d)/dur.length):'—')+'<small>días</small>',s:`Mediana <b>${dur.length?N(dur[Math.floor(dur.length/2)]):'—'}</b> · más rápida <b>${dur.length?N(dur[0]):'—'}</b> · más lenta <b>${dur.length?N(dur[dur.length-1]):'—'}</b>`,x:'',on:"state.crit='';state.estado='CERRADA';sortSt.k='duracion';sortSt.d=-1;render()",act:false},
     {c:'var(--red)',t:'Abiertas críticas',kv:N(crit.length)+`<small>de ${N(ab.length)}</small>`,s:`Más de 180 días abiertas o nivel alto/crítico · <b>${N(ab.filter(r=>(r.dias||0)>365).length)}</b> superan un año`,x:'',on:"state.estado='';setF('crit','SI')",act:!!state.crit},
-  ].map(k=>`<div class="card kpi${k.act&&(state.estado||state.crit)?' act':''}" style="--c:${k.c}" onclick="${k.on}" title="Clic para filtrar el tablero"><div class="t">${k.t}</div><div class="kv">${k.kv}</div><div class="s">${k.s}</div>${k.x}</div>`).join('');
+  ].map(k=>`<div class="card kpi${k.act&&(state.estado||state.crit||state.cyr)?' act':''}" style="--c:${k.c}" onclick="${k.on}" title="Clic para filtrar el tablero"><div class="t">${k.t}</div><div class="kv">${k.kv}</div><div class="s">${k.s}</div>${k.x}</div>`).join('');
 }
 
 /* ---- flujo mensual ---- */
