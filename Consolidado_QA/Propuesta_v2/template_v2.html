@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard Consolidado QA · Caño Sur Este</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@600;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<style>
+:root{
+  --bg:#02040a; --bg2:#070c1f; --bg3:#0b1330;
+  --text:#e8f9ff; --text-2:#9fbbd8; --muted:#5f7194;
+  --border:rgba(70,211,255,.14); --border-2:rgba(70,211,255,.07);
+  --cyan:#00e5ff; --violet:#b26bff; --good:#22ffb8; --warn:#ffb020; --bad:#ff3d7f; --yellow:#ffd23f; --orange:#ff8c42; --sky:#38bdf8; --lime:#a6ff00;
+  --accent:var(--cyan); --accent2:var(--violet);
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--text);min-height:100vh;font-size:13.5px;line-height:1.5;overflow-x:hidden}
+.bg-aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;background:radial-gradient(ellipse at top,#0a1a3a 0%,#050914 55%,#020408 100%)}
+.bg-aurora i{position:absolute;border-radius:50%;filter:blur(160px);opacity:.3;mix-blend-mode:screen;animation:float 28s ease-in-out infinite}
+.bg-aurora i:nth-child(1){width:1100px;height:1100px;background:radial-gradient(circle,#00e5ff 0%,transparent 60%);top:-420px;left:-380px}
+.bg-aurora i:nth-child(2){width:1000px;height:1000px;background:radial-gradient(circle,#b26bff 0%,transparent 60%);bottom:-480px;right:-360px;animation-delay:-10s}
+.bg-aurora i:nth-child(3){width:700px;height:700px;background:radial-gradient(circle,#22ffb8 0%,transparent 60%);top:45%;left:40%;opacity:.12;animation-delay:-18s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(140px,-100px) scale(1.1)}66%{transform:translate(-120px,110px) scale(.9)}}
+.bg-grid{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(0,229,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.035) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 85%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 85%)}
+.container{max-width:1600px;margin:0 auto;padding:0 26px 60px}
+.num,.mono{font-variant-numeric:tabular-nums}
+
+/* ---------- header ---------- */
+.header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:26px 0 18px;flex-wrap:wrap;position:relative}
+.header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),var(--violet),transparent);opacity:.6}
+.header h1{margin:0;font-family:'Orbitron',sans-serif;font-size:25px;font-weight:900;letter-spacing:2px;text-transform:uppercase;background:linear-gradient(90deg,#fff 0%,var(--cyan) 45%,var(--violet) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(0,229,255,.35))}
+.header .sub{font-size:12px;color:var(--text-2);margin-top:6px;letter-spacing:.8px}
+.header .meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chip-h{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.6px;border:1px solid var(--border);background:rgba(0,229,255,.06);color:var(--text-2)}
+.chip-h b{color:var(--cyan)}
+.chip-h.live{color:var(--good);border-color:rgba(34,255,184,.45);background:rgba(34,255,184,.08);text-transform:uppercase;font-weight:800;letter-spacing:1px}
+.chip-h.live::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 12px var(--good);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.5)}}
+
+/* ---------- pulso global ---------- */
+.pulse-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0 14px}
+@media(max-width:1100px){.pulse-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.pulse-row{grid-template-columns:1fr}}
+.pcard{position:relative;display:flex;gap:14px;align-items:center;padding:12px 16px;border-radius:14px;cursor:pointer;color:var(--c);background:linear-gradient(140deg,rgba(18,28,58,.78),rgba(8,13,32,.92));border:1px solid rgba(255,255,255,.06);transition:.25s cubic-bezier(.4,0,.2,1);overflow:hidden}
+.pcard::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--c);box-shadow:0 0 14px var(--c)}
+.pcard:hover{transform:translateY(-3px);border-color:var(--c);box-shadow:0 12px 34px -10px var(--c)}
+.pcard.on{border-color:var(--c);box-shadow:0 0 0 1px var(--c),0 12px 34px -8px var(--c)}
+.ring{--p:0;width:62px;height:62px;flex:0 0 62px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--c) calc(var(--p)*1%),rgba(255,255,255,.07) 0);filter:drop-shadow(0 0 8px var(--c))}
+.ring span{width:48px;height:48px;border-radius:50%;background:#070c1f;display:grid;place-items:center;font:900 12px 'Orbitron';color:#fff}
+.pcard .t{font:800 11px 'Orbitron';letter-spacing:1.4px;text-transform:uppercase;text-shadow:0 0 10px var(--c)}
+.pcard .v{font:900 22px 'Orbitron';color:#fff;margin-top:2px}
+.pcard .s{font-size:10.5px;color:var(--text-2)}
+.pcard .s b{color:var(--c)}
+
+/* ---------- tabs ---------- */
+.tabs{position:sticky;top:0;z-index:60;display:flex;gap:6px;padding:8px;margin:0 -8px 16px;background:rgba(3,6,16,.88);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:14px;flex-wrap:wrap}
+.tab{flex:1;min-width:150px;padding:11px 16px;border-radius:10px;cursor:pointer;font:800 12.5px 'Inter';letter-spacing:.5px;text-align:center;border:1px solid transparent;transition:.2s;background:transparent;color:var(--text-2);text-transform:uppercase}
+.tab:hover{background:rgba(0,229,255,.06);color:var(--text)}
+.tab.active{background:linear-gradient(135deg,color-mix(in srgb,var(--c) 22%,transparent),rgba(178,107,255,.12));color:#fff;border-color:var(--c);box-shadow:0 0 18px -4px var(--c),inset 0 0 12px -6px var(--c);text-shadow:0 0 8px var(--c)}
+.tab .ico{margin-right:8px;font-size:15px}
+.tab .chip{display:inline-block;margin-left:10px;padding:2px 9px;border-radius:9px;background:rgba(0,0,0,.35);color:var(--c);font:800 11px 'Orbitron';border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+
+.section{display:none;animation:fade .35s ease}
+.section.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- KPIs ---------- */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:11px;margin-bottom:14px}
+@media(max-width:1300px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{--k:var(--cyan);position:relative;padding:14px 16px 13px;border-radius:14px;background:linear-gradient(150deg,rgba(18,28,58,.8),rgba(8,13,32,.92));border:1px solid var(--border);overflow:hidden;color:var(--k)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:currentColor;box-shadow:0 0 14px currentColor}
+.kpi::after{content:'';position:absolute;right:-40px;top:-40px;width:120px;height:120px;border-radius:50%;background:currentColor;opacity:.08;filter:blur(22px);pointer-events:none}
+.kpi.good{--k:var(--good)}.kpi.warn{--k:var(--warn)}.kpi.bad{--k:var(--bad)}.kpi.accent2{--k:var(--violet)}.kpi.accent{--k:var(--cyan)}.kpi.yellow{--k:var(--yellow)}
+.kpi .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:1.3px;color:var(--text-2);font-weight:800;display:flex;justify-content:space-between;gap:6px}
+.kpi .lbl i{font-style:normal;opacity:.85}
+.kpi .val{font:900 26px 'Orbitron';color:currentColor;margin-top:6px;text-shadow:0 0 16px currentColor;font-variant-numeric:tabular-nums}
+.kpi .sub{font-size:10.5px;color:var(--text-2);margin-top:2px}
+.kpi .kb{height:4px;border-radius:2px;background:rgba(0,0,0,.45);margin-top:8px;overflow:hidden}
+.kpi .kb span{display:block;height:100%;background:currentColor;box-shadow:0 0 8px currentColor;border-radius:2px}
+.kpi[data-kpi]{cursor:pointer;transition:.2s}
+.kpi[data-kpi]:hover{transform:translateY(-3px);border-color:currentColor;box-shadow:0 14px 34px -12px currentColor}
+.kpi[data-kpi] .go{position:absolute;bottom:10px;right:12px;font-size:10px;font-weight:800;letter-spacing:.6px;opacity:0;transition:.2s;color:currentColor}
+.kpi[data-kpi]:hover .go{opacity:.9}
+
+/* ---------- filter bar ---------- */
+.filter-bar{display:flex;flex-wrap:wrap;gap:10px;padding:12px 14px;background:linear-gradient(180deg,rgba(0,229,255,.05),rgba(178,107,255,.03));border:1px solid var(--border);border-radius:14px;margin-bottom:14px;align-items:flex-end}
+.filter-bar .field{display:flex;flex-direction:column;gap:4px;min-width:130px;max-width:200px;flex:1 1 150px}
+.filter-bar label{font-size:9px;color:var(--text-2);text-transform:uppercase;letter-spacing:1.3px;font-weight:800;line-height:1}
+.filter-bar .reset-btn{background:linear-gradient(135deg,var(--bad),var(--orange));color:#fff;border:0;border-radius:9px;padding:8px 14px;font:800 10.5px 'Inter';letter-spacing:.8px;text-transform:uppercase;cursor:pointer;height:34px;white-space:nowrap;flex:0 0 auto;box-shadow:0 0 14px -4px var(--bad)}
+.filter-bar .reset-btn:hover{filter:brightness(1.15)}
+.filter-bar .count{font-size:11px;color:var(--text-2);flex:1 1 100%;padding-top:7px;border-top:1px dashed var(--border);margin-top:2px}
+.filter-bar .count b{color:var(--cyan);font-family:'Orbitron';font-size:11px}
+
+/* multi-select */
+.ms{position:relative}
+.ms-btn{background:rgba(10,20,40,.85);color:var(--text);border:1px solid rgba(0,229,255,.25);border-radius:9px;padding:8px 11px;font:500 12px 'Inter';cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px;text-align:left;width:100%;min-height:34px;transition:.15s}
+.ms-btn:hover{border-color:var(--cyan)}
+.ms-btn.has-sel{border-color:var(--cyan);background:rgba(0,229,255,.1);box-shadow:0 0 12px -4px var(--cyan)}
+.ms-btn .ms-chev{flex-shrink:0;opacity:.6;font-size:9px;transition:transform .15s}
+.ms.open .ms-btn .ms-chev{transform:rotate(180deg)}
+.ms-btn .ms-sel{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-panel{position:absolute;top:calc(100% + 5px);left:0;min-width:250px;max-width:380px;background:#081028;border:1px solid var(--cyan);border-radius:10px;box-shadow:0 16px 40px rgba(0,0,0,.7),0 0 24px -8px var(--cyan);z-index:90;display:none;flex-direction:column;max-height:350px;overflow:hidden}
+.ms.open .ms-panel{display:flex}
+.ms-search{background:#0d1a3d;color:var(--text);border:none;border-bottom:1px solid var(--border);padding:9px 11px;font:500 12px 'Inter';outline:none}
+.ms-actions{display:flex;gap:6px;padding:7px 8px;border-bottom:1px solid var(--border)}
+.ms-actions button{background:rgba(0,229,255,.08);color:var(--cyan);border:1px solid rgba(0,229,255,.25);border-radius:6px;padding:4px 9px;font:700 11px 'Inter';cursor:pointer;flex:1}
+.ms-actions button:hover{background:rgba(0,229,255,.18)}
+.ms-count{font-size:10px;color:var(--cyan);padding:5px 10px;font-weight:800;text-align:right;border-bottom:1px solid var(--border)}
+.ms-options{overflow-y:auto;flex:1;padding:4px 0}
+.ms-options label{display:flex;align-items:center;gap:8px;padding:6px 11px;cursor:pointer;font-size:12px;color:var(--text);user-select:none;text-transform:none;letter-spacing:0;font-weight:500}
+.ms-options label:hover{background:rgba(0,229,255,.07)}
+.ms-options label.hidden{display:none}
+.ms-options input{accent-color:var(--cyan);cursor:pointer;flex-shrink:0;margin:0}
+.ms-empty{padding:14px;text-align:center;color:var(--muted);font-size:11px}
+
+/* ---------- cards / grid ---------- */
+.grid{display:grid;gap:14px;margin-top:14px}
+.grid:first-of-type{margin-top:0}
+.grid.cols-2{grid-template-columns:repeat(2,1fr)}
+.grid.cols-3{grid-template-columns:repeat(3,1fr)}
+.grid.c-21{grid-template-columns:2fr 1fr}
+@media(max-width:1100px){.grid.cols-2,.grid.cols-3,.grid.c-21{grid-template-columns:1fr}}
+.card{position:relative;background:linear-gradient(160deg,rgba(14,21,46,.75),rgba(7,11,28,.92));border:1px solid var(--border);border-radius:16px;padding:16px 16px 10px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.card::before{content:'';position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,var(--c,var(--cyan)),transparent 70%);box-shadow:0 0 14px var(--c,var(--cyan))}
+.card .ch{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.card h3{margin:0;font:800 12px 'Orbitron';letter-spacing:1.4px;text-transform:uppercase;color:#fff}
+.card h3 i{font-style:normal;color:var(--c,var(--cyan));margin-right:6px;text-shadow:0 0 10px var(--c,var(--cyan))}
+.card .desc{font-size:11px;color:var(--text-2);margin:3px 0 6px}
+.seg{display:inline-flex;border:1px solid rgba(0,229,255,.25);border-radius:8px;overflow:hidden;background:rgba(10,20,40,.85);flex:0 0 auto}
+.seg button{background:none;border:0;color:var(--text-2);font:800 10px 'Inter';letter-spacing:.6px;padding:6px 10px;cursor:pointer}
+.seg button+button{border-left:1px solid rgba(0,229,255,.15)}
+.seg button.on{background:linear-gradient(135deg,rgba(0,229,255,.25),rgba(178,107,255,.25));color:#fff}
+.nodata{padding:50px 10px;text-align:center;color:var(--muted);font-size:12px;letter-spacing:.6px}
+
+/* ---------- tabla ---------- */
+.tbl-tools{display:flex;gap:10px;align-items:center;margin:6px 0 10px;flex-wrap:wrap}
+.tbl-tools input{flex:1;min-width:220px;background:rgba(10,20,40,.85);color:var(--text);border:1px solid rgba(0,229,255,.25);border-radius:9px;padding:8px 12px;font:500 12px 'Inter';outline:none}
+.tbl-tools input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.12)}
+.tbl-tools .cnt{font-size:11px;color:var(--text-2)}
+.tbl-tools .cnt b{color:var(--cyan);font-family:'Orbitron'}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:#0a1430;color:var(--cyan);font-weight:800;text-transform:uppercase;letter-spacing:.8px;font-size:10px;padding:10px;text-align:left;border-bottom:1px solid rgba(0,229,255,.35);white-space:nowrap;position:sticky;top:0;z-index:1;text-shadow:0 0 8px rgba(0,229,255,.4)}
+tbody td{padding:8px 10px;border-bottom:1px solid var(--border-2);vertical-align:top}
+tbody tr:hover{background:rgba(0,229,255,.05)}
+tbody tr.clickable{cursor:pointer}
+tbody tr.clickable:hover{background:rgba(0,229,255,.09);box-shadow:inset 3px 0 0 var(--cyan)}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.code{font:700 11px 'JetBrains Mono';color:#fff}
+.pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:.4px;border:1px solid currentColor;background:color-mix(in srgb,currentColor 12%,transparent);white-space:nowrap}
+.pill.good{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.muted{color:var(--muted)}.pill.accent{color:var(--cyan)}.pill.accent2{color:var(--violet)}
+.tbl-wrap{max-height:460px;overflow:auto;border:1px solid var(--border);border-radius:12px}
+.tbl-wrap::-webkit-scrollbar{width:9px;height:9px}
+.tbl-wrap::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--cyan),var(--violet));border-radius:5px}
+.tbl-wrap::-webkit-scrollbar-track{background:rgba(5,10,24,.6)}
+.bar{height:7px;background:rgba(0,0,0,.45);border-radius:4px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.bar.good span{background:var(--good);box-shadow:0 0 8px var(--good)}.bar.warn span{background:var(--warn);box-shadow:0 0 8px var(--warn)}.bar.bad span{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+
+/* ---------- modal ---------- */
+.modal-back{position:fixed;inset:0;background:rgba(2,4,10,.8);backdrop-filter:blur(8px);z-index:998;opacity:0;pointer-events:none;transition:.22s}
+.modal-back.open{opacity:1;pointer-events:auto}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.94);opacity:0;pointer-events:none;width:min(920px,94vw);max-height:88vh;background:linear-gradient(160deg,#0a1024,#050916);border:1px solid var(--cyan);border-radius:18px;z-index:999;transition:.22s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 100px rgba(0,0,0,.85),0 0 60px -12px var(--cyan)}
+.modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.modal-back.m2{z-index:1000}
+.modal.m2{z-index:1001;width:min(840px,92vw);border-color:var(--violet);box-shadow:0 30px 100px rgba(0,0,0,.85),0 0 60px -12px var(--violet)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(0,229,255,.12),rgba(178,107,255,.06))}
+.modal-head h2{margin:0;font:800 14px 'Orbitron';letter-spacing:1.4px;color:#fff;text-shadow:0 0 12px rgba(0,229,255,.5)}
+.modal-head .sub{color:var(--text-2);font-size:11.5px;margin-top:4px}
+.modal-close{flex:0 0 34px;background:rgba(255,61,127,.12);border:1px solid rgba(255,61,127,.45);color:#ff8fb0;width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:15px;font-weight:700;transition:.2s}
+.modal-close:hover{transform:rotate(90deg);background:rgba(255,61,127,.24)}
+.modal-body{padding:18px 22px;overflow-y:auto;flex:1}
+.modal-kpi{display:flex;align-items:baseline;gap:14px;padding:14px 18px;background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(178,107,255,.04));border:1px solid rgba(0,229,255,.25);border-radius:12px;margin-bottom:16px}
+.modal-kpi .big{font:900 32px 'Orbitron';color:var(--cyan);text-shadow:0 0 16px var(--cyan);font-variant-numeric:tabular-nums}
+.modal-kpi .l{font-size:10.5px;color:var(--text-2);text-transform:uppercase;letter-spacing:1px;font-weight:800}
+.modal-section{margin-top:16px}
+.modal-section h4{font-size:10px;color:var(--text-2);text-transform:uppercase;letter-spacing:1.3px;font-weight:800;margin:0 0 9px}
+.tag{display:inline-block;padding:4px 10px;border-radius:8px;background:rgba(0,229,255,.06);color:var(--text);font-size:11px;border:1px solid rgba(0,229,255,.2)}
+.tag b{color:#fff}
+.tag.tag-click{cursor:pointer;transition:.15s}
+.tag.tag-click:hover{background:rgba(0,229,255,.18);border-color:var(--cyan);transform:translateY(-1px);box-shadow:0 0 12px -4px var(--cyan)}
+.detail-grid{display:grid;grid-template-columns:160px 1fr;gap:9px 14px;font-size:12.5px}
+.detail-grid .k{color:var(--text-2);font-weight:800;text-transform:uppercase;letter-spacing:.8px;font-size:9.5px;padding-top:3px}
+.detail-grid .v{color:var(--text);word-break:break-word}
+.detail-grid .v.muted{color:var(--muted);font-style:italic}
+.cmp-head{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:4px 0 14px;color:var(--text-2);font-size:12px}
+.cmp-head b{color:var(--cyan)}
+.cmp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:1100px){.cmp-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.cmp-grid{grid-template-columns:1fr}}
+.cmp-box{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:rgba(5,10,24,.45)}
+.cmp-box h4{margin:0 0 8px;font:800 11px 'Orbitron';letter-spacing:1px;color:var(--c,var(--cyan));text-transform:uppercase}
+.cmp-box table{width:100%;border-collapse:collapse;font-size:11.5px}
+.cmp-box td{padding:4px 2px;border-bottom:1px solid rgba(255,255,255,.05)}
+.cmp-box td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cmp-up{color:var(--good)}.cmp-dn{color:var(--bad)}.cmp-eq{color:var(--muted)}
+.cmp-filter{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 8px}
+.cmp-filter button{background:rgba(0,229,255,.06);color:var(--text-2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font:700 11px 'Inter';cursor:pointer}
+.cmp-filter button.on{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.14)}
+footer{margin-top:30px;padding-top:18px;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:11px;letter-spacing:.5px}
+footer b{color:var(--cyan)}
+.apexcharts-tooltip{box-shadow:0 10px 30px rgba(0,0,0,.6)!important;border:1px solid rgba(0,229,255,.4)!important;background:rgba(6,10,26,.96)!important}
+.apexcharts-tooltip-title{background:rgba(0,229,255,.1)!important;border-bottom:1px solid rgba(0,229,255,.25)!important;font-weight:800!important}
+.apexcharts-legend-text{font-family:'Inter'!important}
+@media(max-width:700px){.container{padding:0 14px 40px}.header h1{font-size:18px}.detail-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bg-aurora"><i></i><i></i><i></i></div>
+<div class="bg-grid"></div>
+<div class="container">
+
+<div class="header">
+  <div>
+    <h1 id="hdrTitle" style="display:inline-block;vertical-align:middle">Dashboard Consolidado QA · Caño Sur Este</h1><a class="home-link" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:7px;vertical-align:middle;margin-left:18px;padding:7px 14px 7px 11px;border-radius:999px;border:1px solid rgba(0,229,255,.6);background:rgba(0,229,255,.1);color:#9ff6ff;-webkit-text-fill-color:#9ff6ff;background-clip:padding-box;-webkit-background-clip:padding-box;filter:none;animation:none;font:600 13px/1 Inter,'Segoe UI',system-ui,sans-serif;letter-spacing:.2px;text-transform:none;text-decoration:none;white-space:nowrap;box-shadow:0 0 14px rgba(0,229,255,.28);text-shadow:none;transition:box-shadow .15s,transform .15s" onmouseover="this.style.boxShadow='0 0 22px rgba(0,229,255,.65)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='0 0 14px rgba(0,229,255,.28)';this.style.transform=''"><span style="font-size:17px;line-height:1">&#8962;</span>Volver al tablero principal</a>
+    <div class="sub" id="hdrSub">APPLUS+ Colombia · Aseguramiento Técnico Integral</div>
+  </div>
+  <div class="meta">
+    <span class="chip-h">📄 <b id="hdrSrc">—</b></span>
+    <span class="chip-h">⟳ Actualizado <b id="hdrCorte">—</b></span>
+    <span class="chip-h live">Live Feed</span>
+  </div>
+</div>
+
+<div class="pulse-row" id="pulse"></div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-tab="aspectos" style="--c:var(--cyan)"><span class="ico">📋</span>Aspectos Relevantes <span class="chip" id="chipAs">—</span></button>
+  <button class="tab" data-tab="ncr" style="--c:var(--bad)"><span class="ico">⚠️</span>NCR / OBS / PNC <span class="chip" id="chipNc">—</span></button>
+  <button class="tab" data-tab="dossier" style="--c:var(--violet)"><span class="ico">📚</span>Dossier <span class="chip" id="chipDo">—</span></button>
+  <button class="tab" data-tab="soltec" style="--c:var(--good)"><span class="ico">📨</span>Solicitudes Técnicas <span class="chip" id="chipSt">—</span></button>
+</div>
+
+<!-- ============ SECCIÓN 1: ASPECTOS RELEVANTES ============ -->
+<div class="section active" data-section="aspectos">
+  <div class="kpis" id="kpiAs"></div>
+  <div class="filter-bar" data-scope="as">
+    <div class="field"><label>Proyecto</label><div data-dim="proyecto"></div></div>
+    <div class="field"><label>Disciplina</label><div data-dim="disciplina"></div></div>
+    <div class="field"><label>Ejecutor</label><div data-dim="ejecutor"></div></div>
+    <div class="field"><label>Ubicación</label><div data-dim="ubicacion"></div></div>
+    <button class="reset-btn" data-reset>↺ Limpiar</button>
+    <div class="count">Mostrando <b id="asCount">—</b> aspectos · <b id="asCountAb">—</b> abiertos · <b id="asCountCer">—</b> cerrados · <b id="asCountHal">—</b> con hallazgo</div>
+  </div>
+  <div class="grid cols-3">
+    <div class="card" style="--c:var(--good)"><h3><i>◉</i>Tasa de cierre</h3><div class="desc">Cerradas / total (filtrado)</div><div id="chAsEstado" style="height:250px"></div></div>
+    <div class="card" style="--c:var(--cyan)"><h3><i>◈</i>Tipo de visita</h3><div class="desc">RF · VA · VNP · VT · IR · IT</div><div id="chAsTipo" style="height:250px"></div></div>
+    <div class="card" style="--c:var(--warn)"><h3><i>⏱</i>Antigüedad de abiertas</h3><div class="desc">Días desde la visita · aspectos aún abiertos</div><div id="chAsAge" style="height:250px"></div></div>
+  </div>
+  <div class="grid cols-2">
+    <div class="card" style="--c:var(--cyan)"><h3><i>▤</i>Aspectos por disciplina</h3><div class="desc">Cerradas vs abiertas</div><div id="chAsDisc" style="height:320px"></div></div>
+    <div class="card" style="--c:var(--violet)"><h3><i>⌖</i>Aspectos por ubicación</h3><div class="desc">Top 12 · cerradas vs abiertas</div><div id="chAsUbic" style="height:320px"></div></div>
+  </div>
+  <div class="grid">
+    <div class="card" style="--c:var(--violet)"><div class="ch"><div><h3><i>〰</i>Línea de tiempo · visitas por mes</h3><div class="desc">Visitas creadas (columnas) y cuántas de ellas ya están cerradas (línea)</div></div><div class="seg" data-tl="chAsTime"><button data-r="12">12 m</button><button data-r="24">24 m</button><button data-r="0">Todo</button></div></div><div id="chAsTime" style="height:300px"></div></div>
+  </div>
+  <div class="grid c-21">
+    <div class="card" style="--c:var(--orange)"><h3><i>★</i>Top 15 ejecutores</h3><div class="desc">Volumen de aspectos · cerradas vs abiertas</div><div id="chAsEjec" style="height:420px"></div></div>
+    <div class="card" style="--c:var(--bad)"><h3><i>⚑</i>Abiertas por ejecutor</h3><div class="desc">Dónde está el pendiente hoy</div><div id="chAsEjecAb" style="height:420px"></div></div>
+  </div>
+  <div class="grid">
+    <div class="card" style="--c:var(--cyan)">
+      <h3><i>☰</i>Detalle de aspectos</h3><div class="desc">Clic en una fila para ver el registro completo</div>
+      <div class="tbl-tools"><input type="text" data-tsearch="as" placeholder="🔎 Buscar en código, ejecutor, ubicación o aspecto..."><span class="cnt" id="asTblCnt"></span></div>
+      <div class="tbl-wrap"><table id="tblAs"><thead><tr>
+        <th>Código</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Ubicación</th><th>Hallazgo</th><th>Estado</th><th>F. visita</th><th>Aspecto</th>
+      </tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SECCIÓN 2: NCR / OBS / PNC ============ -->
+<div class="section" data-section="ncr">
+  <div class="kpis" id="kpiNc"></div>
+  <div class="filter-bar" data-scope="nc">
+    <div class="field"><label>Proyecto</label><div data-dim="proyecto"></div></div>
+    <div class="field"><label>Disciplina</label><div data-dim="disciplina"></div></div>
+    <div class="field"><label>Tipo de hallazgo</label><div data-dim="tipo"></div></div>
+    <div class="field"><label>Ejecutor</label><div data-dim="ejecutor"></div></div>
+    <div class="field"><label>Ubicación</label><div data-dim="ubicacion"></div></div>
+    <div class="field"><label>Estado hallazgo</label><div data-dim="estado"></div></div>
+    <button class="reset-btn" data-reset>↺ Limpiar</button>
+    <div class="count">Mostrando <b id="ncCount">—</b> hallazgos</div>
+  </div>
+  <div class="grid cols-3">
+    <div class="card" style="--c:var(--bad)"><h3><i>◈</i>Por tipo</h3><div class="desc">NCR · OBS · PNC</div><div id="chNcTipo" style="height:250px"></div></div>
+    <div class="card" style="--c:var(--good)"><h3><i>◉</i>Tasa de cierre</h3><div class="desc">Cerrados / total por tipo</div><div id="chNcEstado" style="height:250px"></div></div>
+    <div class="card" style="--c:var(--violet)"><h3><i>⌂</i>Por proyecto</h3><div class="desc">Volumen por proyecto</div><div id="chNcProy" style="height:250px"></div></div>
+  </div>
+  <div class="grid cols-2">
+    <div class="card" style="--c:var(--cyan)"><h3><i>▤</i>Hallazgos por disciplina</h3><div class="desc">Apilado por tipo</div><div id="chNcDisc" style="height:320px"></div></div>
+    <div class="card" style="--c:var(--orange)"><h3><i>★</i>Top ejecutores con hallazgos</h3><div class="desc">Apilado por tipo</div><div id="chNcEjec" style="height:320px"></div></div>
+  </div>
+  <div class="grid">
+    <div class="card" style="--c:var(--bad)"><div class="ch"><div><h3><i>〰</i>Línea de tiempo · hallazgos por mes</h3><div class="desc">Hallazgos emitidos (columnas) y cuántos ya están cerrados (línea)</div></div><div class="seg" data-tl="chNcTime"><button data-r="12">12 m</button><button data-r="24">24 m</button><button data-r="0">Todo</button></div></div><div id="chNcTime" style="height:290px"></div></div>
+  </div>
+  <div class="grid">
+    <div class="card" style="--c:var(--bad)">
+      <h3><i>☰</i>Detalle de hallazgos</h3><div class="desc">Clic en una fila para ver el registro completo</div>
+      <div class="tbl-tools"><input type="text" data-tsearch="nc" placeholder="🔎 Buscar en código, ejecutor, ubicación..."><span class="cnt" id="ncTblCnt"></span></div>
+      <div class="tbl-wrap"><table id="tblNc"><thead><tr>
+        <th>Código</th><th>Tipo</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Ubic.</th><th>Estado</th><th>F. hallazgo</th><th>F. cierre</th><th>Días</th>
+      </tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SECCIÓN 3: DOSSIER ============ -->
+<div class="section" data-section="dossier">
+  <div class="kpis" id="kpiDo"></div>
+  <div class="filter-bar" data-scope="do">
+    <div class="field"><label>Proyecto</label><div data-dim="proyecto"></div></div>
+    <div class="field"><label>Aliado</label><div data-dim="aliado"></div></div>
+    <div class="field"><label>Ejecutor</label><div data-dim="ejecutor"></div></div>
+    <div class="field"><label>Ubicación</label><div data-dim="ubicacion"></div></div>
+    <div class="field"><label>Estatus dossier</label><div data-dim="estatus"></div></div>
+    <button class="reset-btn" data-reset>↺ Limpiar</button>
+    <div class="count">Mostrando <b id="doCount">—</b> dossieres · avance promedio <b id="doAvg">—</b>%</div>
+  </div>
+  <div class="grid cols-3">
+    <div class="card" style="--c:var(--violet)"><h3><i>◈</i>Distribución por estatus</h3><div class="desc">Avalado · En tiempo · Moderado · Crítico</div><div id="chDoEstatus" style="height:260px"></div></div>
+    <div class="card" style="--c:var(--good)"><h3><i>◉</i>Avance promedio</h3><div class="desc">Dossieres filtrados</div><div id="chDoGauge" style="height:260px"></div></div>
+    <div class="card" style="--c:var(--cyan)"><h3><i>⌂</i>Avance por proyecto</h3><div class="desc">Promedio % · verde ≥ 90 · ámbar ≥ 50 · rosa &lt; 50</div><div id="chDoAvance" style="height:260px"></div></div>
+  </div>
+  <div class="grid">
+    <div class="card" style="--c:var(--orange)"><h3><i>★</i>Top 15 ejecutores / aliados</h3><div class="desc">Dossieres asignados apilados por estatus</div><div id="chDoEjec" style="height:420px"></div></div>
+  </div>
+  <div class="grid">
+    <div class="card" style="--c:var(--violet)">
+      <h3><i>☰</i>Detalle de dossieres</h3><div class="desc">Clic en una fila para ver el registro completo</div>
+      <div class="tbl-tools"><input type="text" data-tsearch="do" placeholder="🔎 Buscar en proyecto, ejecutor, ubicación..."><span class="cnt" id="doTblCnt"></span></div>
+      <div class="tbl-wrap"><table id="tblDo"><thead><tr>
+        <th>Proyecto</th><th>Ejecutor / Aliado</th><th>Ubic.</th><th>Estatus</th><th>Avance %</th><th>Atraso %</th><th>F. PDT</th><th>1ra rev</th><th>Última rev</th><th>F. aval</th>
+      </tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SECCIÓN 4: SOL_TEC ============ -->
+<div class="section" data-section="soltec">
+  <div class="kpis" id="kpiSt"></div>
+  <div class="filter-bar" data-scope="st">
+    <div class="field"><label>Proyecto</label><div data-dim="proyecto"></div></div>
+    <div class="field"><label>Disciplina</label><div data-dim="disciplina"></div></div>
+    <div class="field"><label>Tipo</label><div data-dim="tipo"></div></div>
+    <div class="field"><label>Ejecutor</label><div data-dim="ejecutor"></div></div>
+    <div class="field"><label>Localización</label><div data-dim="localizacion"></div></div>
+    <button class="reset-btn" data-reset>↺ Limpiar</button>
+    <div class="count">Mostrando <b id="stCount">—</b> solicitudes técnicas</div>
+  </div>
+  <div class="grid cols-3">
+    <div class="card" style="--c:var(--good)"><h3><i>◈</i>Por tipo</h3><div class="desc">TQ · CR · DDR · MoC</div><div id="chStTipo" style="height:260px"></div></div>
+    <div class="card" style="--c:var(--cyan)"><h3><i>◉</i>Tasa de cierre</h3><div class="desc">Cerradas / total</div><div id="chStEstado" style="height:260px"></div></div>
+    <div class="card" style="--c:var(--violet)"><h3><i>⌂</i>Por proyecto</h3><div class="desc">Distribución por subproyecto</div><div id="chStProy" style="height:260px"></div></div>
+  </div>
+  <div class="grid cols-2">
+    <div class="card" style="--c:var(--cyan)"><h3><i>▤</i>Por disciplina</h3><div class="desc">Apilado por tipo</div><div id="chStDisc" style="height:320px"></div></div>
+    <div class="card" style="--c:var(--orange)"><h3><i>★</i>Top ejecutores</h3><div class="desc">Apilado por tipo</div><div id="chStEjec" style="height:320px"></div></div>
+  </div>
+  <div class="grid c-21">
+    <div class="card" style="--c:var(--good)"><div class="ch"><div><h3><i>〰</i>Línea de tiempo · solicitudes por mes</h3><div class="desc">Emitidas (columnas) y cuántas ya están cerradas (línea)</div></div><div class="seg" data-tl="chStTime"><button data-r="12">12 m</button><button data-r="24">24 m</button><button data-r="0">Todo</button></div></div><div id="chStTime" style="height:300px"></div></div>
+    <div class="card" style="--c:var(--yellow)"><h3><i>⏱</i>Tiempo de ciclo promedio</h3><div class="desc">Días promedio por etapa según tipo · Aut. técnica + Respuesta + Aprobación (excluye valores atípicos &gt; 2 años)</div><div id="chStCycle" style="height:300px"></div></div>
+  </div>
+  <div class="grid">
+    <div class="card" style="--c:var(--good)">
+      <h3><i>☰</i>Detalle de solicitudes</h3><div class="desc">Clic en una fila para ver el registro completo</div>
+      <div class="tbl-tools"><input type="text" data-tsearch="st" placeholder="🔎 Buscar en código, ejecutor, descripción..."><span class="cnt" id="stTblCnt"></span></div>
+      <div class="tbl-wrap"><table id="tblSt"><thead><tr>
+        <th>Código</th><th>Tipo</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Estado</th><th>F. emisión</th><th>F. cierre</th><th>Duración</th><th>Descripción</th>
+      </tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CAMBIOS FRENTE AL CORTE ANTERIOR ============ -->
+<div class="grid" id="cmpWrap" style="margin-top:26px">
+  <div class="card" style="--c:var(--yellow)">
+    <h3><i>⇄</i>Cambios frente al corte anterior</h3>
+    <div class="cmp-head" id="cmpHead"></div>
+    <div class="cmp-grid" id="cmpGrid"></div>
+    <div class="cmp-filter" id="cmpFilter"></div>
+    <div class="tbl-tools"><input type="text" id="cmpSearch" placeholder="🔎 Buscar código, ejecutor, ubicación..."><span class="cnt" id="cmpCnt"></span></div>
+    <div class="tbl-wrap"><table id="tblCmp"><thead><tr>
+      <th>Sección</th><th>Cambio</th><th>Código</th><th>Antes</th><th>Ahora</th><th>Ejecutor</th><th>Ubicación / detalle</th>
+    </tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+
+<footer><b>APPLUS+ Colombia</b> · Dashboard QA Consolidado · ATIP Caño Sur Este · <span id="ftSrc"></span></footer>
+</div>
+
+<div class="modal-back" id="modalBack"></div>
+<div class="modal" id="modal">
+  <div class="modal-head"><div><h2 id="modalTitle">Detalle</h2><div class="sub" id="modalSub">—</div></div><button class="modal-close" id="modalClose">✕</button></div>
+  <div class="modal-body" id="modalBody"></div>
+</div>
+<div class="modal-back m2" id="modalBack2"></div>
+<div class="modal m2" id="modal2">
+  <div class="modal-head"><div><h2 id="modal2Title">Detalle</h2><div class="sub" id="modal2Sub">—</div></div><button class="modal-close" id="modal2Close">✕</button></div>
+  <div class="modal-body" id="modal2Body"></div>
+</div>
+
+<script>
+const DATA = __DATA__;
+const PREV = __PREV__;
+
+// ============ Helpers ============
+const fmtN = v => (v==null||v==='')?'—':Number(v).toLocaleString('es-CO');
+const fmtPct = v => (v==null||v==='')?'—':(Number(v).toFixed(1)+'%');
+const escHtml = s => String(s==null?'—':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const pct100 = v => { const n = +v || 0; return Math.abs(n) <= 1.5 ? n * 100 : n; };   // dossier: avance/atraso vienen en fracción
+const COLORS = { good:'#22ffb8', warn:'#ffb020', bad:'#ff3d7f', accent:'#00e5ff', accent2:'#b26bff', orange:'#ff8c42', yellow:'#ffd23f', sky:'#38bdf8', lime:'#a6ff00', text:'#e8f9ff', mute:'#9fbbd8' };
+const PALETTE = ['#00e5ff','#b26bff','#22ffb8','#ffd23f','#ff3d7f','#ff8c42','#38bdf8','#a6ff00','#f472b6','#2dd4bf','#c084fc','#fde047','#fb7185','#60a5fa'];
+const TIPO_C = { NCR:COLORS.bad, OBS:COLORS.warn, PNC:COLORS.accent2, TQ:COLORS.accent, CR:COLORS.accent2, DDR:COLORS.warn, MoC:COLORS.bad };
+const EST_C  = { AVALADO:COLORS.good, FINALIZADO:COLORS.lime, 'EN TIEMPO':COLORS.accent, MODERADO:COLORS.warn, CRITICO:COLORS.bad };
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const isOpen = e => /ABIERT/i.test(e || '');
+
+const APEX_BASE = {
+  chart:{toolbar:{show:false},foreColor:'#9fbbd8',background:'transparent',fontFamily:'Inter, sans-serif',animations:{enabled:true,speed:500,animateGradually:{enabled:false}}},
+  grid:{borderColor:'rgba(0,229,255,.07)',strokeDashArray:3},
+  tooltip:{theme:'dark'},
+  legend:{labels:{colors:'#e8f9ff'}, fontSize:'11px', markers:{radius:12}},
+  noData:{text:'Sin datos', style:{color:'#5f7194'}},
+  states:{hover:{filter:{type:'lighten',value:.12}}},
+};
+const GLOW = c => ({enabled:true, top:0, left:0, blur:7, opacity:.55, color:c});
+
+document.getElementById('hdrTitle').textContent = DATA.meta.titulo;
+document.getElementById('hdrSub').textContent = DATA.meta.subtitulo;
+document.getElementById('hdrSrc').textContent = DATA.meta.fuente;
+document.getElementById('hdrCorte').textContent = DATA.meta.corte;
+document.getElementById('ftSrc').textContent = 'Fuente: ' + DATA.meta.fuente + ' · Actualizado ' + DATA.meta.corte;
+document.getElementById('chipAs').textContent = fmtN(DATA.aspectos.totales.filas);
+document.getElementById('chipNc').textContent = fmtN(DATA.ncr.totales.filas);
+document.getElementById('chipDo').textContent = fmtN(DATA.dossier.totales.filas);
+document.getElementById('chipSt').textContent = fmtN(DATA.soltec.totales.filas);
+
+// ============ Pulso global (anillos) ============
+function renderPulse(){
+  const A = DATA.aspectos.rows, N = DATA.ncr.rows, D = DATA.dossier.rows, S = DATA.soltec.rows;
+  const cl = rs => rs.length ? rs.filter(r => !isOpen(r.estado)).length / rs.length * 100 : 0;
+  const dAv = D.length ? D.reduce((s, r) => s + pct100(r.avance), 0) / D.length : 0;
+  const P = [
+    ['aspectos','var(--cyan)','Aspectos', cl(A), fmtN(A.length), '<b>' + fmtN(A.filter(r=>isOpen(r.estado)).length) + '</b> abiertos · ' + fmtN(A.filter(r=>/^S[IÍ]$/i.test(r.hall||'')).length) + ' con hallazgo'],
+    ['ncr','var(--bad)','NCR / OBS / PNC', cl(N), fmtN(N.length), '<b>' + fmtN(N.filter(r=>isOpen(r.estado)).length) + '</b> abiertos · ' + fmtN(N.filter(r=>r.tipo==='NCR').length) + ' NCR'],
+    ['dossier','var(--violet)','Dossier', dAv, fmtN(D.length), '<b>' + fmtN(D.filter(r=>r.estatus==='CRITICO').length) + '</b> críticos · avance prom. ' + dAv.toFixed(0) + '%'],
+    ['soltec','var(--good)','Solicitudes técnicas', cl(S), fmtN(S.length), '<b>' + fmtN(S.filter(r=>isOpen(r.estado)).length) + '</b> abiertas · ' + fmtN(S.filter(r=>r.tipo==='TQ').length) + ' TQ'],
+  ];
+  document.getElementById('pulse').innerHTML = P.map(p => '<div class="pcard" data-go="' + p[0] + '" style="--c:' + p[1] + '"><div class="ring" style="--p:' + p[3].toFixed(1) + '"><span>' + p[3].toFixed(0) + '%</span></div><div><div class="t">' + p[2] + '</div><div class="v">' + p[4] + '</div><div class="s">' + p[5] + '</div></div></div>').join('');
+}
+renderPulse();
+
+// Tabs (con recuerdo en el hash)
+function showTab(tab){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.dataset.section === tab));
+  document.querySelectorAll('.pcard').forEach(p => p.classList.toggle('on', p.dataset.go === tab));
+  try { history.replaceState(null, '', '#' + tab); } catch(e){}
+  // las gráficas se dibujan con la pestaña ya visible (evita gráficas partidas por ancho 0)
+  requestAnimationFrame(() => renderSection(TAB2SCOPE[tab]));
+}
+const TAB2SCOPE = { aspectos:'as', ncr:'nc', dossier:'do', soltec:'st' };
+document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => showTab(btn.dataset.tab)));
+document.getElementById('pulse').addEventListener('click', e => { const p = e.target.closest('.pcard'); if (p){ showTab(p.dataset.go); document.getElementById('tabs').scrollIntoView({behavior:'smooth'}); } });
+
+// ============ Modales ============
+const modal = document.getElementById('modal'), modalBack = document.getElementById('modalBack');
+function openModal(){ modal.classList.add('open'); modalBack.classList.add('open'); }
+function closeModal(){ modal.classList.remove('open'); modalBack.classList.remove('open'); }
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modalBack.addEventListener('click', closeModal);
+const modal2 = document.getElementById('modal2'), modalBack2 = document.getElementById('modalBack2');
+function openModal2(){ modal2.classList.add('open'); modalBack2.classList.add('open'); }
+function closeModal2(){ modal2.classList.remove('open'); modalBack2.classList.remove('open'); }
+document.getElementById('modal2Close').addEventListener('click', closeModal2);
+modalBack2.addEventListener('click', closeModal2);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){
+    if (modal2.classList.contains('open')){ closeModal2(); e.stopImmediatePropagation(); return; }
+    closeModal();
+  }
+}, true);
+
+// ============ Filtros ============
+const filterState = { as:{}, nc:{}, do:{}, st:{} };
+const tblSearch = { as:'', nc:'', do:'', st:'' };
+function fmatch(v, f){ if(!f) return true; if(Array.isArray(f)) return f.length===0 || f.includes(v); return v === f; }
+function applyFilters(rows, f, mapping){
+  return rows.filter(r => { for (const k in f){ const fv = f[k]; if (!fv || (Array.isArray(fv) && fv.length===0)) continue; if (!fmatch(r[mapping[k]], fv)) return false; } return true; });
+}
+function makeMultiSelect(wrapperEl, options, opts){
+  opts = opts || {};
+  const placeholder = opts.placeholder || 'Todos';
+  wrapperEl.classList.add('ms');
+  wrapperEl.innerHTML = `<button type="button" class="ms-btn"><span class="ms-sel">${placeholder}</span><span class="ms-chev">▼</span></button>
+    <div class="ms-panel"><input class="ms-search" placeholder="Buscar..." type="text">
+      <div class="ms-actions"><button type="button" data-act="all">Todos</button><button type="button" data-act="none">Ninguno</button></div>
+      <div class="ms-count" hidden></div><div class="ms-options"></div></div>`;
+  const btn = wrapperEl.querySelector('.ms-btn'), panel = wrapperEl.querySelector('.ms-panel'), selSpan = wrapperEl.querySelector('.ms-sel');
+  const search = wrapperEl.querySelector('.ms-search'), optDiv = wrapperEl.querySelector('.ms-options'), countDiv = wrapperEl.querySelector('.ms-count');
+  function setOptions(list){
+    if (!list.length){ optDiv.innerHTML = '<div class="ms-empty">Sin opciones</div>'; return; }
+    optDiv.innerHTML = list.map(v => { const e = String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); return `<label><input type="checkbox" value="${e}"><span title="${e}">${e}</span></label>`; }).join('');
+    optDiv.querySelectorAll('input').forEach(i => i.addEventListener('change', onChange));
+  }
+  function onChange(){
+    const checked = [...optDiv.querySelectorAll('input:checked')].map(i => i.value);
+    wrapperEl._values = checked;
+    if (checked.length===0){ selSpan.textContent = placeholder; btn.classList.remove('has-sel'); countDiv.hidden = true; }
+    else if (checked.length===1){ selSpan.textContent = checked[0]; btn.classList.add('has-sel'); countDiv.hidden = true; }
+    else { selSpan.textContent = checked.length + ' seleccionados'; btn.classList.add('has-sel'); countDiv.hidden = false; countDiv.textContent = checked.length + ' / ' + options.length; }
+    if (opts.onChange) opts.onChange(checked);
+  }
+  btn.addEventListener('click', e => { e.stopPropagation(); const wasOpen = wrapperEl.classList.contains('open'); document.querySelectorAll('.ms.open').forEach(o => o.classList.remove('open')); if (!wasOpen){ wrapperEl.classList.add('open'); setTimeout(() => search.focus(), 50); } });
+  panel.addEventListener('click', e => e.stopPropagation());
+  search.addEventListener('input', () => { const q = search.value.toLowerCase(); optDiv.querySelectorAll('label').forEach(l => l.classList.toggle('hidden', !l.textContent.toLowerCase().includes(q))); });
+  wrapperEl.querySelector('[data-act="all"]').addEventListener('click', () => { optDiv.querySelectorAll('label:not(.hidden) input').forEach(i => i.checked = true); onChange(); });
+  wrapperEl.querySelector('[data-act="none"]').addEventListener('click', () => { optDiv.querySelectorAll('input').forEach(i => i.checked = false); onChange(); });
+  setOptions(options); wrapperEl._values = [];
+  return { getValue: () => wrapperEl._values || [], clear: () => { optDiv.querySelectorAll('input').forEach(i => i.checked = false); onChange(); } };
+}
+document.addEventListener('click', () => document.querySelectorAll('.ms.open').forEach(o => o.classList.remove('open')));
+const __msInstances = {};
+function buildSelectOpts(scope, dims){
+  const bar = document.querySelector(`[data-scope="${scope}"]`); if (!bar) return;
+  __msInstances[scope] = {};
+  bar.querySelectorAll('div[data-dim]').forEach(wrap => {
+    const dim = wrap.getAttribute('data-dim');
+    __msInstances[scope][dim] = makeMultiSelect(wrap, dims[dim] || [], { placeholder:'Todos', onChange: checked => { if (checked.length === 0) delete filterState[scope][dim]; else filterState[scope][dim] = checked; renderSection(scope); } });
+  });
+  bar.querySelector('[data-reset]').addEventListener('click', () => { Object.values(__msInstances[scope] || {}).forEach(ms => ms.clear()); filterState[scope] = {}; renderSection(scope); });
+}
+let tsT; document.querySelectorAll('[data-tsearch]').forEach(inp => inp.addEventListener('input', () => { clearTimeout(tsT); tsT = setTimeout(() => { tblSearch[inp.dataset.tsearch] = inp.value.toLowerCase().trim(); renderTable(inp.dataset.tsearch); }, 160); }));
+
+// ============ Charts ============
+const charts = {};
+function destroyChart(id){ if (charts[id]){ try { charts[id].destroy(); } catch(e){} charts[id] = null; } }
+function mount(id, cfg){
+  destroyChart(id);
+  const el = document.getElementById(id); if (!el) return;
+  el.innerHTML = '';
+  charts[id] = new ApexCharts(el, cfg); charts[id].render();
+}
+const H = id => parseInt(document.getElementById(id).style.height) || 260;
+const empty = id => { destroyChart(id); const el = document.getElementById(id); if (el) el.innerHTML = '<div class="nodata">— Sin datos con los filtros aplicados —</div>'; };
+const short = (s, n) => (s = String(s)).length > n ? s.slice(0, n - 1) + '…' : s;
+
+function renderDonut(id, data, palette, opts){
+  opts = opts || {};
+  if (!data.length) return empty(id);
+  const cols = data.map((d, i) => (opts.colorOf && opts.colorOf(d.label)) || (palette || PALETTE)[i % (palette || PALETTE).length]);
+  const tot = data.reduce((s, d) => s + d.value, 0);
+  mount(id, {...APEX_BASE,
+    chart:{...APEX_BASE.chart, type:'donut', height:H(id), dropShadow:GLOW('#00e5ff')},
+    series:data.map(d => d.value), labels:data.map(d => short(d.label, 34)), colors:cols,
+    legend:{...APEX_BASE.legend, position:opts.legendPosition || 'right', fontSize:'10.5px', itemMargin:{horizontal:4, vertical:3}, formatter:(s, o) => `${s} <b style="color:#fff">${fmtN(data[o.seriesIndex].value)}</b>`},
+    plotOptions:{pie:{expandOnClick:false, donut:{size:'68%', labels:{show:true, name:{color:'#9fbbd8', fontSize:'11px'}, value:{color:'#fff', fontSize:'22px', fontFamily:'Orbitron', fontWeight:900, formatter:v => fmtN(v)},
+      total:{show:true, label:'Total', color:'#9fbbd8', fontSize:'11px', formatter:() => fmtN(tot)}}}}},
+    dataLabels:{enabled:true, style:{fontSize:'10px', fontWeight:800, colors:['#02040a']}, dropShadow:{enabled:false}, formatter:v => v >= 4 ? v.toFixed(0) + '%' : ''},
+    stroke:{colors:['#070c1f'], width:3},
+    tooltip:{...APEX_BASE.tooltip, y:{formatter:v => fmtN(v) + ' · ' + (v / tot * 100).toFixed(1) + '%'}},
+  });
+}
+function renderGauge(id, value, label, color, sub){
+  const v = Math.max(0, Math.min(100, +value || 0));
+  mount(id, {...APEX_BASE,
+    chart:{...APEX_BASE.chart, type:'radialBar', height:H(id), dropShadow:GLOW(color)},
+    series:[+v.toFixed(1)], labels:[label], colors:[color],
+    plotOptions:{radialBar:{startAngle:-130, endAngle:130, hollow:{size:'62%', background:'transparent'},
+      track:{background:'rgba(255,255,255,.06)', strokeWidth:'100%', margin:0},
+      dataLabels:{name:{offsetY:26, color:'#9fbbd8', fontSize:'11px', fontWeight:700}, value:{offsetY:-12, color:'#fff', fontSize:'30px', fontFamily:'Orbitron', fontWeight:900, formatter:x => (+x).toFixed(1) + '%'}}}},
+    fill:{type:'gradient', gradient:{shade:'dark', type:'horizontal', gradientToColors:[COLORS.accent], stops:[0, 100]}},
+    stroke:{lineCap:'round'},
+  });
+  const el = document.getElementById(id);
+  let d = document.getElementById(id + 'Sub');
+  if (!d){ d = document.createElement('div'); d.id = id + 'Sub'; d.style.cssText = 'text-align:center;font-size:11.5px;font-weight:600;color:var(--text-2);margin:-14px 0 6px'; el.after(d); }
+  d.innerHTML = sub || '';
+}
+// barras horizontales apiladas: cats = [{label, parts:{serie:n}}]
+function renderStackH(id, cats, series, colors, opts){
+  opts = opts || {};
+  if (!cats.length) return empty(id);
+  mount(id, {...APEX_BASE,
+    chart:{...APEX_BASE.chart, type:'bar', stacked:true, height:H(id), dropShadow:GLOW(colors[0])},
+    series:series.map(s => ({name:s, data:cats.map(c => c.parts[s] || 0)})),
+    colors,
+    xaxis:{categories:cats.map(c => short(c.label, opts.maxLbl || 30)), labels:{style:{fontSize:'10.5px'}}},
+    yaxis:{labels:{style:{fontSize:'11px', colors:'#dbeeff'}, maxWidth:220}},
+    plotOptions:{bar:{horizontal:true, borderRadius:4, borderRadiusApplication:'end', borderRadiusWhenStacked:'last', barHeight:'68%',
+      dataLabels:{total:{enabled:true, offsetX:6, formatter:v => fmtN(Math.round(v * 10) / 10), style:{fontSize:'10.5px', fontWeight:800, color:'#fff'}}}}},
+    dataLabels:{enabled:false},
+    fill:{type:'gradient', gradient:{shade:'dark', type:'horizontal', shadeIntensity:.25, opacityFrom:.95, opacityTo:.75}},
+    stroke:{width:1, colors:['#070c1f']},
+    legend:{...APEX_BASE.legend, position:'top', horizontalAlign:'right', show:series.length > 1},
+    grid:{...APEX_BASE.grid, xaxis:{lines:{show:true}}, yaxis:{lines:{show:false}}},
+    tooltip:{...APEX_BASE.tooltip, shared:true, intersect:false, x:{formatter:(v, o) => cats[o.dataPointIndex].label}},
+  });
+}
+function renderBarH(id, data, colorFn){
+  if (!data.length) return empty(id);
+  const cols = data.map(d => colorFn(d));
+  mount(id, {...APEX_BASE,
+    chart:{...APEX_BASE.chart, type:'bar', height:H(id), dropShadow:GLOW(cols[0])},
+    series:[{name:'Valor', data:data.map(d => d.value)}],
+    colors:cols,
+    xaxis:{categories:data.map(d => short(d.label, 30)), max:100, labels:{formatter:v => v + '%', style:{fontSize:'10px'}}},
+    yaxis:{labels:{style:{fontSize:'11px', colors:'#dbeeff'}, maxWidth:200}},
+    plotOptions:{bar:{horizontal:true, distributed:true, borderRadius:5, barHeight:'62%', dataLabels:{position:'top'}}},
+    dataLabels:{enabled:true, offsetX:26, style:{fontSize:'11px', fontWeight:800, colors:['#fff']}, formatter:v => v.toFixed(1) + '%'},
+    legend:{show:false},
+    fill:{type:'gradient', gradient:{shade:'dark', type:'horizontal', opacityFrom:.95, opacityTo:.7}},
+    tooltip:{...APEX_BASE.tooltip, x:{formatter:(v, o) => data[o.dataPointIndex].label}, y:{formatter:v => v.toFixed(1) + '%'}},
+  });
+}
+function renderAge(id, buckets){
+  const tot = buckets.reduce((s, b) => s + b.value, 0);
+  if (!tot) return empty(id);
+  const cols = [COLORS.good, COLORS.yellow, COLORS.warn, COLORS.orange, COLORS.bad];
+  mount(id, {...APEX_BASE,
+    chart:{...APEX_BASE.chart, type:'bar', height:H(id), dropShadow:GLOW(COLORS.warn)},
+    series:[{name:'Abiertas', data:buckets.map(b => b.value)}], colors:cols,
+    xaxis:{categories:buckets.map(b => b.label), labels:{style:{fontSize:'10.5px', colors:'#dbeeff'}}},
+    yaxis:{labels:{formatter:v => Math.round(v)}},
+    plotOptions:{bar:{distributed:true, columnWidth:'58%', borderRadius:6, borderRadiusApplication:'end', dataLabels:{position:'top'}}},
+    dataLabels:{enabled:true, offsetY:-20, style:{fontSize:'12px', fontWeight:900, colors:['#fff']}},
+    legend:{show:false},
+    fill:{type:'gradient', gradient:{shade:'dark', type:'vertical', shadeIntensity:.2, opacityFrom:1, opacityTo:.8}},
+  });
+}
+const TL = {}, TLR = {};
+function renderTimeline(id, data, label1, label2, c1, c2){
+  TL[id] = [data, label1, label2, c1, c2];
+  if (TLR[id] == null) TLR[id] = 24;
+  document.querySelectorAll(`.seg[data-tl="${id}"] button`).forEach(b => b.classList.toggle('on', +b.dataset.r === TLR[id]));
+  if (!data.length) return empty(id);
+  const d = TLR[id] ? data.slice(-TLR[id]) : data;
+  const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const lbl = m => MES[+m.slice(5,7) - 1] + '-' + m.slice(2,4);
+  mount(id, {...APEX_BASE,
+    chart:{...APEX_BASE.chart, type:'line', height:H(id), zoom:{enabled:false}, dropShadow:{enabled:true, top:0, left:0, blur:6, opacity:.5, color:[c1, c2]}},
+    series:[{name:label1, type:'column', data:d.map(x => x.creados)}, {name:label2, type:'area', data:d.map(x => x.cerrados)}],
+    colors:[c1 || COLORS.accent2, c2 || COLORS.good],
+    xaxis:{categories:d.map(x => lbl(x.mes)), labels:{rotate:-45, rotateAlways:d.length > 18, style:{fontSize:'10px'}}, tickAmount:Math.min(d.length, 24)},
+    yaxis:{labels:{formatter:v => Math.round(v)}},
+    plotOptions:{bar:{columnWidth:'55%', borderRadius:4, borderRadiusApplication:'end'}},
+    fill:{type:['gradient', 'gradient'], gradient:{shade:'dark', type:'vertical', opacityFrom:[.95, .35], opacityTo:[.45, .02]}},
+    stroke:{width:[0, 2.5], curve:'smooth'},
+    markers:{size:[0, 3], strokeWidth:0, hover:{size:6}},
+    dataLabels:{enabled:false},
+    legend:{...APEX_BASE.legend, position:'top', horizontalAlign:'right'},
+    tooltip:{...APEX_BASE.tooltip, shared:true, intersect:false},
+  });
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('.seg[data-tl] button'); if (!b) return;
+  const id = b.parentElement.dataset.tl; TLR[id] = +b.dataset.r;
+  const t = TL[id]; if (t) renderTimeline(id, ...t);
+});
+
+// ============ Field maps ============
+const FIELD_MAP_AS_PRE = {proyecto:'proy', disciplina:'disc', ejecutor:'ejec', ubicacion:'ubic'};
+const FIELD_MAP_NC_PRE = {proyecto:'proy', disciplina:'disc', tipo:'tipo', ejecutor:'ejec', ubicacion:'ubic', estado:'estado'};
+const FIELD_MAP_DO_PRE = {proyecto:'proy', aliado:'ejec', ejecutor:'ejec', ubicacion:'ubic', estatus:'estatus'};
+const FIELD_MAP_ST_PRE = {proyecto:'proy', disciplina:'disc', tipo:'tipo', ejecutor:'ejec', localizacion:'loc', estado:'estado'};
+
+// ============ KPI builder ============
+function kpiHTML(items, scope){
+  return items.map(k => {
+    const dk = k.key ? ` data-kpi="${k.key}" data-section="${scope}"` : '';
+    const bar = k.pct != null ? `<div class="kb"><span style="width:${Math.max(0, Math.min(100, k.pct)).toFixed(1)}%"></span></div>` : '';
+    return `<div class="kpi ${k.cls || ''}"${dk}><div class="lbl"><span>${escHtml(k.lbl)}</span><i>${k.ico || ''}</i></div><div class="val">${k.val}</div><div class="sub">${escHtml(k.sub || '')}</div>${bar}${k.key ? '<div class="go">VER ›</div>' : ''}</div>`;
+  }).join('');
+}
+
+// ============ Drill modals ============
+let __pkgRows = [];
+let __pkgSection = null;
+const SECTION_META = {
+  as: { label:'Aspectos Relevantes',
+    fields:[['Código','codigo'],['Proyecto','proy'],['Tipo visita','tipo'],['Disciplina','disc'],['Ejecutor','ejec'],['Ubicación','ubic'],['Locación / clúster','loc'],['Subproyecto','subProy'],['Detectado por','detect'],['Asignado a','asign'],['Líder','lider'],['Contiene hallazgo','hall'],['Estado','estado'],['F. visita','fvis'],['F. compromiso','fcom'],['F. cierre','fcie'],['Días a fecha','dias'],['Duración gestión','dur'],['ODS','ods'],['Aspecto / descripción','aspecto']],
+    drills:{ totales:r => true, abiertas:r => (r.estado||'').toUpperCase()==='ABIERTA', cerradas:r => (r.estado||'').toUpperCase()==='CERRADA', con_hallazgo:r => ['SÍ','SI'].includes((r.hall||'').toUpperCase()), disciplinas:r => true, ejecutores:r => true },
+    drillLabels:{ totales:'Aspectos totales', abiertas:'Aspectos abiertos', cerradas:'Aspectos cerrados', con_hallazgo:'Aspectos con hallazgo', disciplinas:'Disciplinas distintas', ejecutores:'Ejecutores distintos' },
+    rowsKey:() => DATA.aspectos.rows, fieldMap:FIELD_MAP_AS_PRE },
+  nc: { label:'NCR / OBS / PNC',
+    fields:[['Código','codigo'],['Tipo','tipo'],['Proyecto','proy'],['Disciplina','disc'],['Ejecutor','ejec'],['Ubicación','ubic'],['Locación/clúster','loc'],['Detectado por','detect'],['Detectado en','detectH'],['Asignado a','asign'],['Líder','lider'],['Estado','estado'],['F. hallazgo','fhall'],['F. compromiso','fcom'],['F. cierre','fcie'],['Duración gestión','dur'],['ODS','ods']],
+    drills:{ totales:() => true, ncr:r => r.tipo==='NCR', obs:r => r.tipo==='OBS', pnc:r => r.tipo==='PNC', abiertos:r => (r.estado||'').includes('ABIERT'), cerrados:r => (r.estado||'').includes('CERRAD') },
+    drillLabels:{ totales:'Hallazgos totales', ncr:'NCR · No conformidades', obs:'OBS · Observaciones', pnc:'PNC · Producto no conforme', abiertos:'Hallazgos abiertos', cerrados:'Hallazgos cerrados' },
+    rowsKey:() => DATA.ncr.rows, fieldMap:FIELD_MAP_NC_PRE },
+  do: { label:'Dossier',
+    fields:[['Proyecto','proy'],['Ejecutor / aliado','ejec'],['Ubicación','ubic'],['Locación/clúster','loc'],['Estatus dossier','estatus'],['Avance %','avance'],['Atraso %','atraso'],['Avance obra %','pctObra'],['Año','anio'],['Requerido','req'],['F. PDT dossier','fpdt'],['1ra fecha revisión','frev1'],['Última fecha revisión','frevu'],['F. de aval','faval'],['Terminación contractual','termCtr'],['Estado ODS','estOds'],['Líder','lider'],['ODS','ods'],['Duración gestión','dur']],
+    drills:{ totales:() => true, avalados:r => r.estatus==='AVALADO' || r.estatus==='FINALIZADO', criticos:r => r.estatus==='CRITICO', en_tiempo:r => r.estatus==='EN TIEMPO', moderados:r => r.estatus==='MODERADO', avance_prom:() => true },
+    drillLabels:{ totales:'Dossieres totales', avalados:'Dossieres avalados o finalizados', criticos:'Dossieres críticos', en_tiempo:'Dossieres en tiempo', moderados:'Dossieres moderados', avance_prom:'Todos los dossieres (avance promedio)' },
+    rowsKey:() => DATA.dossier.rows, fieldMap:FIELD_MAP_DO_PRE },
+  st: { label:'Solicitudes Técnicas',
+    fields:[['Código','codigo'],['Tipo','tipo'],['Proyecto','proy'],['Disciplina','disc'],['Ejecutor','ejec'],['Localización','loc'],['Estado','estado'],['F. emisión','femit'],['F. cierre','fcie'],['Duración total','dur'],['Días Aut. Técnica','durAT'],['Días Respuesta','durResp'],['Días Aprobación','durAprob'],['ODS','ods'],['Descripción','desc']],
+    drills:{ totales:() => true, abiertas:r => (r.estado||'').toUpperCase()==='ABIERTA', cerradas:r => (r.estado||'').toUpperCase()==='CERRADA', tq:r => r.tipo==='TQ', ddr_cr:r => r.tipo==='DDR' || r.tipo==='CR', moc:r => r.tipo==='MoC' },
+    drillLabels:{ totales:'Solicitudes totales', abiertas:'Solicitudes abiertas', cerradas:'Solicitudes cerradas', tq:'Consultas técnicas (TQ)', ddr_cr:'Desviaciones / Cambios (DDR+CR)', moc:'Cambios MoC' },
+    rowsKey:() => DATA.soltec.rows, fieldMap:FIELD_MAP_ST_PRE },
+};
+function getFilteredRowsForSection(scope){ const meta = SECTION_META[scope]; return applyFilters(meta.rowsKey(), filterState[scope], meta.fieldMap); }
+function miniHead(scope){
+  if (scope==='do') return `<th>Proyecto</th><th>Ejecutor</th><th>Ubic.</th><th>Estatus</th><th>Avance</th>`;
+  return scope==='as' ? `<th>Código</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Ubic.</th><th>Estado</th>` : `<th>Código</th><th>Tipo</th><th>Proyecto</th><th>Disc.</th><th>Ejecutor</th><th>Estado</th>`;
+}
+function miniRow(scope, r, attrs){
+  const ec = isOpen(r.estado) ? 'warn' : 'good';
+  if (scope==='as') return `<tr ${attrs}><td class="code">${escHtml(r.codigo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td>${escHtml(r.ubic)}</td><td><span class="pill ${ec}">${escHtml(r.estado)}</span></td></tr>`;
+  if (scope==='do') return `<tr ${attrs}><td>${escHtml(r.proy)}</td><td>${escHtml((r.ejec||'').slice(0,28))}</td><td>${escHtml(r.ubic)}</td><td>${escHtml(r.estatus)}</td><td>${pct100(r.avance).toFixed(0)}%</td></tr>`;
+  return `<tr ${attrs}><td class="code">${escHtml(r.codigo)}</td><td>${escHtml(r.tipo)}</td><td>${escHtml(r.proy)}</td><td>${escHtml(r.disc)}</td><td>${escHtml((r.ejec||'').slice(0,24))}</td><td><span class="pill ${ec}">${escHtml(r.estado)}</span></td></tr>`;
+}
+const BREAKS = { as:[['Por disciplina','disc'],['Por ubicación','ubic'],['Por estado','estado'],['Top ejecutores','ejec']], nc:[['Por tipo','tipo'],['Por estado','estado'],['Por disciplina','disc'],['Top ejecutores','ejec']], do:[['Por estatus','estatus'],['Por proyecto','proy'],['Top ejecutores / aliados','ejec'],['Por ubicación','ubic']], st:[['Por tipo','tipo'],['Por estado','estado'],['Por disciplina','disc'],['Top ejecutores','ejec']] };
+function showKpiDrill(scope, kpiKey){
+  const meta = SECTION_META[scope];
+  const all = getFilteredRowsForSection(scope), subset = all.filter(meta.drills[kpiKey] || (() => true));
+  __pkgRows = subset; __pkgSection = scope;
+  const title = meta.drillLabels[kpiKey] || meta.label;
+  document.getElementById('modalTitle').textContent = `${title} — ${meta.label}`;
+  document.getElementById('modalSub').textContent = `${subset.length} ítems · respetando filtros actuales (proyecto, disciplina, etc.)`;
+  let html = `<div class="modal-kpi"><div class="big">${fmtN(subset.length)}</div><div class="l">${escHtml(title.toUpperCase())} · DEL TOTAL ${fmtN(all.length)} TRAS FILTROS</div></div>`;
+  if (!subset.length){ html += `<div class="modal-section" style="text-align:center;color:var(--text-2);padding:20px">No hay ítems que cumplan este criterio en el conjunto filtrado.</div>`; document.getElementById('modalBody').innerHTML = html; openModal(); return; }
+  BREAKS[scope].forEach(([t, key]) => {
+    const m = {}; subset.forEach(r => { const k = r[key] || '—'; m[k] = (m[k] || 0) + 1; });
+    const list = Object.entries(m).sort((a, b) => b[1] - a[1]); if (list.length <= 1) return;
+    html += `<div class="modal-section"><h4>${t} <span style="color:var(--text-2);font-weight:500;text-transform:none;letter-spacing:0">· clic para ver detalle</span></h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    list.slice(0, 15).forEach(([k, n]) => { html += `<span class="tag tag-click" data-pillkey="${escHtml(key)}" data-pillvalue="${escHtml(k)}"><b>${escHtml(k)}</b> · ${fmtN(n)}</span>`; });
+    if (list.length > 15) html += `<span class="tag">… ${list.length - 15} más</span>`;
+    html += `</div></div>`;
+  });
+  html += `<div class="modal-section"><h4>Listado detallado ${subset.length > 300 ? `(mostrando 300 de ${fmtN(subset.length)})` : ''}</h4><div class="tbl-wrap" style="max-height:340px"><table><thead><tr>${miniHead(scope)}</tr></thead><tbody>`;
+  subset.slice(0, 300).forEach((r, i) => { html += miniRow(scope, r, `class="clickable" data-pkgrow-idx="${i}" title="Clic para ver detalle"`); });
+  html += `</tbody></table></div></div>`;
+  document.getElementById('modalBody').innerHTML = html; openModal();
+}
+let __pillRows = [];
+function showPillDrill(pillKey, pillValue){
+  if (!__pkgRows.length || !__pkgSection) return;
+  const scope = __pkgSection, meta = SECTION_META[scope];
+  const subset = __pkgRows.filter(r => (r[pillKey] || '—') === pillValue);
+  const fieldLabels = { proy:'Proyecto', disc:'Disciplina', ejec:'Ejecutor', ubic:'Ubicación', loc:'Locación/clúster', tipo:'Tipo', estado:'Estado', estatus:'Estatus', hall:'Contiene hallazgo', detect:'Detectado por', asign:'Asignado a', subProy:'Subproyecto', lider:'Líder' };
+  const fieldLabel = fieldLabels[pillKey] || pillKey;
+  document.getElementById('modal2Title').textContent = `${fieldLabel}: ${pillValue}`;
+  document.getElementById('modal2Sub').textContent = `${subset.length} ítems · dentro del paquete actual (${meta.label})`;
+  let html = `<div class="modal-kpi"><div class="big">${fmtN(subset.length)}</div><div class="l">${escHtml(fieldLabel.toUpperCase())} = ${escHtml(pillValue)}</div></div>`;
+  if (!subset.length){ html += `<div class="modal-section" style="text-align:center;color:var(--text-2);padding:20px">No hay ítems con ${fieldLabel} = ${escHtml(pillValue)} en este paquete.</div>`; document.getElementById('modal2Body').innerHTML = html; openModal2(); return; }
+  BREAKS[scope].forEach(([t, key]) => {
+    if (key === pillKey) return;
+    const m = {}; subset.forEach(r => { const k = r[key] || '—'; m[k] = (m[k] || 0) + 1; });
+    const list = Object.entries(m).sort((a, b) => b[1] - a[1]); if (list.length <= 1) return;
+    html += `<div class="modal-section"><h4>${t}</h4><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    list.slice(0, 15).forEach(([k, n]) => { html += `<span class="tag"><b>${escHtml(k)}</b> · ${fmtN(n)}</span>`; });
+    if (list.length > 15) html += `<span class="tag">… ${list.length - 15} más</span>`;
+    html += `</div></div>`;
+  });
+  html += `<div class="modal-section"><h4>Listado ${subset.length > 200 ? `(mostrando 200 de ${fmtN(subset.length)})` : ''} · clic en una fila para ver detalle</h4><div class="tbl-wrap" style="max-height:340px"><table><thead><tr>${miniHead(scope)}</tr></thead><tbody>`;
+  __pillRows = subset;
+  subset.slice(0, 200).forEach((r, i) => { html += miniRow(scope, r, `class="clickable" data-pillrow-section="${scope}" data-pillrow-idx="${i}" title="Clic para ver detalle"`); });
+  html += `</tbody></table></div></div>`;
+  document.getElementById('modal2Body').innerHTML = html; openModal2();
+}
+function showRowDetail(scope, row){
+  const meta = SECTION_META[scope];
+  document.getElementById('modalTitle').textContent = `Detalle · ${row.codigo || row.proy || row.ejec || '(sin código)'}`;
+  document.getElementById('modalSub').textContent = meta.label;
+  let html = `<div class="modal-kpi"><div class="big">📄</div><div class="l">${escHtml(meta.label.toUpperCase())} · REGISTRO COMPLETO</div></div><div class="modal-section"><div class="detail-grid">`;
+  meta.fields.forEach(([label, key]) => {
+    let v = row[key];
+    if (scope === 'do' && ['avance','atraso','pctObra'].includes(key) && v !== '' && v != null) v = pct100(v).toFixed(1) + '%';
+    if (scope === 'as' && key === 'dias' && (+v < -9000)) v = '';
+    html += `<span class="k">${escHtml(label)}</span>` + ((v===null || v===undefined || v==='') ? '<span class="v muted">—</span>' : `<span class="v">${escHtml(v)}</span>`);
+  });
+  html += `</div></div>`;
+  document.getElementById('modalBody').innerHTML = html; openModal();
+}
+document.addEventListener('click', e => {
+  const pill = e.target.closest('.tag-click');
+  if (pill){ const k = pill.getAttribute('data-pillkey'), v = pill.getAttribute('data-pillvalue'); if (k && v) showPillDrill(k, v); return; }
+  const trPill = e.target.closest('tr[data-pillrow-section]');
+  if (trPill){ const idx = +trPill.getAttribute('data-pillrow-idx'); if (__pillRows[idx]) showRowDetail(trPill.getAttribute('data-pillrow-section'), __pillRows[idx]); return; }
+  const trPkg = e.target.closest('tr[data-pkgrow-idx]');
+  if (trPkg && __pkgSection){ const idx = +trPkg.getAttribute('data-pkgrow-idx'); if (__pkgRows[idx]) showRowDetail(__pkgSection, __pkgRows[idx]); return; }
+  const kpi = e.target.closest('.kpi[data-kpi]');
+  if (kpi){ showKpiDrill(kpi.getAttribute('data-section'), kpi.getAttribute('data-kpi')); return; }
+  const tr = e.target.closest('tbody tr.clickable[data-section]');
+  if (tr && !tr.getAttribute('data-pillrow-section')){ const scope = tr.getAttribute('data-section'); const rows = getFilteredRowsForSection(scope); const r = rows[+tr.getAttribute('data-idx')]; if (r) showRowDetail(scope, r); }
+});
+
+// ============ Agregaciones ============
+const FIELD_MAP_AS = FIELD_MAP_AS_PRE, FIELD_MAP_NC = FIELD_MAP_NC_PRE, FIELD_MAP_DO = FIELD_MAP_DO_PRE, FIELD_MAP_ST = FIELD_MAP_ST_PRE;
+function countBy(rows, key, top){
+  const m = {}; rows.forEach(r => { const k = r[key] || '—'; m[k] = (m[k] || 0) + 1; });
+  const out = Object.entries(m).sort((a, b) => b[1] - a[1]).map(([label, value]) => ({label, value}));
+  return top ? out.slice(0, top) : out;
+}
+function stackBy(rows, catKey, serKey, serOf, top){
+  const m = {};
+  rows.forEach(r => { const c = r[catKey] || '—', s = serOf ? serOf(r) : (r[serKey] || '—'); (m[c] = m[c] || {label:c, total:0, parts:{}}); m[c].total++; m[c].parts[s] = (m[c].parts[s] || 0) + 1; });
+  const out = Object.values(m).sort((a, b) => b.total - a.total);
+  return top ? out.slice(0, top) : out;
+}
+const seriesOf = (cats, order) => { const s = new Set(); cats.forEach(c => Object.keys(c.parts).forEach(k => s.add(k))); return [...(order || []).filter(o => s.has(o)), ...[...s].filter(x => !(order || []).includes(x))]; };
+function timelineBy(rows, dateKey, statusKey, abiertoVal){
+  abiertoVal = abiertoVal || 'ABIERTA';
+  const c = {}, ce = {};
+  rows.forEach(r => { const d = r[dateKey]; if (!d) return; const m = d.slice(0, 7); c[m] = (c[m] || 0) + 1; if (statusKey && (r[statusKey] || '').toUpperCase() !== abiertoVal) ce[m] = (ce[m] || 0) + 1; });
+  const keys = [...new Set([...Object.keys(c), ...Object.keys(ce)])].sort();
+  if (!keys.length) return [];
+  // meses continuos (sin huecos)
+  const out = []; let [y, mo] = keys[0].split('-').map(Number); const [ly, lm] = keys[keys.length - 1].split('-').map(Number);
+  while (y < ly || (y === ly && mo <= lm)){ const k = y + '-' + String(mo).padStart(2, '0'); out.push({mes:k, creados:c[k] || 0, cerrados:ce[k] || 0}); mo++; if (mo > 12){ mo = 1; y++; } }
+  return out;
+}
+const ageDays = s => { if (!s) return null; const d = new Date(s + 'T00:00:00'); return isNaN(d) ? null : Math.round((TODAY - d) / 86400000); };
+const CE_ORDER = ['CERRADA','CERRADO','ABIERTA','ABIERTO'];
+const estColor = s => /ABIERT/i.test(s) ? COLORS.warn : COLORS.good;
+
+// ============ Tablas (con buscador) ============
+function searchable(scope, r){
+  const q = tblSearch[scope]; if (!q) return true;
+  return [r.codigo, r.proy, r.ejec, r.ubic, r.loc, r.aspecto, r.desc, r.disc, r.tipo, r.estado, r.estatus].some(v => v && String(v).toLowerCase().includes(q));
+}
+function renderTable(scope){
+  const rows = getFilteredRowsForSection(scope);
+  const vis = []; rows.forEach((r, i) => { if (searchable(scope, r)) vis.push([r, i]); });
+  const dk = { as:'fvis', nc:'fhall', st:'femit' }[scope];   // más recientes primero (el índice original se conserva)
+  if (dk) vis.sort((a, b) => String(b[0][dk] || '').localeCompare(String(a[0][dk] || '')));
+  const cap = vis.slice(0, 400);
+  const cnt = document.getElementById(scope + 'TblCnt'); if (cnt) cnt.innerHTML = `<b>${fmtN(vis.length)}</b> registros${vis.length > 400 ? ' · mostrando 400' : ''}`;
+  const tr = (i, inner) => `<tr class="clickable" data-section="${scope}" data-idx="${i}" title="Clic para ver detalle">${inner}</tr>`;
+  let html = '';
+  if (scope === 'as') html = cap.map(([r, i]) => { const ecls = (r.estado||'').toUpperCase()==='CERRADA' ? 'good' : 'warn', hcls = ['SÍ','SI'].includes((r.hall||'').toUpperCase()) ? 'bad' : 'muted';
+    return tr(i, `<td class="code">${escHtml(r.codigo)}</td><td>${escHtml(r.proy)}</td><td><span class="pill accent">${escHtml(r.disc)}</span></td><td>${escHtml((r.ejec||'').slice(0,30))}</td><td>${escHtml(r.ubic)}</td><td><span class="pill ${hcls}">${escHtml(r.hall)}</span></td><td><span class="pill ${ecls}">${escHtml(r.estado)}</span></td><td style="font-size:11px;white-space:nowrap">${escHtml(r.fvis)}</td><td style="font-size:11px;max-width:380px">${escHtml((r.aspecto||'').slice(0,140))}</td>`); }).join('');
+  if (scope === 'nc') html = cap.map(([r, i]) => { const tcls = r.tipo==='NCR' ? 'bad' : r.tipo==='OBS' ? 'warn' : 'accent2', ecls = (r.estado||'').includes('CERRAD') ? 'good' : 'warn';
+    return tr(i, `<td class="code">${escHtml(r.codigo)}</td><td><span class="pill ${tcls}">${escHtml(r.tipo)}</span></td><td>${escHtml(r.proy)}</td><td><span class="pill accent">${escHtml(r.disc)}</span></td><td>${escHtml((r.ejec||'').slice(0,28))}</td><td>${escHtml(r.ubic)}</td><td><span class="pill ${ecls}">${escHtml(r.estado)}</span></td><td style="font-size:11px;white-space:nowrap">${escHtml(r.fhall)}</td><td style="font-size:11px;white-space:nowrap">${escHtml(r.fcie)}</td><td class="num">${fmtN(r.dur)}</td>`); }).join('');
+  if (scope === 'do') html = cap.map(([r, i]) => { const scls = r.estatus==='CRITICO' ? 'bad' : r.estatus==='EN TIEMPO' ? 'accent' : r.estatus==='MODERADO' ? 'warn' : 'good'; const av = pct100(r.avance), acls = av >= 90 ? 'good' : av >= 50 ? 'warn' : 'bad';
+    return tr(i, `<td>${escHtml(r.proy)}</td><td>${escHtml((r.ejec||'').slice(0,30))}</td><td>${escHtml(r.ubic)}</td><td><span class="pill ${scls}">${escHtml(r.estatus)}</span></td><td><div style="display:flex;align-items:center;gap:6px;min-width:130px"><div class="bar ${acls}" style="flex:1"><span style="width:${Math.min(av,100)}%"></span></div><span style="font:800 10.5px Orbitron;min-width:40px;text-align:right">${av.toFixed(0)}%</span></div></td><td class="num">${pct100(r.atraso).toFixed(0)}%</td><td style="font-size:11px;white-space:nowrap">${escHtml(r.fpdt)}</td><td style="font-size:11px;white-space:nowrap">${escHtml(r.frev1)}</td><td style="font-size:11px;white-space:nowrap">${escHtml(r.frevu)}</td><td style="font-size:11px;white-space:nowrap">${escHtml(r.faval)}</td>`); }).join('');
+  if (scope === 'st') html = cap.map(([r, i]) => { const tcls = r.tipo==='TQ' ? 'accent' : r.tipo==='DDR' ? 'warn' : r.tipo==='CR' ? 'accent2' : 'bad', ecls = (r.estado||'').toUpperCase()==='CERRADA' ? 'good' : 'warn';
+    return tr(i, `<td class="code">${escHtml(r.codigo)}</td><td><span class="pill ${tcls}">${escHtml(r.tipo)}</span></td><td>${escHtml(r.proy)}</td><td><span class="pill accent">${escHtml(r.disc)}</span></td><td>${escHtml((r.ejec||'').slice(0,28))}</td><td><span class="pill ${ecls}">${escHtml(r.estado)}</span></td><td style="font-size:11px;white-space:nowrap">${escHtml(r.femit)}</td><td style="font-size:11px;white-space:nowrap">${escHtml(r.fcie)}</td><td class="num">${fmtN(r.dur)}</td><td style="font-size:11px;max-width:300px">${escHtml((r.desc||'').slice(0,110))}</td>`); }).join('');
+  const id = { as:'tblAs', nc:'tblNc', do:'tblDo', st:'tblSt' }[scope];
+  document.querySelector('#' + id + ' tbody').innerHTML = html || '<tr><td colspan="10" class="nodata" style="padding:26px">— Sin registros —</td></tr>';
+}
+
+// ============ Secciones ============
+function renderAspectos(){
+  const rows = applyFilters(DATA.aspectos.rows, filterState.as, FIELD_MAP_AS);
+  const ab = rows.filter(r => (r.estado||'').toUpperCase()==='ABIERTA').length;
+  const ce = rows.filter(r => (r.estado||'').toUpperCase()==='CERRADA').length;
+  const hal = rows.filter(r => ['SÍ','SI'].includes((r.hall||'').toUpperCase())).length;
+  const n = rows.length, p = x => n ? x / n * 100 : 0;
+  document.getElementById('asCount').textContent = fmtN(n);
+  document.getElementById('asCountAb').textContent = fmtN(ab);
+  document.getElementById('asCountCer').textContent = fmtN(ce);
+  document.getElementById('asCountHal').textContent = fmtN(hal);
+  document.getElementById('kpiAs').innerHTML = kpiHTML([
+    {key:'totales', lbl:'Aspectos totales', val:fmtN(n), sub:'tras filtros', cls:'accent', ico:'📋'},
+    {key:'abiertas', lbl:'Abiertas', val:fmtN(ab), sub:fmtPct(p(ab)) + ' del total', cls:'warn', pct:p(ab), ico:'⏳'},
+    {key:'cerradas', lbl:'Cerradas', val:fmtN(ce), sub:fmtPct(p(ce)) + ' del total', cls:'good', pct:p(ce), ico:'✔'},
+    {key:'con_hallazgo', lbl:'Con hallazgo', val:fmtN(hal), sub:fmtPct(p(hal)) + ' del total', cls:'bad', pct:p(hal), ico:'⚑'},
+    {key:'disciplinas', lbl:'Disciplinas distintas', val:fmtN(new Set(rows.map(r => r.disc).filter(Boolean)).size), sub:'clic para ver lista', cls:'accent2', ico:'◈'},
+    {key:'ejecutores', lbl:'Ejecutores distintos', val:fmtN(new Set(rows.map(r => r.ejec).filter(Boolean)).size), sub:'clic para ver lista', cls:'yellow', ico:'★'},
+  ], 'as');
+  renderGauge('chAsEstado', p(ce), 'Cerradas', COLORS.good, `<b style="color:var(--good)">${fmtN(ce)}</b> cerradas · <b style="color:var(--warn)">${fmtN(ab)}</b> abiertas`);
+  renderDonut('chAsTipo', countBy(rows, 'tipo'), PALETTE);
+  const B = [['0-30 d', 0, 30], ['31-60 d', 31, 60], ['61-90 d', 61, 90], ['91-180 d', 91, 180], ['> 180 d', 181, 1e9]];
+  const ages = rows.filter(r => (r.estado||'').toUpperCase()==='ABIERTA').map(r => ageDays(r.fvis)).filter(x => x != null);
+  renderAge('chAsAge', B.map(([l, a, b]) => ({label:l, value:ages.filter(d => d >= a && d <= b).length})));
+  const disc = stackBy(rows, 'disc', 'estado');
+  renderStackH('chAsDisc', disc, seriesOf(disc, CE_ORDER), seriesOf(disc, CE_ORDER).map(estColor));
+  const ub = stackBy(rows, 'ubic', 'estado', null, 12);
+  renderStackH('chAsUbic', ub, seriesOf(ub, CE_ORDER), seriesOf(ub, CE_ORDER).map(estColor), {maxLbl:28});
+  renderTimeline('chAsTime', timelineBy(rows, 'fvis', 'estado', 'ABIERTA'), 'Visitas', 'Cerradas', COLORS.accent2, COLORS.good);
+  const ej = stackBy(rows, 'ejec', 'estado', null, 15);
+  renderStackH('chAsEjec', ej, seriesOf(ej, CE_ORDER), seriesOf(ej, CE_ORDER).map(estColor));
+  const ejAb = countBy(rows.filter(r => (r.estado||'').toUpperCase()==='ABIERTA'), 'ejec', 15).map(d => ({label:d.label, parts:{Abiertas:d.value}}));
+  renderStackH('chAsEjecAb', ejAb, ['Abiertas'], [COLORS.bad], {maxLbl:24});
+  renderTable('as');
+}
+function renderNcr(){
+  const rows = applyFilters(DATA.ncr.rows, filterState.nc, FIELD_MAP_NC);
+  document.getElementById('ncCount').textContent = fmtN(rows.length);
+  const ncr = rows.filter(r => r.tipo==='NCR').length, obs = rows.filter(r => r.tipo==='OBS').length, pnc = rows.filter(r => r.tipo==='PNC').length;
+  const ab = rows.filter(r => (r.estado||'').includes('ABIERT')).length, ce = rows.filter(r => (r.estado||'').includes('CERRAD')).length;
+  const n = rows.length, p = x => n ? x / n * 100 : 0;
+  document.getElementById('kpiNc').innerHTML = kpiHTML([
+    {key:'totales', lbl:'Hallazgos totales', val:fmtN(n), sub:'tras filtros', cls:'accent', ico:'⚠'},
+    {key:'ncr', lbl:'NCR', val:fmtN(ncr), sub:'No conformidades', cls:'bad', pct:p(ncr), ico:'✖'},
+    {key:'obs', lbl:'OBS', val:fmtN(obs), sub:'Observaciones', cls:'warn', pct:p(obs), ico:'👁'},
+    {key:'pnc', lbl:'PNC', val:fmtN(pnc), sub:'Producto No Conforme', cls:'accent2', pct:p(pnc), ico:'⛔'},
+    {key:'abiertos', lbl:'Abiertos', val:fmtN(ab), sub:fmtPct(p(ab)) + ' del total', cls:'yellow', pct:p(ab), ico:'⏳'},
+    {key:'cerrados', lbl:'Cerrados', val:fmtN(ce), sub:fmtPct(p(ce)) + ' del total', cls:'good', pct:p(ce), ico:'✔'},
+  ], 'nc');
+  renderDonut('chNcTipo', countBy(rows, 'tipo'), null, {colorOf:l => TIPO_C[l]});
+  const sub = ['NCR','OBS','PNC'].map(t => { const rs = rows.filter(r => r.tipo===t); const c = rs.filter(r => (r.estado||'').includes('CERRAD')).length; return rs.length ? `<span style="color:${TIPO_C[t]}">${t} ${(c / rs.length * 100).toFixed(0)}%</span>` : ''; }).filter(Boolean).join(' · ');
+  renderGauge('chNcEstado', p(ce), 'Cerrados', COLORS.good, sub);
+  renderDonut('chNcProy', countBy(rows, 'proy'), [COLORS.accent2, COLORS.accent, COLORS.good, COLORS.yellow, COLORS.orange], {legendPosition:'bottom'});
+  const disc = stackBy(rows, 'disc', 'tipo'), ser = seriesOf(disc, ['NCR','OBS','PNC']);
+  renderStackH('chNcDisc', disc, ser, ser.map(s => TIPO_C[s] || COLORS.accent));
+  const ej = stackBy(rows, 'ejec', 'tipo', null, 15), ser2 = seriesOf(ej, ['NCR','OBS','PNC']);
+  renderStackH('chNcEjec', ej, ser2, ser2.map(s => TIPO_C[s] || COLORS.accent), {maxLbl:24});
+  renderTimeline('chNcTime', timelineBy(rows, 'fhall', 'estado', 'ABIERTO'), 'Hallazgos', 'Cerrados', COLORS.bad, COLORS.good);
+  renderTable('nc');
+}
+function renderDossier(){
+  const rows = applyFilters(DATA.dossier.rows, filterState.do, FIELD_MAP_DO);
+  document.getElementById('doCount').textContent = fmtN(rows.length);
+  const avgAv = rows.length ? rows.reduce((s, r) => s + pct100(r.avance), 0) / rows.length : 0;
+  document.getElementById('doAvg').textContent = avgAv.toFixed(1);
+  const cri = rows.filter(r => r.estatus==='CRITICO').length, en = rows.filter(r => r.estatus==='EN TIEMPO').length, mo = rows.filter(r => r.estatus==='MODERADO').length, av = rows.filter(r => r.estatus==='AVALADO' || r.estatus==='FINALIZADO').length;
+  const n = rows.length, p = x => n ? x / n * 100 : 0;
+  document.getElementById('kpiDo').innerHTML = kpiHTML([
+    {key:'totales', lbl:'Dossieres totales', val:fmtN(n), sub:'tras filtros', cls:'accent', ico:'📚'},
+    {key:'avalados', lbl:'Avalados / Finaliz.', val:fmtN(av), sub:fmtPct(p(av)) + ' del total', cls:'good', pct:p(av), ico:'✔'},
+    {key:'criticos', lbl:'Críticos', val:fmtN(cri), sub:fmtPct(p(cri)) + ' del total', cls:'bad', pct:p(cri), ico:'🔥'},
+    {key:'en_tiempo', lbl:'En tiempo', val:fmtN(en), sub:fmtPct(p(en)) + ' del total', cls:'accent', pct:p(en), ico:'⏱'},
+    {key:'moderados', lbl:'Moderados', val:fmtN(mo), sub:fmtPct(p(mo)) + ' del total', cls:'warn', pct:p(mo), ico:'◐'},
+    {key:'avance_prom', lbl:'Avance promedio', val:avgAv.toFixed(1) + '%', sub:'a la fecha', cls:'accent2', pct:avgAv, ico:'📈'},
+  ], 'do');
+  renderDonut('chDoEstatus', countBy(rows, 'estatus'), null, {colorOf:l => EST_C[l] || COLORS.mute});
+  renderGauge('chDoGauge', avgAv, 'Avance prom.', COLORS.violet, `<b style="color:var(--bad)">${fmtN(cri)}</b> críticos · <b style="color:var(--warn)">${fmtN(mo)}</b> moderados`);
+  const pm = {}; rows.forEach(r => { const k = r.proy || '—'; (pm[k] = pm[k] || {n:0, s:0}); pm[k].n++; pm[k].s += pct100(r.avance); });
+  const avProy = Object.entries(pm).map(([l, v]) => ({label:l, value:+(v.s / v.n).toFixed(1)})).sort((a, b) => b.value - a.value);
+  renderBarH('chDoAvance', avProy, d => d.value >= 90 ? COLORS.good : d.value >= 50 ? COLORS.warn : COLORS.bad);
+  const ej = stackBy(rows, 'ejec', 'estatus', null, 15), ser = seriesOf(ej, ['AVALADO','FINALIZADO','EN TIEMPO','MODERADO','CRITICO']);
+  renderStackH('chDoEjec', ej, ser, ser.map(s => EST_C[s] || COLORS.mute));
+  renderTable('do');
+}
+function renderSoltec(){
+  const rows = applyFilters(DATA.soltec.rows, filterState.st, FIELD_MAP_ST);
+  document.getElementById('stCount').textContent = fmtN(rows.length);
+  const ab = rows.filter(r => (r.estado||'').toUpperCase()==='ABIERTA').length, ce = rows.filter(r => (r.estado||'').toUpperCase()==='CERRADA').length;
+  const tq = rows.filter(r => r.tipo==='TQ').length, ddr = rows.filter(r => r.tipo==='DDR').length, cr = rows.filter(r => r.tipo==='CR').length, moc = rows.filter(r => r.tipo==='MoC').length;
+  const n = rows.length, p = x => n ? x / n * 100 : 0;
+  document.getElementById('kpiSt').innerHTML = kpiHTML([
+    {key:'totales', lbl:'Solicitudes totales', val:fmtN(n), sub:'tras filtros', cls:'accent', ico:'📨'},
+    {key:'abiertas', lbl:'Abiertas', val:fmtN(ab), sub:fmtPct(p(ab)) + ' del total', cls:'warn', pct:p(ab), ico:'⏳'},
+    {key:'cerradas', lbl:'Cerradas', val:fmtN(ce), sub:fmtPct(p(ce)) + ' del total', cls:'good', pct:p(ce), ico:'✔'},
+    {key:'tq', lbl:'TQ · Consultas', val:fmtN(tq), sub:fmtPct(p(tq)) + ' del total', cls:'accent', pct:p(tq), ico:'❓'},
+    {key:'ddr_cr', lbl:'DDR + CR', val:fmtN(ddr + cr), sub:'desviaciones / cambios', cls:'accent2', pct:p(ddr + cr), ico:'⇄'},
+    {key:'moc', lbl:'MoC', val:fmtN(moc), sub:'gestión del cambio', cls:'bad', pct:p(moc), ico:'⚙'},
+  ], 'st');
+  renderDonut('chStTipo', countBy(rows, 'tipo'), null, {colorOf:l => TIPO_C[l]});
+  renderGauge('chStEstado', p(ce), 'Cerradas', COLORS.accent, `<b style="color:var(--good)">${fmtN(ce)}</b> cerradas · <b style="color:var(--warn)">${fmtN(ab)}</b> abiertas`);
+  renderDonut('chStProy', countBy(rows, 'proy'), [COLORS.accent2, COLORS.accent, COLORS.good, COLORS.yellow, COLORS.orange], {legendPosition:'bottom'});
+  const order = ['TQ','CR','DDR','MoC'];
+  const disc = stackBy(rows, 'disc', 'tipo'), s1 = seriesOf(disc, order);
+  renderStackH('chStDisc', disc, s1, s1.map(s => TIPO_C[s] || COLORS.accent));
+  const ej = stackBy(rows, 'ejec', 'tipo', null, 15), s2 = seriesOf(ej, order);
+  renderStackH('chStEjec', ej, s2, s2.map(s => TIPO_C[s] || COLORS.accent), {maxLbl:24});
+  renderTimeline('chStTime', timelineBy(rows, 'femit', 'estado'), 'Emitidas', 'Cerradas', COLORS.good, COLORS.accent);
+  const avg = (rs, k) => { const v = rs.map(r => +r[k]).filter(x => isFinite(x) && x >= 0 && x <= 730); /* descarta atípicos (> 2 años) */ return v.length ? +(v.reduce((s, x) => s + x, 0) / v.length).toFixed(1) : 0; };
+  const cyc = order.map(t => { const rs = rows.filter(r => r.tipo === t); return rs.length ? {label:t + ' (' + rs.length + ')', parts:{'Aut. técnica':avg(rs, 'durAT'), 'Respuesta':avg(rs, 'durResp'), 'Aprobación':avg(rs, 'durAprob')}} : null; }).filter(Boolean);
+  renderStackH('chStCycle', cyc, ['Aut. técnica','Respuesta','Aprobación'], [COLORS.accent, COLORS.accent2, COLORS.yellow]);
+  renderTable('st');
+}
+function renderSection(scope){ if (scope==='as') renderAspectos(); else if (scope==='nc') renderNcr(); else if (scope==='do') renderDossier(); else if (scope==='st') renderSoltec(); }
+
+// ============ Inicialización ============
+buildSelectOpts('as', DATA.aspectos.filterDims);
+buildSelectOpts('nc', DATA.ncr.filterDims);
+buildSelectOpts('do', DATA.dossier.filterDims);
+buildSelectOpts('st', DATA.soltec.filterDims);
+const startTab = (location.hash || '').slice(1);
+showTab(['aspectos','ncr','dossier','soltec'].includes(startTab) ? startTab : 'aspectos');
+// ============ Cambios frente al corte anterior ============
+(function(){
+  const wrap = document.getElementById('cmpWrap');
+  if (!PREV || !PREV.secciones) { wrap.style.display = 'none'; return; }
+  document.getElementById('cmpHead').innerHTML = 'Corte <b>' + escHtml(PREV.corte_act) + '</b> frente al corte <b>' + escHtml(PREV.corte_ant) + '</b>' +
+    '<span>Anterior: ' + escHtml(PREV.fuente_ant) + '</span><span>Actual: ' + escHtml(PREV.fuente_act) + '</span>';
+  const dl = (a, b, inv) => { const d = b - a; if (!d) return '<span class="cmp-eq">=</span>'; const good = inv ? d < 0 : d > 0;
+    return '<span class="' + (good ? 'cmp-up' : 'cmp-dn') + '">' + (d > 0 ? '+' : '') + fmtN(+d.toFixed(1)) + '</span>'; };
+  document.getElementById('cmpGrid').innerHTML = PREV.secciones.map(s => '<div class="cmp-box" style="--c:' + s.color + '"><h4>' + escHtml(s.nombre) + '</h4><table>' +
+    '<tr><td class="cmp-eq">Indicador</td><td class="n cmp-eq">Ant.</td><td class="n cmp-eq">Act.</td><td class="n cmp-eq">Δ</td></tr>' +
+    s.filas.map(f => '<tr><td>' + escHtml(f[0]) + '</td><td class="n">' + fmtN(f[1]) + '</td><td class="n">' + fmtN(f[2]) + '</td><td class="n">' + dl(f[1], f[2], f[3]) + '</td></tr>').join('') +
+    '</table></div>').join('');
+  const tipos = ['Todos'].concat(PREV.secciones.map(s => s.nombre));
+  let fSec = 'Todos';
+  const fb = document.getElementById('cmpFilter');
+  const pill = c => ({'Nuevo':'accent','Cerrado':'good','Reabierto':'bad','Retirado':'muted'}[c] || 'warn');
+  function draw(){
+    const q = (document.getElementById('cmpSearch').value || '').toLowerCase();
+    const rs = PREV.cambios.filter(r => (fSec === 'Todos' || r.sec === fSec) && (!q || JSON.stringify(r).toLowerCase().includes(q)));
+    document.querySelector('#tblCmp tbody').innerHTML = rs.length ? rs.map(r => '<tr><td>' + escHtml(r.sec) + '</td><td><span class="pill ' + pill(r.cambio) + '">' + escHtml(r.cambio) +
+      '</span></td><td>' + escHtml(r.cod) + '</td><td>' + escHtml(r.antes) + '</td><td>' + escHtml(r.ahora) + '</td><td>' + escHtml(r.ejec) + '</td><td>' + escHtml(r.det) + '</td></tr>').join('')
+      : '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:18px">Sin cambios de registros entre los dos cortes</td></tr>';
+    document.getElementById('cmpCnt').innerHTML = '<b>' + fmtN(rs.length) + '</b> de ' + fmtN(PREV.cambios.length) + ' cambios';
+    fb.innerHTML = tipos.map(t => { const n = t === 'Todos' ? PREV.cambios.length : PREV.cambios.filter(r => r.sec === t).length;
+      return '<button class="' + (t === fSec ? 'on' : '') + '" data-s="' + escHtml(t) + '">' + escHtml(t) + ' (' + n + ')</button>'; }).join('');
+  }
+  fb.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { fSec = b.dataset.s; draw(); } });
+  document.getElementById('cmpSearch').addEventListener('input', draw);
+  draw();
+})();
+</script>
+<a id="home-float" href="../../index.html" title="Volver al tablero principal" style="position:fixed;right:22px;bottom:22px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:11px 18px 11px 14px;border-radius:999px;border:1px solid rgba(0,229,255,.75);background:rgba(6,10,24,.92);color:#9ff6ff;font:700 13.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 22px rgba(0,229,255,.45),0 10px 30px rgba(0,0,0,.55);backdrop-filter:blur(6px);opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .25s,transform .25s,box-shadow .15s" onmouseover="this.style.boxShadow='0 0 30px rgba(0,229,255,.75),0 10px 30px rgba(0,0,0,.55)'" onmouseout="this.style.boxShadow='0 0 22px rgba(0,229,255,.45),0 10px 30px rgba(0,0,0,.55)'"><span style="font-size:18px;line-height:1">&#8962;</span>Volver al tablero principal</a>
+<script>(function(){var f=document.getElementById('home-float'),t=document.querySelector('.home-link');if(!f)return;function show(v){f.style.opacity=v?1:0;f.style.transform=v?'none':'translateY(14px)';f.style.pointerEvents=v?'auto':'none'}if(t&&'IntersectionObserver' in window){new IntersectionObserver(function(e){show(!e[0].isIntersecting)}).observe(t)}else{window.addEventListener('scroll',function(){show(window.scrollY>220)});show(window.scrollY>220)}})();</script>
+</body>
+</html>
