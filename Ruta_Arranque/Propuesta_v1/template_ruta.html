@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ruta al Arranque · CSE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.45.2/apexcharts.min.js"></script>
+<style>
+/*__CSS__*/
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;margin-bottom:18px;position:relative}
+.stg{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px;position:relative;cursor:pointer;transition:.18s;min-width:0}
+.stg:hover{transform:translateY(-3px);border-color:var(--c);box-shadow:0 0 22px -6px var(--c)}
+.stg.on{border-color:var(--c);background:linear-gradient(160deg,rgba(255,255,255,.07),transparent)}
+.stg .n{font:700 11px Rajdhani;letter-spacing:1px;color:var(--c);text-shadow:0 0 8px var(--c)}
+.stg .t{font:700 15px Rajdhani;letter-spacing:.4px;line-height:1.1;margin:2px 0 6px;min-height:34px}
+.stg .v{font:700 26px/1 Rajdhani;color:#fff}
+.stg .s{font-size:10.8px;color:var(--text2);margin-top:3px;min-height:30px}
+.stg .bar{height:5px;border-radius:5px;background:rgba(255,255,255,.07);margin-top:8px;overflow:hidden;display:flex}
+.stg .bar i{display:block;height:100%}
+.stg a{font-size:10.5px;color:#8ff3ff;text-decoration:none;display:inline-block;margin-top:7px}
+.stg a:hover{text-shadow:0 0 8px var(--cy)}
+.stg:not(:last-child)::after{content:"➜";position:absolute;right:-12px;top:42%;color:var(--c);font-size:14px;text-shadow:0 0 8px var(--c);z-index:2}
+.stg.off{opacity:.55}
+.stg.off .v{color:var(--muted)}
+/* matrix */
+.mx td{padding:5px 6px}
+.mx th{text-align:center}
+.mx th:first-child,.mx td:first-child{text-align:left}
+.cell{display:block;min-width:60px;max-width:150px;margin:0 auto;text-align:center;border-radius:8px;padding:5px 6px;font:600 11px Inter;white-space:nowrap;border:1px solid;cursor:pointer;transition:.12s}
+.cell:hover{transform:scale(1.06)}
+.c-ok{color:#04120a;background:rgba(57,255,136,.85);border-color:var(--lm);box-shadow:0 0 10px -2px var(--lm)}
+.c-warn{color:#1a1400;background:rgba(255,225,77,.85);border-color:var(--yl);box-shadow:0 0 10px -2px var(--yl)}
+.c-bad{color:#fff;background:rgba(255,61,113,.85);border-color:var(--rd);box-shadow:0 0 10px -2px var(--rd)}
+.c-info{color:#cdf9ff;background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4)}
+.c-na{color:var(--muted);background:transparent;border-color:rgba(255,255,255,.06);cursor:default}
+.c-na:hover{transform:none}
+.rd{display:flex;align-items:center;gap:8px;min-width:120px}
+.rd .bb{flex:1;height:7px;border-radius:7px;background:rgba(255,255,255,.07);overflow:hidden}
+.rd .bb i{display:block;height:100%}
+.rd b{font:700 15px Rajdhani;width:38px;text-align:right}
+.loc{font:700 15px Rajdhani;letter-spacing:.4px;color:#fff;cursor:pointer}
+.loc:hover{color:var(--cy);text-shadow:0 0 8px var(--cy)}
+.sm{font-size:10.5px;color:var(--muted)}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--text2);margin:0 0 10px}
+.leg span{display:flex;gap:6px;align-items:center}.leg i{width:14px;height:10px;border-radius:3px;display:inline-block}
+.alist{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.al{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:12px;padding:10px 12px;cursor:pointer}
+.al:hover{border-color:var(--c);box-shadow:0 0 18px -6px var(--c)}
+.al h4{margin:0;font:700 16px Rajdhani;display:flex;justify-content:space-between}
+.al ul{margin:6px 0 0;padding-left:16px;font-size:12px;color:var(--text2)}
+.al li b{color:var(--text)}
+.guide{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.gbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.gbox h4{margin:0 0 6px;font:700 17px Rajdhani;color:var(--c,var(--cy))}
+.gbox p,.gbox li{font-size:12.5px;color:var(--text2);line-height:1.55}
+.gbox ul{margin:4px 0 0;padding-left:18px}
+.gbox b{color:var(--text)}
+.tl2{display:flex;flex-direction:column;gap:6px;grid-column:1/-1}
+@media(max-width:1750px){.pipe{grid-template-columns:repeat(5,1fr)}.stg:nth-child(5)::after{display:none}}
+.vt td{white-space:nowrap}.vt .gate{font:700 11px Inter;padding:3px 8px;border-radius:7px;border:1px solid}
+@media(max-width:1400px){.stg:nth-child(5)::after{display:none}.guide{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.pipe{grid-template-columns:1fr 1fr}.alist,.guide{grid-template-columns:1fr}}
+</style>
+<style>.fbar{position:sticky;top:0;z-index:60;background:rgba(8,12,28,.95)}</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>RUTA AL ARRANQUE · CAÑO SUR ESTE<a class="home-link" href="../../index.html" title="Volver al tablero principal" style="display:inline-flex;align-items:center;gap:7px;vertical-align:middle;margin-left:18px;padding:7px 14px 7px 11px;border-radius:999px;border:1px solid rgba(0,229,255,.6);background:rgba(0,229,255,.1);color:#9ff6ff;-webkit-text-fill-color:#9ff6ff;background-clip:padding-box;-webkit-background-clip:padding-box;filter:none;animation:none;font:600 13px/1 Inter,'Segoe UI',system-ui,sans-serif;letter-spacing:.2px;text-transform:none;text-decoration:none;white-space:nowrap;box-shadow:0 0 14px rgba(0,229,255,.28);text-shadow:none;transition:box-shadow .15s,transform .15s" onmouseover="this.style.boxShadow='0 0 22px rgba(0,229,255,.65)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='0 0 14px rgba(0,229,255,.28)';this.style.transform=''"><span style="font-size:17px;line-height:1">&#8962;</span>Volver al tablero principal</a></h1>
+      <div class="sub">Trazabilidad por locación: <b>compra</b> → <b>en campo</b> → <b>preservación</b> → <b>programación</b> (entrega de construcción + taladro) → <b>certificación AC1 / HC1</b> → <b>dossier</b> → <b>garantías</b> → <b>IDA</b> → <b>QA</b> → <b>alertas</b></div>
+    </div>
+    <div class="stamp"><span class="pill"><i></i>Actualizado <span id="gen-at"></span></span><div class="sub" style="margin-top:8px;max-width:560px" id="fuentes"></div></div>
+  </div>
+
+  <div class="pipe" id="pipe"></div>
+
+  <div class="fbar">
+    <div class="fg"><label>Frente</label><select id="f-fr"><option value="">Todos</option><option>Exteriores</option><option>Estaciones</option></select></div>
+    <div class="fg"><label>Locaciones</label><select id="f-ruta"><option value="ruta">Ruta del taladro + estaciones + en construcción</option><option value="all">Todas</option><option value="alert">Solo con alertas</option></select></div>
+    <div class="fg"><label>Etapa con problema</label><select id="f-stg"><option value="">Cualquiera</option></select></div>
+    <div class="fg grow"><label>Buscar locación</label><input id="f-q" placeholder="CASE-0610, CUMA, Centauros…"></div>
+    <button class="btn" onclick="resetF()">Limpiar</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" data-v="mx" onclick="goTab('mx')">Matriz por locación <span class="ct" id="ct-mx"></span></div>
+    <div class="tab" data-v="al" onclick="goTab('al')">Alertas cruzadas <span class="ct" id="ct-al"></span></div>
+    <div class="tab" data-v="pg" onclick="goTab('pg')">Programación</div>
+    <div class="tab" data-v="gd" onclick="goTab('gd')">Cómo usarlo</div>
+  </div>
+
+  <div class="view on" id="v-mx">
+    <div class="leg"><span><i style="background:var(--lm)"></i>Listo / cerrado</span><span><i style="background:var(--yl)"></i>En curso / pendiente</span><span><i style="background:var(--rd)"></i>Bloquea el arranque</span><span><i style="background:rgba(0,229,255,.35)"></i>Informativo</span><span><i style="background:rgba(255,255,255,.08)"></i>Sin datos para la locación</span><span style="color:var(--muted)">· clic en una celda para ver el detalle · clic en la locación para su ficha completa</span></div>
+    <div class="tcard"><div class="tw" style="max-height:none"><table class="mx"><thead><tr id="mx-h"></tr></thead><tbody id="mx-b"></tbody></table></div></div>
+  </div>
+
+  <div class="view" id="v-al">
+    <div class="grid g2"><div class="card"><h3>Alertas por etapa</h3><div class="d">Cantidad de alertas cruzadas en las locaciones filtradas · clic para filtrar</div><div id="c-al"></div></div>
+    <div class="card"><h3>Preparación de la ruta del taladro</h3><div class="d">% de etapas listas por clúster, ordenado por llegada del taladro</div><div id="c-ready"></div></div></div>
+    <div class="alist" id="alist"></div>
+  </div>
+
+  <div class="view" id="v-pg">
+    <div class="grid g2">
+      <div class="card"><h3>Entrega de construcción y ruta del taladro</h3><div class="d">Por locación: construcción del aliado (hasta su pronóstico de entrega) y periodo del taladro · sin entrega de construcción no se llevan equipos</div><div id="c-tal"></div></div>
+      <div class="card"><h3>Avance de construcción por aliado</h3><div class="d">Solo aliados que entregan locaciones con equipos: DIATECO, MTZ 08, DISCON 17, PYC ANDINOS 08 y GTC 010 · % programado vs % ejecutado</div><div id="c-ali"></div></div>
+    </div>
+    <div class="card" style="margin-top:14px"><h3>Ventana de preparación por locación</h3><div class="d">Desde que construcción entrega la locación (o hoy, si ya está entregada) hasta el 1er completamiento del taladro: en esa ventana se llevan los equipos, se preservan y se solicitan las asistencias técnicas</div>
+      <div class="tw" style="max-height:520px"><table class="vt"><thead><tr><th>Locación</th><th>Aliado</th><th>Construcción</th><th>Entrega (pronóstico)</th><th>Taladro llega</th><th>1er completamiento</th><th>Días de ventana</th><th>Equipos en campo</th><th>Estado</th></tr></thead><tbody id="vt-b"></tbody></table></div></div>
+  </div>
+
+  <div class="view" id="v-gd">
+    <div class="guide">
+      <div class="gbox" style="--c:var(--cy)"><h4>1 · La locación es la llave</h4><p>Cada fila es un <b>clúster, centro de maniobra o sistema de estación</b>. Todo lo que pasa en los 11 dashboards se agrupa ahí: lo que se compró, lo que está en bodega, la preservación, el taladro, los AC1/HC1, las garantías y los hallazgos QA.</p></div>
+      <div class="gbox" style="--c:var(--mg)"><h4>2 · Semáforo por etapa</h4><ul><li><b>Compra</b>: rojo si un equipo llega después del taladro o vencido.</li><li><b>Construcción</b>: rojo si el taladro llega antes de que el aliado entregue la locación; amarillo mientras no esté al 100 %.</li><li><b>Preservación</b>: rojo si hay rutinas vencidas.</li><li><b>AC1 / HC1</b>: rojo si hay fechas programadas vencidas.</li><li><b>Dossier</b>: rojo si hay dossieres devueltos o dossier QA crítico.</li><li><b>Garantías</b>: rojo si hay abiertas.</li><li><b>QA</b>: rojo si hay NCR abiertas.</li></ul></div>
+      <div class="gbox" style="--c:var(--or)"><h4>Regla de programación</h4><p>Hasta que <b>construcción entregue la locación</b> (aliado al 100 %) no se llevan equipos. La <b>ventana de preparación</b> va de esa entrega al <b>1er completamiento del taladro</b>: ahí se programan traslado de equipos, preservación y asistencias técnicas, y luego AC1/HC1 y dossier.</p></div>
+      <div class="gbox" style="--c:var(--lm)"><h4>3 · Preparación (%)</h4><p>Porcentaje de etapas en verde sobre las etapas que aplican a la locación. Una locación está lista para arrancar cuando <b>todas sus etapas están en verde</b>.</p></div>
+      <div class="gbox" style="--c:var(--yl)"><h4>4 · Rutina semanal sugerida</h4><ul><li><b>Lunes</b>: actualizar fuentes (tracking, inventario, preservación, RyC, BD dossier, garantías, QA) y regenerar.</li><li><b>Reunión</b>: revisar Alertas cruzadas de los clústeres que el taladro toca en ≤90 días.</li><li>Cada alerta con <b>responsable y fecha</b> en el registro de acciones.</li></ul></div>
+      <div class="gbox" style="--c:var(--or)"><h4>5 · Qué falta integrar</h4><ul><li><b>IDA</b> (RBI / RCM): falta su listado por locación o TAG.</li><li><b>Reporte consolidado de estaciones</b>: atrasado, se integra al ponerse al día.</li><li><b>TAG único</b> entre tracking, preservación y garantías para trazar equipo por equipo.</li></ul></div>
+      <div class="gbox" style="--c:var(--vi)"><h4>6 · Fuentes</h4><p id="g-src"></p></div>
+    </div>
+  </div>
+
+  <footer>Ruta al arranque · cruza Tracking, Inventarios, Preservación, Timeline Taladro y Estaciones, Control de Dossieres AC1/HC1, Garantías y Consolidado QA · ATIP Applus+ / Ecopetrol · Caño Sur Este</footer>
+</div>
+
+<div class="mback" id="mback" onclick="closeM()"></div>
+<div class="modal" id="modal"><div class="mhead"><div><h2 id="m-t"></h2><div class="ms" id="m-s"></div><div class="chipsm" id="m-c"></div></div><button class="x" onclick="closeM()">✕</button></div><div class="mbody" id="m-b"></div></div>
+
+<script>
+const DATA = __DATA__;
+const HOY = DATA.meta.hoy, T = DATA.tot;
+const C = {cy:'#00e5ff',mg:'#ff2bd6',lm:'#39ff88',yl:'#ffe14d',rd:'#ff3d71',or:'#ff9f1c',vi:'#b46bff',bl:'#4d7cff',tx:'#9fb3d9'};
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const fd=s=>s&&s!=='None'?(+String(s).slice(8,10))+'-'+MES[+String(s).slice(5,7)-1]+'-'+String(s).slice(2,4):'—';
+const nf=n=>(Math.round(n*10)/10).toLocaleString('es-CO');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct=(a,b)=>b?Math.round(100*a/b):0;
+const STG=[
+ {k:'trk',n:'01',t:'Compra y llegada',h:'Compra',c:C.cy,href:'../../Tracking_Equipos/Ejecutable/Dashboard_Tracking_Equipos.html'},
+ {k:'inv',n:'02',t:'En campo · equipos',h:'En campo',c:C.bl,href:'../../Inventarios/Ejecutable/Dashboard_Inventarios.html'},
+ {k:'pre',n:'03',t:'Preservación',c:C.lm,href:'../../Dashboard_Preservaci%C3%B3n/Ejecutable/Dashboard_Preservacion.html'},
+ {k:'cons',n:'04',t:'Entrega de construcción',h:'Construcción',c:C.or,href:'../../Timeline_Estaciones/Ejecutable/Timeline_Estaciones_Q3Q4_2026.html'},
+ {k:'prog',n:'05',t:'Ruta del taladro',h:'Taladro',c:C.yl,href:'../../Timeline_Taladro/Ejecutable/Timeline_Taladro_Q3Q4_2026.html'},
+ {k:'ac1',n:'06',t:'Certificación AC1',h:'AC1',c:C.or,href:'../../Control_Dossiers_AC1-HC1/Exteriores/Ejecutable/Dashboard_Control_Dossiers.html'},
+ {k:'hc1',n:'07',t:'Certificación HC1',h:'HC1',c:C.mg,href:'../../Control_Dossiers_AC1-HC1/Exteriores/Ejecutable/Dashboard_Control_Dossiers.html'},
+ {k:'dos',n:'08',t:'Elaboración de dossier',h:'Dossier',c:C.vi,href:'../../Control_Dossiers_AC1-HC1/Exteriores/Ejecutable/Dashboard_Control_Dossiers.html'},
+ {k:'gar',n:'09',t:'Garantías',c:C.vi,href:'../../Garantias/Ejecutable/Dashboard_Garantias.html'},
+ {k:'ida',n:'10',t:'IDA · RBI / RCM',h:'IDA',c:C.tx,href:'',off:true},
+ {k:'qa',n:'11',t:'NCR y paquete QA',h:'QA',c:C.rd,href:'../../Consolidado_QA/Ejecutable/Dashboard_QA_CSE.html'},
+];
+const PIPE=STG.filter(s=>s.k!=='hc1'||true);
+let F={fr:'',ruta:'ruta',stg:'',q:''}, TAB='mx', CH={};
+DATA.locs.forEach((x,i)=>x.i=i);
+
+function rows(){
+  const q=F.q.toLowerCase();
+  return DATA.locs.filter(x=>(!F.fr||x.fr===F.fr)&&(F.ruta==='all'||(F.ruta==='alert'?x.al.length:(x.ruta||x.fr==='Estaciones'||(x.S.cons.st!=='na'&&!x.S.cons.done))))
+    &&(!F.stg||x.S[F.stg].st==='bad')&&(!q||x.loc.toLowerCase().includes(q)));
+}
+function pipe(){
+  const p=[
+    ['trk',`${nf(T.trk.rec)} / ${nf(T.trk.n)}`,`equipos recibidos · ${T.trk.late} tarde o vencidos · ${T.trk.sc} sin compra`,[[T.trk.rec,C.lm],[T.trk.pend-T.trk.sc,C.yl],[T.trk.sc,C.vi]],T.trk.n],
+    ['inv',nf(T.inv.trk+T.inv.bod),`equipos en campo · ${nf(T.inv.trk)} recibidos en sitio (tracking) · ${nf(T.inv.bod)} en bodega (inventario)`,[[T.inv.trk,C.lm],[T.inv.bod,C.cy]],T.inv.trk+T.inv.bod],
+    ['pre',`${T.pre.n-T.pre.hc1}`,`equipos en preservación · ${T.pre.venc} rutinas vencidas · ${T.pre.pend} pendientes`,[[T.pre.n-T.pre.hc1,C.lm],[T.pre.hc1,C.tx]],T.pre.n],
+    ['cons',`${T.cons.ok} / ${T.cons.n}`,`locaciones entregadas por construcción · ${T.cons.tarde} con el taladro antes de la entrega`,[[T.cons.ok,C.lm],[T.cons.n-T.cons.ok-T.cons.tarde,C.yl],[T.cons.tarde,C.rd]],T.cons.n],
+    ['prog',`${T.prog.cl}`,`clústeres en la ruta del taladro · ${T.prog.activos} con taladro hoy`,null],
+    ['ac1',`${pct(T.ac1.ok,T.ac1.n)}%`,`${nf(T.ac1.ok)} de ${nf(T.ac1.n)} AC1 cerrados (Exteriores + Facilidades)`,[[T.ac1.ok,C.lm],[T.ac1.n-T.ac1.ok,C.yl]],T.ac1.n],
+    ['hc1',`${pct(T.hc1.ok,T.hc1.n)}%`,`${nf(T.hc1.ok)} de ${nf(T.hc1.n)} HC1 entregados`,[[T.hc1.ok,C.lm],[T.hc1.n-T.hc1.ok,C.yl]],T.hc1.n],
+    ['dos',`${pct(T.dos.ok,T.dos.n)}%`,`${nf(T.dos.ok)} de ${nf(T.dos.n)} dossieres entregados/avalados · ${T.dos.dev} devueltos · ${T.dos.crit} QA críticos`,[[T.dos.ok,C.lm],[T.dos.n-T.dos.ok-T.dos.dev,C.yl],[T.dos.dev,C.rd]],T.dos.n],
+    ['gar',`${T.gar.ab}`,`garantías abiertas de ${T.gar.n}`,[[T.gar.n-T.gar.ab,C.lm],[T.gar.ab,C.rd]],T.gar.n],
+    ['ida','—','RBI / RCM: pendiente de integrar (falta listado por locación o TAG)',null],
+    ['qa',`${T.qa.asp+T.qa.ncr+T.qa.sol}`,`abiertos: ${T.qa.ncr} NCR · ${T.qa.asp} aspectos · ${T.qa.sol} sol. técnicas`,null],
+  ];
+  const show=STG.filter(s=>s.k!=='hc1');  // AC1 y HC1 comparten tarjeta de pipeline para que queden 10
+  const P=p.filter(x=>x[0]!=='hc1');
+  P.find(x=>x[0]==='ac1')[1]=`${pct(T.ac1.ok,T.ac1.n)}% · ${pct(T.hc1.ok,T.hc1.n)}%`;
+  P.find(x=>x[0]==='ac1')[2]=`AC1 cerrados · HC1 entregados · Exteriores + Facilidades`;
+  show.find(s=>s.k==='ac1').t2='Certificación AC1 · HC1';
+  document.getElementById('pipe').innerHTML=show.map((s,i)=>{const x=P[i];const tot=x[4];
+    const bar=x[3]?`<div class="bar">${x[3].map(([v,c])=>`<i style="width:${tot?100*v/tot:0}%;background:${c}"></i>`).join('')}</div>`:'<div class="bar"></div>';
+    return `<div class="stg ${s.off?'off':''} ${F.stg===s.k?'on':''}" style="--c:${s.c}" onclick="${s.off?'':`stgClick('${s.k}')`}"><div class="n">ETAPA ${String(i+1).padStart(2,'0')}</div><div class="t">${s.t2||s.t}</div><div class="v">${x[1]}</div><div class="s">${x[2]}</div>${bar}${s.href?`<a href="${s.href}" target="_blank" onclick="event.stopPropagation()">Abrir dashboard ↗</a>`:'<span class="sm">por integrar</span>'}</div>`}).join('');
+}
+function stgClick(k){F.stg=F.stg===k?'':k;document.getElementById('f-stg').value=F.stg;render()}
+
+function cellTxt(k,s){
+  if(s.st==='na')return '—';
+  switch(k){
+    case 'trk':return `${s.ok}/${s.n}`+(s.late?` · ${s.late}⚠`:'')+(s.sc?` · ${s.sc} s/c`:'');
+    case 'inv':return `${s.n} equipos`;
+    case 'pre':return s.venc?`${s.venc} venc.`:(s.pend?`${s.pend} pend.`:`${s.n} al día`);
+    case 'cons':return s.done?`entregada ${fd(s.pron)}`:`${s.ejec}% · ${fd(s.pron)}`;
+    case 'dos':return s.dev?`${s.dev} devuelto(s)`:s.crit?`${s.crit} QA crítico`:`${s.ok}/${s.n}`;
+    case 'prog':return s.tipo==='taladro'?(s.fin&&s.fin<HOY?'taladro terminó':s.dias<=0?'taladro en sitio':`taladro en ${s.dias} d`):`${s.ejec}% ejec.`;
+    case 'ac1':return `${s.ok}/${s.n}`+(s.venc?` · ${s.venc} venc.`:'');
+    case 'hc1':return `${s.ok}/${s.n}`+(s.venc?` · ${s.venc} venc.`:'');
+    case 'gar':return s.ab?`${s.ab} abiertas`:`${s.n} cerradas`;
+    case 'qa':return s.ab?`${s.ab} abiertos`:'sin abiertos';
+    default:return '—';
+  }
+}
+const CLS={ok:'c-ok',warn:'c-warn',bad:'c-bad',info:'c-info',na:'c-na'};
+function rcol(r){return r==null?C.tx:r>=80?C.lm:r>=50?C.yl:C.rd}
+function mxView(){
+  const R=rows();
+  document.getElementById('mx-h').innerHTML='<th>Locación</th><th>Fecha clave</th><th>Preparación</th>'+STG.map(s=>`<th style="color:${s.c}">${s.h||s.t}</th>`).join('')+'<th>Alertas</th>';
+  document.getElementById('mx-b').innerHTML=R.map(x=>{const pg=x.S.prog;
+    const cs=x.S.cons, cl=cs.st!=='na'?`<span class="sm">construcción</span> ${cs.done?'<b style="color:'+C.lm+'">entregada</b>':fd(cs.pron)}<br>`:'';
+    const key=cl+(pg.tipo==='taladro'?`<span class="sm">${esc(pg.taladro.join(', '))}</span> ${fd(pg.ini)} → ${fd(pg.fin)}`:pg.tipo==='cronograma'?`<span class="sm">cronograma estaciones</span> fin ${fd(pg.fin)}`:(cl?'':'<span class="sm">—</span>'));
+    return `<tr><td><span class="loc" onclick="openLoc(${x.i})">${esc(x.loc)}</span><div class="sm">${x.fr}</div></td><td style="font-size:11.5px">${key}</td>
+      <td><div class="rd"><div class="bb"><i style="width:${x.ready??0}%;background:${rcol(x.ready)};box-shadow:0 0 8px ${rcol(x.ready)}"></i></div><b style="color:${rcol(x.ready)}">${x.ready??'—'}${x.ready!=null?'%':''}</b></div></td>
+      ${STG.map(s=>{const st=x.S[s.k];return `<td><span class="cell ${CLS[st.st]}" ${st.st!=='na'?`onclick="openStage(${x.i},'${s.k}')"`:''}>${cellTxt(s.k,st)}</span></td>`}).join('')}
+      <td style="text-align:center">${x.al.length?`<span class="b ${x.al.some(a=>a[0]==='bad')?'b-bd':'b-wa'}" style="cursor:pointer" onclick="openLoc(${x.i})">${x.al.length}</span>`:'<span class="sm">0</span>'}</td></tr>`}).join('')||'<tr><td colspan="${STG.length+4}" class="empty">Sin locaciones con los filtros actuales</td></tr>';
+  document.getElementById('ct-mx').textContent=R.length;
+}
+
+const AX={labels:{style:{colors:C.tx,fontSize:'11px'}},axisBorder:{color:'rgba(255,255,255,.1)'},axisTicks:{color:'rgba(255,255,255,.1)'}};
+const SHOT=location.hash.includes('shot');
+const baseOpt=()=>({chart:{background:'transparent',foreColor:C.tx,toolbar:{show:false},fontFamily:'Inter',animations:{enabled:!SHOT}},theme:{mode:'dark'},grid:{borderColor:'rgba(255,255,255,.06)',strokeDashArray:3},dataLabels:{enabled:false},legend:{labels:{colors:C.tx}},tooltip:{theme:'dark'}});
+function mk(id,o){if(CH[id])CH[id].destroy();CH[id]=new ApexCharts(document.getElementById(id),o);CH[id].render()}
+
+function alView(){
+  const R=rows().filter(x=>x.al.length);
+  const cats=['Construcción','Preparación','Compras','Preservación','Certificación','HC1 / Dossier','Dossier','Garantías','QA'];
+  const bad=cats.map(c=>R.reduce((s,x)=>s+x.al.filter(a=>a[1]===c&&a[0]==='bad').length,0)), warn=cats.map(c=>R.reduce((s,x)=>s+x.al.filter(a=>a[1]===c&&a[0]==='warn').length,0));
+  mk('c-al',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:300,stacked:true},series:[{name:'Bloquea el arranque',data:bad},{name:'Atención',data:warn}],colors:[C.rd,C.yl],
+    plotOptions:{bar:{horizontal:true,barHeight:'60%',borderRadius:4}},xaxis:{categories:cats,...AX},yaxis:{labels:{style:{colors:C.tx}}},dataLabels:{enabled:true,style:{colors:['#04060d']},formatter:v=>v||''},legend:{position:'top',labels:{colors:C.tx}}});
+  const RT=DATA.locs.filter(x=>x.ruta&&x.S.prog.ini).sort((a,b)=>a.S.prog.ini.localeCompare(b.S.prog.ini));
+  mk('c-ready',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:300,events:{dataPointSelection:(e,c,o)=>openLoc(RT[o.dataPointIndex].i)}},series:[{name:'Preparación %',data:RT.map(x=>x.ready??0)}],
+    colors:[({dataPointIndex})=>rcol(RT[dataPointIndex].ready)],plotOptions:{bar:{columnWidth:'55%',borderRadius:4,distributed:true}},legend:{show:false},
+    dataLabels:{enabled:true,formatter:v=>v+'%',style:{colors:['#04060d']}},xaxis:{categories:RT.map(x=>[x.loc,fd(x.S.prog.ini)]),...AX},yaxis:{max:100,labels:{style:{colors:C.tx}}}});
+  document.getElementById('alist').innerHTML=R.sort((a,b)=>b.al.filter(z=>z[0]==='bad').length-a.al.filter(z=>z[0]==='bad').length||b.al.length-a.al.length).map(x=>{
+    const c=x.al.some(a=>a[0]==='bad')?C.rd:C.yl;
+    return `<div class="al" style="--c:${c}" onclick="openLoc(${x.i})"><h4>${esc(x.loc)}<span class="sm">${x.fr}${x.S.prog.ini?' · taladro '+fd(x.S.prog.ini):''} · preparación ${x.ready??'—'}%</span></h4><ul>${x.al.map(a=>`<li><b style="color:${a[0]==='bad'?C.rd:C.yl}">${a[1]}</b> · ${esc(a[2])}</li>`).join('')}</ul></div>`}).join('')||'<div class="empty">Sin alertas con los filtros actuales</div>';
+  document.getElementById('ct-al').textContent=R.reduce((s,x)=>s+x.al.length,0);
+}
+function pgView(){
+  const Tm=d=>new Date(d+'T00:00:00').getTime(), key=x=>x.S.prog.ini||x.S.cons.pron||'9999', X0=Tm(HOY)-182*864e5;
+  const RT=rows().filter(x=>(x.ruta&&x.S.prog.ini)||(x.S.cons.st!=='na'&&!x.S.cons.done)).sort((a,b)=>key(a).localeCompare(key(b)));
+  const cS=RT.filter(x=>x.S.cons.st!=='na').map(x=>{const c=x.cons.filter(k=>k.ini);const ini=c.length?c.map(k=>k.ini).sort()[0]:x.S.cons.pron;
+    return {x:x.loc,y:[Math.max(Tm(ini),X0),Math.max(Tm(x.S.cons.pron),X0+864e5)],fillColor:x.S.cons.done?'rgba(57,255,136,.55)':x.S.cons.st==='bad'?C.rd:C.or,_i:x.i}});
+  const tS=RT.filter(x=>x.ruta&&x.S.prog.ini&&(x.S.prog.fin||x.S.prog.ini)>=HOY.slice(0,4)+'-01-01').map(x=>({x:x.loc,y:[Math.max(Tm(x.S.prog.ini),X0),Tm(x.S.prog.fin||x.S.prog.ini)],fillColor:C.cy,_i:x.i}));
+  mk('c-tal',{...baseOpt(),chart:{...baseOpt().chart,type:'rangeBar',height:Math.max(280,RT.length*40+90),events:{dataPointSelection:(e,c,o)=>openLoc((o.seriesIndex?tS:cS)[o.dataPointIndex]._i)}},
+    series:[{name:'Construcción (hasta entrega)',data:cS},{name:'Taladro en la locación',data:tS}],colors:[C.or,C.cy],legend:{position:'top',labels:{colors:C.tx}},
+    plotOptions:{bar:{horizontal:true,barHeight:'62%',borderRadius:4}},xaxis:{type:'datetime',min:X0,...AX,labels:{style:{colors:C.tx},datetimeFormatter:{month:"MMM 'yy"}}},yaxis:{labels:{style:{colors:C.tx}}},
+    annotations:{xaxis:[{x:Tm(HOY),borderColor:C.mg,label:{text:'hoy',style:{background:'#0b1230',color:C.mg}}}]},
+    tooltip:{theme:'dark',custom:({seriesIndex,dataPointIndex})=>{const x=DATA.locs[(seriesIndex?tS:cS)[dataPointIndex]._i],c=x.S.cons,p=x.S.prog;
+      return `<div style="padding:8px 10px"><b>${x.loc}</b><br>`+(c.st!=='na'?`Construcción ${esc(c.al.join(', '))}: ${c.ejec}% · entrega ${fd(c.pron)}<br>`:'')+(p.tipo==='taladro'?`Taladro ${esc(p.taladro.join(', '))}: ${fd(p.ini)} → ${fd(p.fin)} · 1er completamiento ${fd(p.comp1)}<br>`:'')+`Preparación ${x.ready??'—'}% · ${x.al.length} alertas</div>`}}});
+  vtView();
+  const A=T.prog.aliados;
+  mk('c-ali',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:Math.max(300,A.length*78+90)},series:[{name:'% programado',data:A.map(a=>Math.round(a.prog*100))},{name:'% ejecutado',data:A.map(a=>Math.round(a.ejec*100))}],
+    colors:[C.cy,C.lm],plotOptions:{bar:{horizontal:true,barHeight:'70%',borderRadius:3}},dataLabels:{enabled:true,formatter:v=>v+'%',style:{colors:['#04060d']}},
+    xaxis:{categories:A.map(a=>[a.al,a.alcance||'',`fin ${fd(a.fin)} · pron. ${fd(a.pron)}`]),max:100,...AX},yaxis:{labels:{style:{colors:C.tx},minWidth:250,maxWidth:300}},legend:{position:'top',labels:{colors:C.tx}}});
+}
+function vtView(){
+  const vk=x=>{const f=x.S.prog.vent.fin;return (f&&f<HOY?'2':'1')+(f||'9999')+(x.S.cons.pron||'')};
+  const R=rows().filter(x=>x.S.cons.st!=='na'||(x.ruta&&x.S.prog.ini)).sort((a,b)=>vk(a).localeCompare(vk(b)));
+  const G=(t,c)=>`<span class="gate" style="color:${c};border-color:${c}">${t}</span>`;
+  document.getElementById('vt-b').innerHTML=R.map(x=>{const c=x.S.cons,p=x.S.prog,v=p.vent,t=x.S.trk,eq=x.S.inv.n||0;
+    let est;
+    const tal=p.tipo==='taladro', pas=v.fin&&v.fin<HOY;
+    if(tal&&p.fin&&p.fin<HOY)est=G('Taladro ya pasó',C.tx);
+    else if(pas)est=G('1er completamiento ya pasó',C.tx);
+    else if(!tal&&c.st!=='na'&&c.done)est=G('Entregada · sin taladro en la ventana',C.cy);
+    else if(c.st==='bad')est=G('Taladro antes de la entrega',C.rd);
+    else if(c.st!=='na'&&!c.done)est=G('Esperar entrega de construcción',C.yl);
+    else if(v.fin&&v.dias!=null&&v.dias<30)est=G(`Ventana corta (${v.dias} d)`,C.rd);
+    else if(t.pend)est=G(`Llevar equipos · ${t.pend} sin llegar`,C.or);
+    else est=G('Lista para preparar',C.lm);
+    return `<tr><td><span class="loc" onclick="openLoc(${x.i})">${esc(x.loc)}</span><div class="sm">${x.fr}</div></td><td class="sm">${c.al?esc(c.al.join(', ')):'—'}</td>
+      <td>${c.st==='na'?'<span class="sm">sin cronograma</span>':`<div class="rd"><div class="bb"><i style="width:${c.ejec}%;background:${c.done?C.lm:C.or}"></i></div><b style="color:${c.done?C.lm:C.or}">${c.ejec}%</b></div>`}</td>
+      <td>${c.st==='na'?'—':c.done?`<b style="color:${C.lm}">entregada</b> ${fd(c.pron)}`:fd(c.pron)}</td><td>${p.tipo==='taladro'?fd(p.ini):'—'}</td><td>${p.tipo==='taladro'?fd(p.comp1):'—'}</td>
+      <td>${v.fin&&v.dias!=null&&!pas?`<b style="color:${v.dias<30?C.rd:v.dias<90?C.yl:C.lm}">${v.dias}</b>`:'—'}</td><td>${eq?`${eq}`:'—'}${t.pend?` <span class="sm">· ${t.pend} por llegar</span>`:''}</td><td>${est}</td></tr>`}).join('')||'<tr><td colspan="9" class="empty">Sin locaciones con los filtros actuales</td></tr>';
+}
+
+const DET={
+  trk:x=>({h:['Llegada','Equipo','TAG','Proveedor','ODB','Alertas'],r:x.det.trk.map(e=>[e.rec?'<span class="b b-ok">Recibido</span>':`<span class="b ${e.lleg==='ETA vencida'?'b-bd':e.lleg==='Sin compra'?'b-vi':'b-wa'}">${e.eta?fd(e.eta):e.lleg}</span>`,esc(e.t),esc(e.tag),esc(e.prov),esc(e.odb||'—'),esc(e.al.join(' · '))])}),
+  inv:x=>({h:['Origen','Equipo','TAG / material','Cantidad','Proveedor / almacén','Fecha'],r:x.det.inv.map(e=>[`<span class="b ${e.src.startsWith('Tracking')?'b-ok':'b-in'}">${esc(e.src)}</span>`,esc(e.t),esc(e.tag),nf(e.cant),esc(e.prov||e.alm||'—'),fd(e.f)])}),
+  pre:x=>({h:['Equipo','TAG','Ubicación','Vencidas','Pendientes','Ejecutadas','Última ejecución'],r:x.det.pre.map(e=>[esc(e.t),esc(e.tag),esc(e.ubic),e.venc?`<b style="color:${C.rd}">${e.venc}</b>`:0,e.pend,e.ejec,fd(e.ult)])}),
+  cons:x=>({h:['Aliado','Actividad','Inicio','Fin plan','Pronóstico','% prog.','% ejec.'],r:x.cons.map(e=>[esc(e.al),esc(e.d),fd(e.ini),fd(e.fin),fd(e.pron),Math.round(e.prog*100)+'%',`<b style="color:${e.ejec>=.999?C.lm:C.or}">${Math.floor(e.ejec*100)}%</b>`])}),
+  dos:x=>({h:['Origen','Código / sistema','Estatus dossier','Fecha'],r:x.det.hc1.filter(e=>e.dos).map(e=>['HC1',esc(e.id+' · '+e.s),`<span class="b ${e.dos==='ENTREGADO'?'b-ok':e.dos==='DEVUELTO'?'b-bd':'b-wa'}">${esc(e.dos)}</span>`,fd(e.fp)]).concat(x.det.qa.filter(e=>e.sec==='dossier').map(e=>['Dossier QA',esc(e.cod),`<span class="b ${e.st==='CRITICO'?'b-bd':e.ab?'b-wa':'b-ok'}">${esc(e.st)}</span>`,fd(e.f)]))}),
+  prog:x=>{const p=x.S.prog;if(p.tipo==='taladro')return {h:['Taladro','Inicio','Fin','1er completamiento','Pozos'],r:[[esc(p.taladro.join(', ')),fd(p.ini),fd(p.fin),fd(p.comp1),p.pozos]]};return {h:['Aliado','Actividad','Fin','Pronóstico','% prog.','% ejec.'],r:x.ep.map(e=>[esc(e.al),esc(e.d),fd(e.fin),fd(e.pron),Math.round(e.prog*100)+'%',Math.round(e.ejec*100)+'%'])}},
+  ac1:x=>({h:['Certificado','Subsistema','Estatus','Fecha programada','Arranque'],r:x.det.ac1.sort((a,b)=>(a.st==='CERRADO')-(b.st==='CERRADO')).map(e=>[esc(e.id),esc(e.ss),`<span class="b ${e.st==='CERRADO'?'b-ok':e.fp&&e.fp<HOY?'b-bd':'b-wa'}">${esc(e.st)}</span>`,fd(e.fp),esc(e.arr)])}),
+  hc1:x=>({h:['HC1','Sistema','Entrega','Fecha prog.','Cert. pend.','Pend. abiertos','Dossier'],r:x.det.hc1.sort((a,b)=>(a.ent==='ENTREGADO')-(b.ent==='ENTREGADO')).map(e=>[esc(e.id),esc(e.s),`<span class="b ${e.ent==='ENTREGADO'?'b-ok':e.fp&&e.fp<HOY?'b-bd':'b-wa'}">${esc(e.ent)}</span>`,fd(e.fp),e.cert,e.pend,`<span class="b ${e.dos==='ENTREGADO'?'b-ok':e.dos==='DEVUELTO'?'b-bd':'b-wa'}">${esc(e.dos||'—')}</span>`])}),
+  gar:x=>({h:['Estado','Equipo','Proveedor','Apertura','Días','Nivel'],r:x.det.gar.sort((a,b)=>(a.st==='CERRADA')-(b.st==='CERRADA')).map(e=>[`<span class="b ${e.st==='ABIERTA'?'b-bd':'b-ok'}">${esc(e.st)}</span>`,esc(e.t),esc(e.prov),fd(e.ap),e.dias??'—',esc(e.niv)])}),
+  qa:x=>({h:['Tipo','Código','Estado','Fecha','Descripción'],r:x.det.qa.filter(e=>e.sec!=='dossier').sort((a,b)=>b.ab-a.ab).map(e=>[esc({aspectos:'Aspecto',ncr:'NCR',soltec:'Sol. técnica',dossier:'Dossier QA'}[e.sec]),esc(e.cod),`<span class="b ${e.ab?(e.sec==='ncr'||e.st==='CRITICO'?'b-bd':'b-wa'):'b-ok'}">${esc(e.st)}</span>`,fd(e.f),esc(e.d)])}),
+};
+function tbl(d){return `<div class="tw" style="max-height:420px"><table><thead><tr>${d.h.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${d.r.map(r=>`<tr style="cursor:default">${r.map(c=>`<td style="white-space:normal;max-width:420px">${c}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${d.h.length}" class="empty">Sin registros</td></tr>`}</tbody></table></div>`}
+function openStage(i,k){
+  const x=DATA.locs[i],s=STG.find(z=>z.k===k);
+  document.getElementById('m-t').textContent=`${x.loc} · ${s.t}`;
+  document.getElementById('m-s').textContent=`${x.fr} · ${cellTxt(k,x.S[k])}`;
+  document.getElementById('m-c').innerHTML=s.href?`<a class="b b-in" style="text-decoration:none" href="${s.href}" target="_blank">Abrir dashboard de origen ↗</a>`:'';
+  document.getElementById('m-b').innerHTML=tbl(DET[k](x));showM();
+}
+function openLoc(i){
+  const x=DATA.locs[i],p=x.S.prog;
+  document.getElementById('m-t').textContent=x.loc;
+  document.getElementById('m-s').textContent=`${x.fr} · preparación ${x.ready??'—'}%`+(p.tipo==='taladro'?` · ${p.taladro.join(', ')} del ${fd(p.ini)} al ${fd(p.fin)}`:'');
+  document.getElementById('m-c').innerHTML=x.al.map(a=>`<span class="b ${a[0]==='bad'?'b-bd':'b-wa'}">${a[1]}: ${esc(a[2])}</span>`).join(' ');
+  document.getElementById('m-b').innerHTML=`<div class="fgrid">${STG.map(s=>{const st=x.S[s.k];return `<div class="fld ${st.st==='bad'?'hi':''}" style="border-left-color:${{ok:C.lm,warn:C.yl,bad:C.rd,info:C.cy,na:'rgba(255,255,255,.1)'}[st.st]};cursor:${st.st==='na'?'default':'pointer'}" ${st.st!=='na'?`onclick="openStage(${i},'${s.k}')"`:''}><div class="k">${s.t}</div><div class="v">${cellTxt(s.k,st)}</div></div>`}).join('')}</div>`;
+  showM();
+}
+function showM(){document.getElementById('mback').classList.add('on');document.getElementById('modal').classList.add('on')}
+function closeM(){document.getElementById('mback').classList.remove('on');document.getElementById('modal').classList.remove('on')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+
+function goTab(t){TAB=t;document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('on',e.dataset.v===t));document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+t));renderTab()}
+function renderTab(){if(TAB==='mx')mxView();if(TAB==='al')alView();if(TAB==='pg')pgView()}
+function render(){pipe();mxView();document.getElementById('ct-al').textContent=rows().reduce((s,x)=>s+x.al.length,0);renderTab()}
+function resetF(){F={fr:'',ruta:'ruta',stg:'',q:''};['f-fr','f-stg'].forEach(i=>document.getElementById(i).value='');document.getElementById('f-ruta').value='ruta';document.getElementById('f-q').value='';render()}
+const sel=document.getElementById('f-stg');STG.filter(s=>!s.off).forEach(s=>sel.insertAdjacentHTML('beforeend',`<option value="${s.k}">${s.t} (en rojo)</option>`));
+document.getElementById('f-fr').onchange=e=>{F.fr=e.target.value;render()};document.getElementById('f-ruta').onchange=e=>{F.ruta=e.target.value;render()};
+sel.onchange=e=>{F.stg=e.target.value;render()};let tq;document.getElementById('f-q').oninput=e=>{clearTimeout(tq);tq=setTimeout(()=>{F.q=e.target.value;render()},250)};
+document.getElementById('gen-at').textContent=fd(HOY);
+const SRCN={facilidades:'Dossieres Facilidades',tracking:'Tracking',inventarios:'Inventarios',preservacion:'Preservación',dossier:'Dossieres',garantias:'Garantías',qa:'QA',taladro:'RyC taladro',estaciones:'Estaciones'};
+const src=Object.entries(DATA.meta.fuentes).map(([k,v])=>`<b>${SRCN[k]}</b> ${esc(String(v||'—').slice(0,22))}`).join(' · ');
+document.getElementById('fuentes').innerHTML=src;document.getElementById('g-src').innerHTML=src;
+window.onerror=(m,u,l)=>{document.body.insertAdjacentHTML('afterbegin','<div style="background:#f00;color:#fff;padding:8px;font:14px monospace">JS ERROR: '+m+' @'+l+'</div>')};
+render();if(location.hash)goTab(location.hash.slice(1).replace('-shot',''));
+</script>
+<a id="home-float" href="../../index.html" title="Volver al tablero principal" style="position:fixed;right:22px;bottom:22px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:11px 18px 11px 14px;border-radius:999px;border:1px solid rgba(0,229,255,.75);background:rgba(6,10,24,.92);color:#9ff6ff;font:700 13.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 22px rgba(0,229,255,.45),0 10px 30px rgba(0,0,0,.55);backdrop-filter:blur(6px);opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .25s,transform .25s,box-shadow .15s" onmouseover="this.style.boxShadow='0 0 30px rgba(0,229,255,.75),0 10px 30px rgba(0,0,0,.55)'" onmouseout="this.style.boxShadow='0 0 22px rgba(0,229,255,.45),0 10px 30px rgba(0,0,0,.55)'"><span style="font-size:18px;line-height:1">&#8962;</span>Volver al tablero principal</a>
+<script>(function(){var f=document.getElementById('home-float'),t=document.querySelector('.home-link');if(!f)return;function show(v){f.style.opacity=v?1:0;f.style.transform=v?'none':'translateY(14px)';f.style.pointerEvents=v?'auto':'none'}if(t&&'IntersectionObserver' in window){new IntersectionObserver(function(e){show(!e[0].isIntersecting)}).observe(t)}else{window.addEventListener('scroll',function(){show(window.scrollY>220)});show(window.scrollY>220)}})();</script>
+</body>
+</html>
