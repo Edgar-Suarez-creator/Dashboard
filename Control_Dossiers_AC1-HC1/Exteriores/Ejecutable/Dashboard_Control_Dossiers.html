@@ -89,6 +89,7 @@ h1,h2,h3,.rj{font-family:Rajdhani,Inter,sans-serif}
 .stm-g .c span{font-size:10.5px;color:#c9d6f5;margin-top:3px;opacity:.85}
 .stm-g .c.z b{color:#3d4a70}.stm-g .c.z{cursor:default}
 .stm-g .c.nk{cursor:default}
+#hc1-pc{margin-top:-4px}
 .stm-g .tot .c{background:#131c3a;border-color:rgba(255,255,255,.08)}
 .stm-g .tot.rh{color:var(--yl,#ffe14d);letter-spacing:.8px}
 @media(max-width:900px){.kpis.stm{overflow-x:auto}.stm-g{min-width:760px}}
@@ -215,6 +216,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
     </div>
     <div class="chips" id="hc1-chips"></div>
     <div class="kpis" id="hc1-kpis"></div>
+    <div class="kpis stm" id="hc1-pc"></div>
     <div class="grid g21">
       <div class="card"><h3>Curva S · HC1 programado vs arrancado</h3><div class="d">Acumulado por fecha. Arrastre para hacer zoom · la línea magenta marca hoy</div><div id="hc1-s"></div></div>
       <div class="card"><h3>Avance por módulo</h3><div class="d">% de HC1 entregados · clic para filtrar</div><div id="hc1-rad"></div></div>
@@ -416,6 +418,34 @@ function stm(view, title, desc, groups){
   const el=$(view+'-kpis'); el.className='kpis stm';
   el.innerHTML=`<h3>${title}</h3><div class="d">${desc}</div>`+g+'</div>';
 }
+// ---------- matriz de pendientes abiertos y certificados pendientes (sumas por módulo)
+function stmSum(){
+  const R=stmBase('hc1'), mods=[...new Set(R.map(r=>r.mod))].filter(Boolean).sort();
+  const groups=[
+    {l:'Pendientes abiertos',c:C.or,cols:[['pdts_civil','Civil',C.or],['pdts_elect','Eléctrico',C.yl],['pdts_instr','Instrumentación',C.cy],['pdts_tuber','Tubería',C.mg],['total_pend_abiertos','Total',C.rd]]},
+    {l:'Certificados pendientes',c:C.vi,cols:[['cert_electrica','Eléctrica',C.lm],['cert_instr','Instrumentación',C.bl],['cert_tuberia','Tubería',C.vi],['total_cert_pendientes','Total',C.mg]]},
+    {l:'HC1 afectados',c:C.cy,cols:[['_hp','Con pendientes',C.or],['_hc','Con certificados',C.vi]]}];
+  const cols=groups.flatMap(g=>g.cols);
+  const fx=(k)=>k==='_hp'?(r=>(+r.total_pend_abiertos||0)>0):k==='_hc'?(r=>(+r.total_cert_pendientes||0)>0):(r=>(+r[k]||0)>0);
+  const val=(rows,k)=>k[0]==='_'?rows.filter(fx(k)).length:rows.reduce((s,r)=>s+(+r[k]||0),0);
+  const mx=cols.map(([k])=>Math.max(1,...mods.map(m=>val(R.filter(r=>r.mod===m),k))));
+  const lbl={_hp:'HC1 con pendientes abiertos',_hc:'HC1 con certificados pendientes'};
+  const cell=(rows,[k,l,c],i,m,tot)=>{ const v=val(rows,k), n=rows.filter(fx(k)).length;
+    return `<div class="c ${v?'':'z'}" style="--c:${c};${v&&!tot?`background:${hexA(c,.10+.5*(v/mx[i]))}`:''}" ${v?`onclick="stmSumPick('${k}','${m}')"`:''} title="${esc(lbl[k]||l)}${m?' · '+m:''}: ${nf(v)}"><b>${nf(v)}</b>${v&&k[0]!=='_'?`<span>en ${nf(n)} HC1</span>`:v?`<span>${f1(pct(v,rows.length))}% de ${nf(rows.length)}</span>`:''}</div>`; };
+  const tmpl=`minmax(150px,1.5fr) repeat(${cols.length},minmax(62px,1fr))`;
+  let g=`<div class="stm-g" style="grid-template-columns:${tmpl}"><div></div>`+groups.map(x=>`<div class="gh" style="--c:${x.c};grid-column:span ${x.cols.length}">${x.l}</div>`).join('');
+  g+='<div></div>'+cols.map(([k,l,c])=>`<div class="ch" style="--c:${c}">${l}</div>`).join('');
+  mods.forEach(m=>{ const rows=R.filter(r=>r.mod===m); g+=`<div class="rh">${m}<small>${PROY[m]||''} · ${nf(rows.length)} HC1</small></div>`+cols.map((c,i)=>cell(rows,c,i,m,false)).join(''); });
+  g+=`<div class="rh tot">TOTALES<small>${nf(R.length)} HC1</small></div>`+cols.map((c,i)=>`<div class="tot" style="display:contents">${cell(R,c,i,'',true)}</div>`).join('');
+  $('hc1-pc').innerHTML=`<h3>Estatus de pendientes y certificados</h3><div class="d">Pendientes abiertos y certificados pendientes por disciplina y módulo (suma de los HC1 del filtro) · clic en una celda para ver los HC1</div>`+g+'</div>';
+}
+function stmSumPick(k,m){
+  const R=stmBase('hc1').filter(r=>!m||r.mod===m);
+  const f=k==='_hp'?(r=>(+r.total_pend_abiertos||0)>0):k==='_hc'?(r=>(+r.total_cert_pendientes||0)>0):(r=>(+r[k]||0)>0);
+  const L={pdts_civil:'Pendientes civil',pdts_elect:'Pendientes eléctrico',pdts_instr:'Pendientes instrumentación',pdts_tuber:'Pendientes tubería',total_pend_abiertos:'Pendientes abiertos',cert_electrica:'Certificados eléctrica',cert_instr:'Certificados instrumentación',cert_tuberia:'Certificados tubería',total_cert_pendientes:'Certificados pendientes',_hp:'HC1 con pendientes abiertos',_hc:'HC1 con certificados pendientes'};
+  const sk=k[0]==='_'?(k==='_hp'?'total_pend_abiertos':'total_cert_pendientes'):k;
+  openList(`${L[k]} · ${m||'Todos los módulos'}`, R.filter(f).sort((a,b)=>(+b[sk]||0)-(+a[sk]||0)),'hc1');
+}
 // ---------- KPI
 function kpis(view, list){
   $(view+'-kpis').innerHTML = list.map(k=>`<div class="kpi ${S[view].k===k.k?'on':''}" style="--c:${k.c}" onclick="toggleK('${view}','${k.k||''}')"><div class="l">${k.l}</div><div class="v">${typeof k.v==="string"?k.v:nf(k.v)}</div><div class="s">${k.s||''}</div><div class="bar"><i style="width:${Math.min(100,k.p||0)}%"></i></div></div>`).join('');
@@ -569,7 +599,7 @@ function renderHC1(){
     series:[{name:'Pendientes abiertos',data:pk.map(k=>R.reduce((s,r)=>s+(+r[k]||0),0))},{name:'Certificados pendientes',data:ck.map(k=>k?R.reduce((s,r)=>s+(+r[k]||0),0):0)}],
     colors:[C.or,C.mg],plotOptions:{bar:{columnWidth:'55%',borderRadius:6,dataLabels:{position:'top'}}},dataLabels:{enabled:true,offsetY:-18,style:{colors:[C.tx]}},xaxis:{categories:disc},legend:{position:'top'},
     fill:{type:'gradient',gradient:{shade:'dark',type:'vertical',opacityFrom:1,opacityTo:.55}}});
-  table('hc1',R); renderPend();
+  stmSum(); table('hc1',R); renderPend();
 }
 // ================= AC1
 function renderAC1(){
