@@ -92,6 +92,10 @@ h1,h2,h3,.rj{font-family:Rajdhani,Inter,sans-serif}
 
 .stm-g .tot .c{background:#131c3a;border-color:rgba(255,255,255,.08)}
 .stm-g .tot.rh{color:var(--yl,#ffe14d);letter-spacing:.8px}
+.stm-g .gh{color:#5fd4f0!important;border-bottom-color:rgba(95,212,240,.35)!important;text-shadow:none!important}
+.stm-g .ch{color:#9fb3d9!important}
+.stm-g .c:hover,.stm-g .c.on{border-color:#5fd4f0!important}.stm-g .c.on{box-shadow:0 0 14px -2px #5fd4f0!important}
+.stm-g .c span{color:#c9d6f5}
 @media(max-width:900px){.kpis.stm{overflow-x:auto}.stm-g{min-width:760px}}
 .kpi .bar i{display:block;height:100%;background:var(--c,var(--cy));box-shadow:0 0 10px var(--c,var(--cy))}
 /* GRID / CARDS */
@@ -210,6 +214,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
   <section class="view on" id="v-hc1">
     <div class="fbar">
       <div class="fg"><label>Módulo</label><select id="hc1-mod"></select></div>
+      <div class="fg"><label>Subproyecto</label><select id="hc1-sub"></select></div>
       <div class="fg"><label>Etapa</label><select id="hc1-etapa"></select></div>
       <div class="fg"><label>Estado arranque</label><select id="hc1-arr"></select></div>
       <div class="fg"><label>Estatus dossier</label><select id="hc1-dos"></select></div>
@@ -238,6 +243,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
   <section class="view" id="v-ac1">
     <div class="fbar">
       <div class="fg"><label>Módulo</label><select id="ac1-mod"></select></div>
+      <div class="fg"><label>Subproyecto</label><select id="ac1-sub"></select></div>
       <div class="fg"><label>Etapa</label><select id="ac1-etapa"></select></div>
       <div class="fg"><label>Estado arranque</label><select id="ac1-arr"></select></div>
       <div class="fg"><label>Estatus AC1</label><select id="ac1-est"></select></div>
@@ -267,6 +273,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
   <section class="view" id="v-dos">
     <div class="fbar">
       <div class="fg"><label>Módulo</label><select id="dos-mod"></select></div>
+      <div class="fg"><label>Subproyecto</label><select id="dos-sub"></select></div>
       <div class="fg"><label>Etapa</label><select id="dos-etapa"></select></div>
       <div class="fg"><label>Estado arranque</label><select id="dos-arr"></select></div>
       <div class="fg"><label>Estatus dossier</label><select id="dos-est"></select></div>
@@ -297,6 +304,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
   <section class="view" id="v-pen">
     <div class="fbar">
       <div class="fg"><label>Módulo</label><select id="pen-mod"></select></div>
+      <div class="fg"><label>Subproyecto</label><select id="pen-sub"></select></div>
       <div class="fg"><label>Etapa</label><select id="pen-etapa"></select></div>
       <div class="fg"><label>Estado arranque</label><select id="pen-arr"></select></div>
       <div class="fg grow"><label>Buscar</label><input id="pen-q" placeholder="ID HC1, sistema, subproyecto, responsable…"></div>
@@ -314,6 +322,7 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
   <section class="view" id="v-cer">
     <div class="fbar">
       <div class="fg"><label>Módulo</label><select id="cer-mod"></select></div>
+      <div class="fg"><label>Subproyecto</label><select id="cer-sub"></select></div>
       <div class="fg"><label>Etapa</label><select id="cer-etapa"></select></div>
       <div class="fg"><label>Estado arranque</label><select id="cer-arr"></select></div>
       <div class="fg grow"><label>Buscar</label><input id="cer-q" placeholder="ID HC1, sistema, subproyecto, responsable…"></div>
@@ -344,8 +353,11 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
     <div class="wl" id="cmp-prev"></div>
   </section>
 
-  <div class="sec" style="margin-top:28px">Cambios frente al corte anterior <span id="cc-lbl" style="font:500 12.5px Inter;color:#9fb3d9;margin-left:10px"></span></div>
+  <div style="margin-top:24px"><button class="btn cy" id="cc-btn" onclick="toggleCC()">📊 Ver cambios frente al corte anterior</button></div>
+  <div id="cc-box" style="display:none">
+  <div class="sec" style="margin-top:18px">Cambios frente al corte anterior <span id="cc-lbl" style="font:500 12.5px Inter;color:#9fb3d9;margin-left:10px"></span></div>
   <div class="card"><table class="cmpt" id="cc-tbl"></table><div class="mv" id="cc-mv"></div></div>
+  </div>
 
   <footer>Control de Dossieres AC1 / HC1 · Caño Sur Este · v3 · clic en gráficos, indicadores y filas para ver detalle · Esc cierra las ventanas</footer>
 </div>
@@ -390,11 +402,11 @@ const dosDev = r => r.estatus_entrega_dossier==='DEVUELTO';
 const dosPen = r => r.estatus_entrega_dossier==='PENDIENTE' || r.estatus_entrega_dossier==='EN PROCESO' || !r.estatus_entrega_dossier;
 // ---------- estado de filtros
 const S = {
-  hc1:{mod:'',etapa:'',arr:'',dos:'',q:'',k:'',x:null},
-  ac1:{mod:'',etapa:'',arr:'',est:'',q:'',k:'',x:null},
-  dos:{mod:'',etapa:'',arr:'',est:'',resp:'',q:'',k:'',x:null},
-  pen:{mod:'',etapa:'',arr:'',q:'',k:'',x:null},
-  cer:{mod:'',etapa:'',arr:'',q:'',k:'',x:null},
+  hc1:{mod:'',sub:'',etapa:'',arr:'',dos:'',q:'',k:'',x:null},
+  ac1:{mod:'',sub:'',etapa:'',arr:'',est:'',q:'',k:'',x:null},
+  dos:{mod:'',sub:'',etapa:'',arr:'',est:'',resp:'',q:'',k:'',x:null},
+  pen:{mod:'',sub:'',etapa:'',arr:'',q:'',k:'',x:null},
+  cer:{mod:'',sub:'',etapa:'',arr:'',q:'',k:'',x:null},
   cmp:{mod:'',win:7}, view:'hc1', lim:{hc1:300,ac1:300,dos:300}, sort:{hc1:null,ac1:null,dos:null}
 };
 const KF = {
@@ -403,11 +415,11 @@ const KF = {
   dos:{ap:dosAp, env:dosEnv, dev:dosDev, pen:dosPen, arrpen:r=>r.e_arranque==='ARRANCADO'&&dosPen(r), penno:r=>r.e_arranque!=='ARRANCADO'&&dosPen(r), entall:r=>!dosPen(r)}
 };
 function qmatch(r,q,fields){ if(!q) return true; q=q.toLowerCase(); return fields.some(f=>String(r[f]||'').toLowerCase().includes(q)); }
-function rowsHC1(){ const s=S.hc1; return H.filter(r=>(!s.mod||r.mod===s.mod)&&(!s.etapa||r.etapa===s.etapa)&&(!s.arr||r.e_arranque===s.arr)&&(!s.dos||r.estatus_entrega_dossier===s.dos)&&(!s.k||KF.hc1[s.k](r))&&(!s.x||s.x.f(r))&&qmatch(r,s.q,['id_hc1','sistema','subproyecto','rspa','etapa','responsable'])); }
+function rowsHC1(){ const s=S.hc1; return H.filter(r=>(!s.mod||r.mod===s.mod)&&(!s.sub||r.subproyecto===s.sub)&&(!s.etapa||r.etapa===s.etapa)&&(!s.arr||r.e_arranque===s.arr)&&(!s.dos||r.estatus_entrega_dossier===s.dos)&&(!s.k||KF.hc1[s.k](r))&&(!s.x||s.x.f(r))&&qmatch(r,s.q,['id_hc1','sistema','subproyecto','rspa','etapa','responsable'])); }
 function rowsCER(noMod){ return rowsPEN(noMod,'cer'); }
-function rowsPEN(noMod,v){ const s=S[v||'pen']; return H.filter(r=>(noMod||!s.mod||r.mod===s.mod)&&(!s.etapa||r.etapa===s.etapa)&&(!s.arr||r.e_arranque===s.arr)&&qmatch(r,s.q,['id_hc1','sistema','subproyecto','rspa','etapa','responsable'])); }
-function rowsAC1(){ const s=S.ac1; return A.filter(r=>(!s.mod||r.mod===s.mod)&&(!s.etapa||r.etapa===s.etapa)&&(!s.arr||r.estado_arranque===s.arr)&&(!s.est||r.estatus===s.est)&&(!s.k||KF.ac1[s.k](r))&&(!s.x||s.x.f(r))&&qmatch(r,s.q,['subsistema','id_certificado','rspa','etapa','subpry'])); }
-function rowsDOS(){ const s=S.dos; return H.filter(r=>(!s.mod||r.mod===s.mod)&&(!s.etapa||r.etapa===s.etapa)&&(!s.arr||r.e_arranque===s.arr)&&(!s.est||r.estatus_entrega_dossier===s.est)&&(!s.resp||r.responsable===s.resp)&&(!s.k||KF.dos[s.k](r))&&(!s.x||s.x.f(r))&&qmatch(r,s.q,['id_hc1','sistema','subproyecto','responsable','ruta_ecosearch','rspa'])); }
+function rowsPEN(noMod,v){ const s=S[v||'pen']; return H.filter(r=>(noMod||!s.mod||r.mod===s.mod)&&(!s.sub||r.subproyecto===s.sub)&&(!s.etapa||r.etapa===s.etapa)&&(!s.arr||r.e_arranque===s.arr)&&qmatch(r,s.q,['id_hc1','sistema','subproyecto','rspa','etapa','responsable'])); }
+function rowsAC1(){ const s=S.ac1; return A.filter(r=>(!s.mod||r.mod===s.mod)&&(!s.sub||r.subpry===s.sub)&&(!s.etapa||r.etapa===s.etapa)&&(!s.arr||r.estado_arranque===s.arr)&&(!s.est||r.estatus===s.est)&&(!s.k||KF.ac1[s.k](r))&&(!s.x||s.x.f(r))&&qmatch(r,s.q,['subsistema','id_certificado','rspa','etapa','subpry'])); }
+function rowsDOS(){ const s=S.dos; return H.filter(r=>(!s.mod||r.mod===s.mod)&&(!s.sub||r.subproyecto===s.sub)&&(!s.etapa||r.etapa===s.etapa)&&(!s.arr||r.e_arranque===s.arr)&&(!s.est||r.estatus_entrega_dossier===s.est)&&(!s.resp||r.responsable===s.resp)&&(!s.k||KF.dos[s.k](r))&&(!s.x||s.x.f(r))&&qmatch(r,s.q,['id_hc1','sistema','subproyecto','responsable','ruta_ecosearch','rspa'])); }
 // ---------- badges
 function bArr(v){ return !v?'<span class="b b-nt">-</span>':v==='ARRANCADO'?`<span class="b b-ok">${v}</span>`:v==='NO ARRANCADO'?`<span class="b b-wa">${v}</span>`:`<span class="b b-bd">${esc(v)}</span>`; }
 function bEst(v){ return !v?'<span class="b b-nt">-</span>':(v==='CERRADO'||v==='ENTREGADO')?`<span class="b b-ok">${v}</span>`:(v==='PENDIENTE'||v==='NO ENTREGADO')?`<span class="b b-wa">${v}</span>`:`<span class="b b-nt">${esc(v)}</span>`; }
@@ -430,6 +442,7 @@ function renderGauges(){
 }
 // ---------- matriz módulo × estatus (reemplaza las tarjetas KPI)
 const PROY={M3:'ECU17049',M4:'ECU21212',M5:'ECU24091'};
+const HEAT='#0fb5d6';
 function hexA(c,a){ const n=parseInt(c.slice(1),16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
 function stmBase(view){ const s=S[view], m=s.mod, k=s.k; s.mod=''; s.k=''; const R=view==='hc1'?rowsHC1():view==='ac1'?rowsAC1():rowsDOS(); s.mod=m; s.k=k; return R; }
 function stmPick(view,mod,k){ const s=S[view]; const same=s.mod===mod&&s.k===k; s.mod=same?'':mod; s.k=same?'':k; const el=$(view+'-mod'); if(el) el.value=s.mod; S.lim[view]=300; render(); }
@@ -440,10 +453,10 @@ function stm(view, title, desc, groups){
   const mx=cols.map(c=>Math.max(1,...mods.map(m=>val(R.filter(r=>r.mod===m),c)||0)));
   const cell=(rows,c,i,m,tot)=>{
     const s=S[view], on=c.k&&s.k===c.k&&s.mod===(m||'')&&!(m===''&&!tot);
-    if(c.pct){ const a=rows.filter(c.pct[0]).length, b=rows.length, p=b?Math.round(a*100/b):0; return `<div class="c nk" style="--c:${c.c};background:${hexA(c.c,.10+.45*p/100)}"><b>${p}%</b><span>${nf(a)} de ${nf(b)}</span></div>`; }
-    const v=val(rows,c), n=rows.length, a=tot?.10:(.10+.5*(v/mx[i]));
+    if(c.pct){ const a=rows.filter(c.pct[0]).length, b=rows.length, p=b?Math.round(a*100/b):0; return `<div class="c nk" style="--c:${c.c};background:${hexA(HEAT,.06+.62*p/100)}"><b>${p}%</b><span>${nf(a)} de ${nf(b)}</span></div>`; }
+    const v=val(rows,c), n=rows.length, a=tot?.10:(.06+.62*(v/mx[i]));
     const click=c.k!==undefined&&v?`onclick="stmPick('${view}','${m}','${c.k}')"`:'';
-    return `<div class="c ${v?'':'z'} ${c.k===undefined?'nk':''} ${on?'on':''}" style="--c:${c.c};${v&&!tot?`background:${hexA(c.c,a)}`:''}" ${click} title="${esc(c.l)}${m?' · '+m:''}: ${nf(v)}"><b>${nf(v)}</b>${c.sub!==false&&v&&n?`<span>${f1(pct(v,n))}%</span>`:''}</div>`;
+    return `<div class="c ${v?'':'z'} ${c.k===undefined?'nk':''} ${on?'on':''}" style="--c:${c.c};${v&&!tot?`background:${hexA(HEAT,a)}`:''}" ${click} title="${esc(c.l)}${m?' · '+m:''}: ${nf(v)}"><b>${nf(v)}</b>${c.sub!==false&&v&&n?`<span>${f1(pct(v,n))}%</span>`:''}</div>`;
   };
   const tmpl=`minmax(150px,1.5fr) repeat(${cols.length},minmax(62px,1fr))`;
   let g=`<div class="stm-g" style="grid-template-columns:${tmpl}"><div></div>`+groups.map(x=>`<div class="gh" style="--c:${x.c};grid-column:span ${x.cols.length}">${x.l}</div>`).join('');
@@ -471,7 +484,7 @@ function stmSum(v){
   const val=(rows,k)=>k[0]==='_'?rows.filter(fx(k)).length:rows.reduce((s,r)=>s+(+r[k]||0),0);
   const mx=cols.map(([k])=>Math.max(1,...mods.map(m=>val(R.filter(r=>r.mod===m),k))));
   const cell=(rows,[k,l,c],i,m,tot)=>{ const v_=val(rows,k), n=rows.filter(fx(k)).length;
-    return `<div class="c ${v_?'':'z'}" style="--c:${c};${v_&&!tot?`background:${hexA(c,.10+.5*(v_/mx[i]))}`:''}" ${v_?`onclick="stmSumPick('${v}','${k}','${m}')"`:''} title="${esc(PCL[k]||l)}${m?' · '+m:''}: ${nf(v_)}"><b>${nf(v_)}</b>${v_&&k[0]!=='_'?`<span>en ${nf(n)} HC1</span>`:v_?`<span>${f1(pct(v_,rows.length))}% de ${nf(rows.length)}</span>`:''}</div>`; };
+    return `<div class="c ${v_?'':'z'}" style="--c:${c};${v_&&!tot?`background:${hexA(HEAT,.06+.62*(v_/mx[i]))}`:''}" ${v_?`onclick="stmSumPick('${v}','${k}','${m}')"`:''} title="${esc(PCL[k]||l)}${m?' · '+m:''}: ${nf(v_)}"><b>${nf(v_)}</b>${v_&&k[0]!=='_'?`<span>en ${nf(n)} HC1</span>`:v_?`<span>${f1(pct(v_,rows.length))}% de ${nf(rows.length)}</span>`:''}</div>`; };
   const tmpl=`minmax(150px,1.5fr) repeat(${cols.length},minmax(62px,1fr))`;
   let g=`<div class="stm-g" style="grid-template-columns:${tmpl}"><div></div>`+G.groups.map(x=>`<div class="gh" style="--c:${x.c};grid-column:span ${x.cols.length}">${x.l}</div>`).join('');
   g+='<div></div>'+cols.map(([k,l,c])=>`<div class="ch" style="--c:${c}">${l}</div>`).join('');
@@ -491,7 +504,7 @@ function kpis(view, list){
 function toggleK(view,k){ if(!k) return; S[view].k = S[view].k===k?'':k; S.lim[view]=300; render(); }
 function chips(view){
   const s=S[view], out=[];
-  const lbl={mod:'Módulo',etapa:'Etapa',arr:'Arranque',dos:'Dossier',est:'Estatus',resp:'Responsable',q:'Búsqueda'};
+  const lbl={mod:'Módulo',sub:'Subproyecto',etapa:'Etapa',arr:'Arranque',dos:'Dossier',est:'Estatus',resp:'Responsable',q:'Búsqueda'};
   Object.keys(lbl).forEach(k=>{ if(s[k]) out.push(`<span class="chip" onclick="unset('${view}','${k}')">${lbl[k]}: ${esc(s[k])} ✕</span>`); });
   const KL={ent:'Entregados',arrsin:'Arrancados sin HC1',noarr:'No arrancados',noent:'Pendientes',exc:'Con exclusiones',pend:'Con pendientes abiertos',cer:'Cerrados',penarr:'Pendientes arrancados',penno:'Pendientes no arrancados',pennoall:'Pendientes no arrancados',venc:'Vencidos',ap:'Aprobados CIT',env:'En revisión',dev:'Devueltos con comentarios',pen:'Pendientes',arrpen:'Pendientes arrancados',entall:'Entregados'};
   if(s.k) out.push(`<span class="chip" onclick="unset('${view}','k')">Estatus: ${esc(KL[s.k]||s.k)} ✕</span>`);
@@ -751,11 +764,14 @@ fill('hc1-mod',uniq(H,'mod')); fill('hc1-etapa',uniq(H,'etapa'),'Todas'); fill('
 fill('ac1-mod',uniq(A,'mod')); fill('ac1-etapa',uniq(A,'etapa'),'Todas'); fill('ac1-arr',uniq(A,'estado_arranque')); fill('ac1-est',uniq(A,'estatus'));
 fill('dos-mod',uniq(H,'mod')); fill('dos-etapa',uniq(H,'etapa'),'Todas'); fill('dos-arr',['ARRANCADO','NO ARRANCADO']); fill('dos-est',['ENTREGADO','ENVIADO','DEVUELTO','PENDIENTE']); fill('dos-resp',uniq(H,'responsable'));
 fill('cmp-mod',uniq(H,'mod'));
+function fillSub(v){ const src=v==='ac1'?A:H, k=v==='ac1'?'subpry':'subproyecto', m=S[v].mod, el=$(v+'-sub'); if(!el) return;
+  const o=uniq(src.filter(r=>!m||r.mod===m),k); fill(v+'-sub',o); if(S[v].sub&&!o.includes(S[v].sub)) S[v].sub=''; el.value=S[v].sub; }
+['hc1','ac1','dos','pen','cer'].forEach(fillSub);
 fill('pen-mod',uniq(H,'mod')); fill('pen-etapa',uniq(H,'etapa'),'Todas'); fill('pen-arr',['ARRANCADO','NO ARRANCADO']);
 fill('cer-mod',uniq(H,'mod')); fill('cer-etapa',uniq(H,'etapa'),'Todas'); fill('cer-arr',['ARRANCADO','NO ARRANCADO']);
 $('ct-cer').textContent=nf(H.reduce((s,r)=>s+(+r.total_cert_pendientes||0),0));
 $('ct-pen').textContent=nf(H.reduce((s,r)=>s+(+r.total_pend_abiertos||0),0));
-[['hc1',['mod','etapa','arr','dos','q']],['ac1',['mod','etapa','arr','est','q']],['dos',['mod','etapa','arr','est','resp','q']],['pen',['mod','etapa','arr','q']],['cer',['mod','etapa','arr','q']]].forEach(([v,ks])=>ks.forEach(k=>$(v+'-'+k).addEventListener('input',e=>{ S[v][k]=e.target.value; S.lim[v]=300; render(); })));
+[['hc1',['mod','sub','etapa','arr','dos','q']],['ac1',['mod','sub','etapa','arr','est','q']],['dos',['mod','sub','etapa','arr','est','resp','q']],['pen',['mod','sub','etapa','arr','q']],['cer',['mod','sub','etapa','arr','q']]].forEach(([v,ks])=>ks.forEach(k=>$(v+'-'+k).addEventListener('input',e=>{ S[v][k]=e.target.value; if(k==='mod') fillSub(v); S.lim[v]=300; render(); })));
 $('cmp-mod').onchange=e=>{S.cmp.mod=e.target.value; render();}; $('cmp-win').onchange=e=>{S.cmp.win=+e.target.value; render();};
 function clearF(v){ Object.keys(S[v]).forEach(k=>S[v][k]= k==='x'?null:''); document.querySelectorAll(`#v-${v} select, #v-${v} input`).forEach(el=>el.value=''); S.lim[v]=300; render(); }
 function goTab(v){ document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.v===v)); document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v)); S.view=v; render(); window.scrollTo({top:0,behavior:'smooth'}); }
@@ -808,8 +824,9 @@ function openMv(i){ const [l,c,L,kind]=window._MV[i]; if(!L.length) return;
   const cols=kind==='goneH'?[['mod','Mód.'],['id','ID HC1'],['sis','Sistema'],['arr','Arranque'],['ent','Entrega']]:[['mod','Mód.'],['id','ID certificado'],['sub','Subsistema'],['arr','Arranque'],['est','Estatus']];
   $('ml-tbl').querySelector('thead').innerHTML='<tr>'+cols.map(c=>`<th>${c[1]}</th>`).join('')+'</tr>';
   $('ml-tbl').querySelector('tbody').innerHTML=L.map(r=>'<tr>'+cols.map(([k])=>`<td>${esc(r[k])||'-'}</td>`).join('')+'</tr>').join(''); showM('mlist'); }
-setTimeout(renderChanges,60);
-function render(){ clearTimeout(RT); RT=setTimeout(()=>{ ({hc1:renderHC1,ac1:renderAC1,dos:renderDOS,pen:renderPEN,cer:renderCER,cmp:renderCMP})[S.view](); },30); }
+let CC_ON=false;
+function toggleCC(){ CC_ON=!CC_ON; $('cc-box').style.display=CC_ON?'':'none'; $('cc-btn').textContent=CC_ON?'✕ Ocultar cambios frente al corte anterior':'📊 Ver cambios frente al corte anterior'; if(CC_ON){ renderChanges(); $('cc-box').scrollIntoView({behavior:'smooth',block:'start'}); } }
+function render(){ clearTimeout(RT); RT=setTimeout(()=>{ if(S[S.view]&&'sub' in S[S.view]) fillSub(S.view); ({hc1:renderHC1,ac1:renderAC1,dos:renderDOS,pen:renderPEN,cer:renderCER,cmp:renderCMP})[S.view](); },30); }
 renderGauges(); render();
 </script>
 <a id="home-float" href="../../../index.html" title="Volver al tablero principal" style="position:fixed;right:22px;bottom:22px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:11px 18px 11px 14px;border-radius:999px;border:1px solid rgba(0,229,255,.75);background:rgba(6,10,24,.92);color:#9ff6ff;font:700 13.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 22px rgba(0,229,255,.45),0 10px 30px rgba(0,0,0,.55);backdrop-filter:blur(6px);opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .25s,transform .25s,box-shadow .15s" onmouseover="this.style.boxShadow='0 0 30px rgba(0,229,255,.75),0 10px 30px rgba(0,0,0,.55)'" onmouseout="this.style.boxShadow='0 0 22px rgba(0,229,255,.45),0 10px 30px rgba(0,0,0,.55)'"><span style="font-size:18px;line-height:1">&#8962;</span>Volver al tablero principal</a>
