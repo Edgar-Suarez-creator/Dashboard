@@ -115,6 +115,32 @@
   @media(max-width:640px){.wrap{padding:24px 16px 50px}.hero .main{padding:24px 20px}.stats{grid-template-columns:1fr 1fr}}
   @media(prefers-reduced-motion:reduce){.glow i,.hero .main:before,.chip .dot{animation:none}}
 </style>
+
+<style>
+/* ===== índice como diagrama de flujo ===== */
+.fl-top{display:grid;grid-template-columns:1fr;margin:6px 0 0}
+.fl-top .card{display:grid;grid-template-columns:auto 1fr auto;gap:6px 20px;align-items:center}
+.fl-top .card .desc{grid-column:2;margin:0}.fl-top .card .top{grid-row:1/3}.fl-top .card .footer{grid-column:3;grid-row:1/3;flex-direction:column;align-items:flex-end;gap:8px;margin:0}
+.fl-down{display:flex;justify-content:center;height:34px;position:relative}
+.fl-down::before{content:"";width:2px;background:linear-gradient(var(--orange),var(--cyan));box-shadow:0 0 10px var(--cyan)}
+.fl-down span{position:absolute;bottom:-6px;color:var(--cyan);font-size:14px;text-shadow:0 0 8px var(--cyan)}
+.flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0 30px;align-items:start;position:relative;margin-top:4px}
+.stage{position:relative;display:flex;flex-direction:column;gap:10px}
+.stage .sh{border:1px solid var(--c);border-radius:12px;padding:9px 12px;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 18%,transparent),transparent);box-shadow:0 0 18px -6px var(--c)}
+.stage .sh b{display:block;font:800 12.5px Inter;letter-spacing:.6px;text-transform:uppercase;color:var(--c);text-shadow:0 0 10px var(--c)}
+.stage .sh span{display:block;font-size:10.5px;color:var(--text2);margin-top:2px;line-height:1.35}
+.stage:not(:last-child) .sh::after{content:"➜";position:absolute;right:-24px;top:12px;font-size:18px;color:var(--c);text-shadow:0 0 10px var(--c)}
+.stage .card{padding:12px 12px 10px}
+.stage .card .icn{width:34px;height:34px;font-size:17px}
+.stage .card .ttl{font-size:13.5px}
+.stage .card .ttl small{font-size:9.5px}
+.stage .card .desc{font-size:11px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;margin:8px 0}
+.stage .card .tags{gap:4px}.stage .card .tag{font-size:9px;padding:2px 6px;white-space:normal;max-width:100%}
+.stage .card .badge{display:none}.stage .card .tag:nth-child(n+3){display:none}.stage .card .footer{flex-wrap:wrap;gap:6px;margin-top:6px}.stage .card .footer .tags{flex:1 1 100%}.stage .card .open{margin-left:auto}.stage .card .desc{-webkit-line-clamp:3!important}.stage .card .top{gap:9px}
+.stage .conn{align-self:center;width:2px;height:10px;margin:-10px 0;background:var(--c);opacity:.6;box-shadow:0 0 8px var(--c)}
+@media(max-width:1300px){.flow{grid-template-columns:repeat(3,minmax(0,1fr));gap:22px 30px}.stage:nth-child(3) .sh::after{display:none}}
+@media(max-width:760px){.flow{grid-template-columns:1fr}.stage .sh::after{display:none}}
+</style>
 </head>
 <body>
 <div class="glow"><i></i><i></i><i></i></div>
@@ -137,7 +163,7 @@
     </div>
     <div class="meta">
       <span class="chip live"><span class="dot"></span>En línea</span>
-      <span class="chip">Publicado 16‑oct‑2026</span>
+      <span class="chip">Publicado 25‑oct‑2026</span>
     </div>
   </div>
 
@@ -154,28 +180,14 @@
     </div>
     <div class="stats">
       <div class="stat" style="--c:var(--cyan)"><div class="v num" id="st-n">11</div><div class="l">Dashboards</div><div class="s">publicados en GitHub Pages</div></div>
-      <div class="stat" style="--c:var(--lime)"><div class="v num">2</div><div class="l">Actualizados hoy</div><div class="s">Garantías · Consolidado QA</div></div>
+      <div class="stat" style="--c:var(--lime)"><div class="v num">1</div><div class="l">Actualizados hoy</div><div class="s">Asistencias Técnicas (nuevo)</div></div>
       <div class="stat" style="--c:var(--pink)"><div class="v num">143</div><div class="l">Equipos en preservación</div><div class="s">$48,0 mil M COP sin HC‑1</div></div>
       <div class="stat" style="--c:var(--yellow)"><div class="v num">1.341</div><div class="l">Ítems en inventario</div><div class="s">$45,2 mil M COP · M3 + M4 + M5</div></div>
     </div>
   </div>
 
-  <!-- ====== CATEGORÍAS ====== -->
-  <div class="cats" id="cats">
-    <button class="cat on" data-c="">Todos <small id="c-all"></small></button>
-    <button class="cat" data-c="ruta">Vista integradora</button>
-    <button class="cat" data-c="plan">Planeación</button>
-    <button class="cat" data-c="sum">Suministro</button>
-    <button class="cat" data-c="mont">Montaje y puesta en marcha</button>
-    <button class="cat" data-c="cal">Certificación y calidad</button>
-    <button class="cat" data-c="post">Post-arranque</button>
-    <button class="cat" data-c="equipo">Equipo de trabajo</button>
-  </div>
-
-  <!-- ====== VISTA INTEGRADORA ====== -->
-  <div class="sec" data-sec="ruta" style="--c:var(--orange)"><h2>Vista integradora</h2><span class="n">todo el ciclo por locación · qué bloquea el arranque</span></div>
-  <div class="grid" data-sec="ruta">
-
+  <!-- ====== DIAGRAMA DE FLUJO ====== -->
+  <div class="fl-top">
     <a class="card" data-c="ruta" style="--c:var(--orange)" href="Ruta_Arranque/Ejecutable/Dashboard_Ruta_Arranque.html">
       <div class="top"><div class="icn">🚦</div><div class="ttl">Ruta al Arranque<small>CSE · act. 24‑oct</small></div></div>
       <div class="desc">
@@ -188,13 +200,10 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
   </div>
-
-  <!-- ====== 1 · PLANEACIÓN ====== -->
-  <div class="sec" data-sec="plan" style="--c:var(--cyan)"><h2>1 · Planeación</h2><span class="n">cuándo se necesita cada cosa · ruta del taladro · entrega de construcción</span></div>
-  <div class="grid" data-sec="plan">
-
+  <div class="fl-down"><span>▼</span></div>
+  <div class="flow">
+    <div class="stage" style="--c:var(--cyan)"><div class="sh"><b>1 · Planeación</b><span>cuándo se necesita cada cosa · ruta del taladro · entrega de construcción</span></div>
     <a class="card" data-c="plan" style="--c:var(--yellow)" href="Timeline_Taladro/Ejecutable/Timeline_Taladro_Q3Q4_2026.html">
       <div class="top"><div class="icn">🛢️</div><div class="ttl">Timeline Taladro<small>Q3‑Q4 2026 + Q1 2027 · corte 20‑oct</small></div></div>
       <div class="desc">
@@ -207,7 +216,7 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
+      <div class="conn"></div>
     <a class="card" data-c="plan" style="--c:var(--violet)" href="Timeline_Estaciones/Ejecutable/Timeline_Estaciones_Q3Q4_2026.html">
       <div class="top"><div class="icn">⚡</div><div class="ttl">Timeline Estaciones<small>Q3‑Q4 2026 + Q1 2027 · corte 15‑oct</small></div></div>
       <div class="desc">
@@ -221,13 +230,8 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
-  </div>
-
-  <!-- ====== 2 · SUMINISTRO ====== -->
-  <div class="sec" data-sec="sum" style="--c:var(--lime)"><h2>2 · Suministro</h2><span class="n">que el equipo llegue y se conserve · tracking → inventarios → preservación</span></div>
-  <div class="grid" data-sec="sum">
-
+    </div>
+    <div class="stage" style="--c:var(--lime)"><div class="sh"><b>2 · Suministro</b><span>que el equipo llegue y se conserve · tracking → inventarios → preservación</span></div>
     <a class="card hasbadge" data-c="sum" style="--c:var(--pink)" href="Tracking_Equipos/Ejecutable/Dashboard_Tracking_Equipos.html">
       <span class="badge">NUEVO · V2</span>
       <div class="top"><div class="icn">🚚</div><div class="ttl">Tracking de Materiales y Equipos<small>M3 + M4 + M5 · corte 21‑oct</small></div></div>
@@ -242,7 +246,7 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
+      <div class="conn"></div>
     <a class="card hasbadge" data-c="sum" style="--c:var(--cyan)" href="Inventarios/Ejecutable/Dashboard_Inventarios.html">
       <span class="badge">NUEVO · V2</span>
       <div class="top"><div class="icn">📦</div><div class="ttl">Dashboard de Inventarios<small>CSE · M3 + M4 + M5 · corte 18‑oct</small></div></div>
@@ -257,7 +261,7 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
+      <div class="conn"></div>
     <a class="card hasbadge" data-c="sum" style="--c:var(--lime)" href="Dashboard_Preservaci%C3%B3n/Ejecutable/Dashboard_Preservacion.html">
       <span class="badge">NUEVO · V3</span>
       <div class="top"><div class="icn">📋</div><div class="ttl">Dashboard de Preservación<small>Control de equipos · corte 22‑oct</small></div></div>
@@ -272,13 +276,8 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
-  </div>
-
-  <!-- ====== 3 · MONTAJE Y PUESTA EN MARCHA ====== -->
-  <div class="sec" data-sec="mont" style="--c:var(--violet)"><h2>3 · Montaje y puesta en marcha</h2><span class="n">asistencias técnicas de vendors</span></div>
-  <div class="grid" data-sec="mont">
-
+    </div>
+    <div class="stage" style="--c:var(--violet)"><div class="sh"><b>3 · Montaje y puesta en marcha</b><span>asistencias técnicas de vendors</span></div>
     <a class="card hasbadge" data-c="mont" style="--c:var(--violet)" href="Asistencias_Tecnicas/Ejecutable/Dashboard_Asistencias_Tecnicas.html">
       <span class="badge">NUEVO</span>
       <div class="top"><div class="icn">🛠️</div><div class="ttl">Asistencias Técnicas · Vendors<small>CSE · act. 25‑oct</small></div></div>
@@ -291,13 +290,8 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
-  </div>
-
-  <!-- ====== 4 · CERTIFICACIÓN Y CALIDAD ====== -->
-  <div class="sec" data-sec="cal" style="--c:var(--pink)"><h2>4 · Certificación y calidad</h2><span class="n">AC1 / HC1 · dossieres · IDA · QA</span></div>
-  <div class="grid" data-sec="cal">
-
+    </div>
+    <div class="stage" style="--c:var(--pink)"><div class="sh"><b>4 · Certificación y calidad</b><span>AC1 / HC1 · dossieres · IDA · QA</span></div>
     <a class="card hasbadge" data-c="cal" style="--c:var(--violet)" href="Control_Dossiers_AC1-HC1/Exteriores/Ejecutable/Dashboard_Control_Dossiers.html">
       <span class="badge">NUEVO · V3</span>
       <div class="top"><div class="icn">📑</div><div class="ttl">Control de Dossieres AC1 / HC1<small>PAD2 y Exteriores · corte 23‑oct</small></div></div>
@@ -312,7 +306,7 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
+      <div class="conn"></div>
     <a class="card hasbadge" data-c="cal" style="--c:var(--cyan)" href="Control_Dossiers_AC1-HC1/Facilidades/Ejecutable/Dashboard_Control_Dossiers_Facilidades.html">
       <span class="badge">NUEVO</span>
       <div class="top"><div class="icn">🏭</div><div class="ttl">Control de Dossieres · Facilidades<small>Estaciones · corte 23‑oct</small></div></div>
@@ -326,7 +320,7 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
+      <div class="conn"></div>
     <a class="card" data-c="cal" style="--c:var(--orange)" href="IDA/Ejecutable/Informe_Ejecutivo_IDA_CSE.html">
       <div class="top"><div class="icn">⚙️</div><div class="ttl">Informe Ejecutivo IDA<small>Incorporación de activos · CSE</small></div></div>
       <div class="desc">
@@ -339,7 +333,7 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
+      <div class="conn"></div>
     <a class="card" data-c="cal" style="--c:var(--mint)" href="Consolidado_QA/Ejecutable/Dashboard_QA_CSE.html">
       <div class="top"><div class="icn">🧪</div><div class="ttl">Dashboard Consolidado QA<small>CSE · corte 20‑oct</small></div></div>
       <div class="desc">
@@ -352,13 +346,8 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
-  </div>
-
-  <!-- ====== 5 · POST-ARRANQUE ====== -->
-  <div class="sec" data-sec="post" style="--c:var(--yellow)"><h2>5 · Post-arranque</h2><span class="n">garantías de equipos entregados</span></div>
-  <div class="grid" data-sec="post">
-
+    </div>
+    <div class="stage" style="--c:var(--yellow)"><div class="sh"><b>5 · Post-arranque</b><span>garantías de equipos entregados</span></div>
     <a class="card hasbadge" data-c="post" style="--c:var(--yellow)" href="Garantias/Ejecutable/Dashboard_Garantias.html">
       <span class="badge">NUEVO · V2</span>
       <div class="top"><div class="icn">🛡️</div><div class="ttl">Dashboard de Garantías<small>Caño Sur Este · corte 23‑oct</small></div></div>
@@ -372,13 +361,8 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
-  </div>
-
-  <!-- ====== 6 · EQUIPO DE TRABAJO ====== -->
-  <div class="sec" data-sec="equipo" style="--c:var(--mint)"><h2>6 · Equipo de trabajo</h2><span class="n">organigrama ATIP</span></div>
-  <div class="grid" data-sec="equipo">
-
+    </div>
+    <div class="stage" style="--c:var(--mint)"><div class="sh"><b>6 · Equipo de trabajo</b><span>organigrama ATIP</span></div>
     <a class="card hasbadge" data-c="equipo" style="--c:var(--pink)" href="Organigrama/Ejecutable/Dashboard_Organigrama.html">
       <span class="badge">NUEVO · V2</span>
       <div class="top"><div class="icn">👥</div><div class="ttl">Organigrama ATIP<small>Caño Sur Este · corte 16‑oct</small></div></div>
@@ -393,7 +377,7 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
-
+    </div>
   </div>
 
   <div class="empty" id="empty">No hay dashboards que coincidan con esa búsqueda.</div>
@@ -406,15 +390,15 @@
 
 <script>
 (function(){
-  const cards=[...document.querySelectorAll('.card')], q=document.getElementById('q'), cats=[...document.querySelectorAll('.cat')];
+  const cards=[...document.querySelectorAll('.card')], q=document.getElementById('q'), cats=[];
   let cat='';
-  document.getElementById('c-all').textContent=cards.filter(c=>!c.classList.contains('placeholder')).length;
+  void cards.filter(c=>!c.classList.contains('placeholder')).length;
   document.getElementById('st-n').textContent=cards.filter(c=>!c.classList.contains('placeholder')).length;
   function norm(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
   function apply(){
     const t=norm(q.value.trim()); let shown=0;
     cards.forEach(c=>{const ok=(!cat||c.dataset.c===cat)&&(!t||norm(c.textContent).includes(t)); c.classList.toggle('hide',!ok); if(ok&&!c.classList.contains('placeholder'))shown++;});
-    document.querySelectorAll('[data-sec]').forEach(el=>{const any=[...document.querySelectorAll(`.grid[data-sec="${el.dataset.sec}"] .card`)].some(c=>!c.classList.contains('hide')); el.style.display=any?'':'none';});
+    [].forEach(el=>{const any=[...document.querySelectorAll(`.grid[data-sec="${el.dataset.sec}"] .card`)].some(c=>!c.classList.contains('hide')); el.style.display=any?'':'none';});
     document.getElementById('empty').classList.toggle('show',shown===0);
   }
   q.addEventListener('input',apply);
