@@ -163,140 +163,20 @@
   <!-- ====== CATEGORÍAS ====== -->
   <div class="cats" id="cats">
     <button class="cat on" data-c="">Todos <small id="c-all"></small></button>
-    <button class="cat" data-c="activos">Control de activos</button>
-    <button class="cat" data-c="avance">Avance y calidad</button>
-    <button class="cat" data-c="plan">Planeación y equipo</button>
+    <button class="cat" data-c="ruta">Vista integradora</button>
+    <button class="cat" data-c="plan">Planeación</button>
+    <button class="cat" data-c="sum">Suministro</button>
+    <button class="cat" data-c="mont">Montaje y puesta en marcha</button>
+    <button class="cat" data-c="cal">Certificación y calidad</button>
+    <button class="cat" data-c="post">Post-arranque</button>
+    <button class="cat" data-c="equipo">Equipo de trabajo</button>
   </div>
 
-  <!-- ====== CONTROL DE ACTIVOS ====== -->
-  <div class="sec" data-sec="activos" style="--c:var(--lime)"><h2>Control de activos</h2><span class="n">preservación · inventarios · garantías · tracking de equipos</span></div>
-  <div class="grid" data-sec="activos">
+  <!-- ====== VISTA INTEGRADORA ====== -->
+  <div class="sec" data-sec="ruta" style="--c:var(--orange)"><h2>Vista integradora</h2><span class="n">todo el ciclo por locación · qué bloquea el arranque</span></div>
+  <div class="grid" data-sec="ruta">
 
-    <a class="card hasbadge" data-c="activos" style="--c:var(--lime)" href="Dashboard_Preservaci%C3%B3n/Ejecutable/Dashboard_Preservacion.html">
-      <span class="badge">NUEVO · V3</span>
-      <div class="top"><div class="icn">📋</div><div class="ttl">Dashboard de Preservación<small>Control de equipos · corte 22‑oct</small></div></div>
-      <div class="desc">
-        Preservación de los <b>143 equipos</b> de Caño Sur Este M3 + M4 + M5 (bombas, skids, transformadores, VFD, gabinetes, UPS, generadores).
-        Proyección de rutinas por mes con filtro al hacer clic en cada barra, carga proyectada, cumplimiento programado vs. ejecutado,
-        riesgo por tiempo sin rutina, cambios frente al corte anterior (20‑oct) y detalle de equipos y rutinas con totales y fichas.
-        Opción para excluir los equipos entregados a operaciones (HC‑1).
-      </div>
-      <div class="footer">
-        <div class="tags"><span class="tag">143 equipos · 130 sin HC‑1</span><span class="tag">$48,0 mil M sin HC‑1</span><span class="tag">82 rutinas proyectadas · 7 vencidas</span><span class="tag good">Corte 22‑oct</span></div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card hasbadge" data-c="activos" style="--c:var(--cyan)" href="Inventarios/Ejecutable/Dashboard_Inventarios.html">
-      <span class="badge">NUEVO · V2</span>
-      <div class="top"><div class="icn">📦</div><div class="ttl">Dashboard de Inventarios<small>CSE · M3 + M4 + M5 · corte 18‑oct</small></div></div>
-      <div class="desc">
-        Inventario general M3 + M4 + M5 de Caño Sur Este. Clasificación por responsable: <b>Clúster</b>, <b>Estación Centauros EP1</b>
-        y <b>Troncales y PAD's</b> (con detalle de troncales eléctricas, mecánicas y PAD's de inyección).
-        Resumen de valor, ítems y sobrantes, reparto por módulo, valor por almacén, sistema, tipo y material,
-        concentración del valor (80/20), detalle con fichas y cambios frente al corte anterior.
-      </div>
-      <div class="footer">
-        <div class="tags"><span class="tag">1.341 ítems · $45,2 mil M</span><span class="tag">Clúster $26,9 mil M</span><span class="tag">EP1 $9,6 mil M</span><span class="tag">Troncales y PAD's $8,8 mil M</span><span class="tag good">Corte 18‑oct</span></div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card hasbadge" data-c="activos" style="--c:var(--yellow)" href="Garantias/Ejecutable/Dashboard_Garantias.html">
-      <span class="badge">NUEVO · V2</span>
-      <div class="top"><div class="icn">🛡️</div><div class="ttl">Dashboard de Garantías<small>Caño Sur Este · corte 23‑oct</small></div></div>
-      <div class="desc">
-        Seguimiento a las <b>154 garantías</b> con proveedores de M3 + M4. Flujo mensual de aperturas y cierres con saldo abierto,
-        mapa de puntos de las abiertas por días de espera, anillos por disciplina, top proveedores, matriz grupo × disciplina,
-        tiempo de cierre, cambios frente al corte anterior (21‑oct) y detalle con la bitácora completa de cada garantía.
-      </div>
-      <div class="footer">
-        <div class="tags"><span class="tag">154 garantías</span><span class="tag">17 abiertas</span><span class="tag">89,0 % cerradas</span><span class="tag good">Corte 23‑oct</span></div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card hasbadge" data-c="activos" style="--c:var(--pink)" href="Tracking_Equipos/Ejecutable/Dashboard_Tracking_Equipos.html">
-      <span class="badge">NUEVO · V2</span>
-      <div class="top"><div class="icn">🚚</div><div class="ttl">Tracking de Materiales y Equipos<small>M3 + M4 + M5 · corte 21‑oct</small></div></div>
-      <div class="desc">
-        Trazabilidad completa de <b>materiales y equipos</b> (como la lleva GyQ) con selector <b>Solo equipos</b> para el alcance ATIP.
-        Une todos los archivos de tracking y sus hojas GENERAL, ESTADO ODB y ALERTAS. Llegadas por mes (real, proyectada y vencida),
-        curva S de suministro, embudo de aprovisionamiento, matriz especialidad × etapa, una tarjeta por subproyecto,
-        ODB en seguimiento con desviación vs. requerido, alertas abiertas y detalle con ficha y CSV.
-      </div>
-      <div class="footer">
-        <div class="tags"><span class="tag">15.509 líneas · 1.200 equipos</span><span class="tag">87,6 % comprado · 56,5 % recibido</span><span class="tag">4.397 llegan en 90 días · 130 vencidas</span><span class="tag">38 alertas abiertas</span><span class="tag good">Act. 22‑oct</span></div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-  </div>
-
-  <!-- ====== AVANCE Y CALIDAD ====== -->
-  <div class="sec" data-sec="avance" style="--c:var(--pink)"><h2>Avance y calidad</h2><span class="n">reportes consolidados · IDA · QA</span></div>
-  <div class="grid" data-sec="avance">
-
-    <a class="card hasbadge" data-c="avance" style="--c:var(--violet)" href="Control_Dossiers_AC1-HC1/Exteriores/Ejecutable/Dashboard_Control_Dossiers.html">
-      <span class="badge">NUEVO · V3</span>
-      <div class="top"><div class="icn">📑</div><div class="ttl">Control de Dossieres AC1 / HC1<small>PAD2 y Exteriores · corte 23‑oct</small></div></div>
-      <div class="desc">
-        Estatus de <b>937 HC1</b>, <b>1.112 AC1</b> y los dossieres CIT de M3, M4 y M5 desde la BD General oficial.
-        Medidores globales, curvas S programado vs ejecutado, embudo del dossier (arranque → entrega → envío → aprobación CIT),
-        antigüedad de pendientes, matriz responsable × estatus, AC1 vs fecha programada, comparativa semanal con tendencia
-        y ventanas emergentes con detalle y listas al hacer clic en cualquier gráfico.
-      </div>
-      <div class="footer">
-        <div class="tags"><span class="tag">HC1 73,3 % entregados</span><span class="tag">AC1 85 % cerrados</span><span class="tag">538 aprobados CIT</span><span class="tag good">Corte 23‑oct</span></div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card hasbadge" data-c="avance" style="--c:var(--cyan)" href="Control_Dossiers_AC1-HC1/Facilidades/Ejecutable/Dashboard_Control_Dossiers_Facilidades.html">
-      <span class="badge">NUEVO</span>
-      <div class="top"><div class="icn">🏭</div><div class="ttl">Control de Dossieres · Facilidades<small>Estaciones · corte 23‑oct</small></div></div>
-      <div class="desc">
-        Mismo tablero de Control de Dossieres, para <b>Facilidades y Estaciones</b>: Estación Centauros EP1 (M3 y M4), PAD MITO 2, PAD 3 y PAD 2.
-        Estatus de <b>HC1</b> por sistema y <b>AC1</b> por subsistema, certificados pre/com y pendientes abiertos de SmartCompletions,
-        curvas S, vencimientos, etapas, comparativa semanal y detalle con fichas.
-      </div>
-      <div class="footer">
-        <div class="tags"><span class="tag">101 / 119 HC1 entregados</span><span class="tag">295 / 340 AC1 cerrados</span><span class="tag good">Corte 23‑oct</span></div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card" data-c="avance" style="--c:var(--orange)" href="IDA/Ejecutable/Informe_Ejecutivo_IDA_CSE.html">
-      <div class="top"><div class="icn">⚙️</div><div class="ttl">Informe Ejecutivo IDA<small>Incorporación de activos · CSE</small></div></div>
-      <div class="desc">
-        Avance de <b>Incorporación de Activos</b> (CAR · CAT · RBI · RCM) ponderado sobre <b>66 pozos y subproyectos</b>
-        de CSE‑FAC + CSE‑POZOS. Trae KPIs por disciplina, comparativo por estación, ranking por proyecto/pozo,
-        desglose de sub‑actividades y curvas semanales S00‑S21 (ejecutado vs programado).
-      </div>
-      <div class="footer">
-        <div class="tags"><span class="tag">66 subproyectos</span><span class="tag">4 disciplinas</span><span class="tag good">Carga rápida</span></div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-
-    <a class="card" data-c="avance" style="--c:var(--mint)" href="Consolidado_QA/Ejecutable/Dashboard_QA_CSE.html">
-      <div class="top"><div class="icn">🧪</div><div class="ttl">Dashboard Consolidado QA<small>CSE · corte 20‑oct</small></div></div>
-      <div class="desc">
-        Nueva versión fluorescente con 4 secciones: <b>Aspectos Relevantes (4.977)</b>, <b>NCR/OBS/PNC (170)</b>,
-        <b>Dossieres (268)</b> y <b>Solicitudes Técnicas (335)</b>. Pulso global de cierre, medidores, barras apiladas
-        abiertas/cerradas, antigüedad de abiertas, tiempo de ciclo, timeline 12/24 m, tablas con buscador y drill‑down.
-      </div>
-      <div class="footer">
-        <div class="tags"><span class="tag">4 secciones</span><span class="tag">~5.750 ítems</span><span class="tag good">Corte 20‑oct</span></div>
-        <span class="open">ABRIR →</span>
-      </div>
-    </a>
-  </div>
-
-  <!-- ====== PLANEACIÓN Y EQUIPO ====== -->
-  <div class="sec" data-sec="plan" style="--c:var(--cyan)"><h2>Planeación y equipo</h2><span class="n">timelines · organigrama</span></div>
-  <div class="grid" data-sec="plan">
-
-    <a class="card" data-c="plan" style="--c:var(--orange)" href="Ruta_Arranque/Ejecutable/Dashboard_Ruta_Arranque.html">
+    <a class="card" data-c="ruta" style="--c:var(--orange)" href="Ruta_Arranque/Ejecutable/Dashboard_Ruta_Arranque.html">
       <div class="top"><div class="icn">🚦</div><div class="ttl">Ruta al Arranque<small>CSE · act. 24‑oct</small></div></div>
       <div class="desc">
         Control integrado por locación: <b>compra</b> → <b>en campo</b> → <b>preservación</b> → <b>entrega de construcción</b> → <b>ruta del taladro</b>
@@ -308,6 +188,12 @@
         <span class="open">ABRIR →</span>
       </div>
     </a>
+
+  </div>
+
+  <!-- ====== 1 · PLANEACIÓN ====== -->
+  <div class="sec" data-sec="plan" style="--c:var(--cyan)"><h2>1 · Planeación</h2><span class="n">cuándo se necesita cada cosa · ruta del taladro · entrega de construcción</span></div>
+  <div class="grid" data-sec="plan">
 
     <a class="card" data-c="plan" style="--c:var(--yellow)" href="Timeline_Taladro/Ejecutable/Timeline_Taladro_Q3Q4_2026.html">
       <div class="top"><div class="icn">🛢️</div><div class="ttl">Timeline Taladro<small>Q3‑Q4 2026 + Q1 2027 · corte 20‑oct</small></div></div>
@@ -336,7 +222,164 @@
       </div>
     </a>
 
-    <a class="card hasbadge" data-c="plan" style="--c:var(--pink)" href="Organigrama/Ejecutable/Dashboard_Organigrama.html">
+  </div>
+
+  <!-- ====== 2 · SUMINISTRO ====== -->
+  <div class="sec" data-sec="sum" style="--c:var(--lime)"><h2>2 · Suministro</h2><span class="n">que el equipo llegue y se conserve · tracking → inventarios → preservación</span></div>
+  <div class="grid" data-sec="sum">
+
+    <a class="card hasbadge" data-c="sum" style="--c:var(--pink)" href="Tracking_Equipos/Ejecutable/Dashboard_Tracking_Equipos.html">
+      <span class="badge">NUEVO · V2</span>
+      <div class="top"><div class="icn">🚚</div><div class="ttl">Tracking de Materiales y Equipos<small>M3 + M4 + M5 · corte 21‑oct</small></div></div>
+      <div class="desc">
+        Trazabilidad completa de <b>materiales y equipos</b> (como la lleva GyQ) con selector <b>Solo equipos</b> para el alcance ATIP.
+        Une todos los archivos de tracking y sus hojas GENERAL, ESTADO ODB y ALERTAS. Llegadas por mes (real, proyectada y vencida),
+        curva S de suministro, embudo de aprovisionamiento, matriz especialidad × etapa, una tarjeta por subproyecto,
+        ODB en seguimiento con desviación vs. requerido, alertas abiertas y detalle con ficha y CSV.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">15.509 líneas · 1.200 equipos</span><span class="tag">87,6 % comprado · 56,5 % recibido</span><span class="tag">4.397 llegan en 90 días · 130 vencidas</span><span class="tag">38 alertas abiertas</span><span class="tag good">Act. 22‑oct</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <a class="card hasbadge" data-c="sum" style="--c:var(--cyan)" href="Inventarios/Ejecutable/Dashboard_Inventarios.html">
+      <span class="badge">NUEVO · V2</span>
+      <div class="top"><div class="icn">📦</div><div class="ttl">Dashboard de Inventarios<small>CSE · M3 + M4 + M5 · corte 18‑oct</small></div></div>
+      <div class="desc">
+        Inventario general M3 + M4 + M5 de Caño Sur Este. Clasificación por responsable: <b>Clúster</b>, <b>Estación Centauros EP1</b>
+        y <b>Troncales y PAD's</b> (con detalle de troncales eléctricas, mecánicas y PAD's de inyección).
+        Resumen de valor, ítems y sobrantes, reparto por módulo, valor por almacén, sistema, tipo y material,
+        concentración del valor (80/20), detalle con fichas y cambios frente al corte anterior.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">1.341 ítems · $45,2 mil M</span><span class="tag">Clúster $26,9 mil M</span><span class="tag">EP1 $9,6 mil M</span><span class="tag">Troncales y PAD's $8,8 mil M</span><span class="tag good">Corte 18‑oct</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <a class="card hasbadge" data-c="sum" style="--c:var(--lime)" href="Dashboard_Preservaci%C3%B3n/Ejecutable/Dashboard_Preservacion.html">
+      <span class="badge">NUEVO · V3</span>
+      <div class="top"><div class="icn">📋</div><div class="ttl">Dashboard de Preservación<small>Control de equipos · corte 22‑oct</small></div></div>
+      <div class="desc">
+        Preservación de los <b>143 equipos</b> de Caño Sur Este M3 + M4 + M5 (bombas, skids, transformadores, VFD, gabinetes, UPS, generadores).
+        Proyección de rutinas por mes con filtro al hacer clic en cada barra, carga proyectada, cumplimiento programado vs. ejecutado,
+        riesgo por tiempo sin rutina, cambios frente al corte anterior (20‑oct) y detalle de equipos y rutinas con totales y fichas.
+        Opción para excluir los equipos entregados a operaciones (HC‑1).
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">143 equipos · 130 sin HC‑1</span><span class="tag">$48,0 mil M sin HC‑1</span><span class="tag">82 rutinas proyectadas · 7 vencidas</span><span class="tag good">Corte 22‑oct</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ====== 3 · MONTAJE Y PUESTA EN MARCHA ====== -->
+  <div class="sec" data-sec="mont" style="--c:var(--violet)"><h2>3 · Montaje y puesta en marcha</h2><span class="n">asistencias técnicas de vendors</span></div>
+  <div class="grid" data-sec="mont">
+
+    <a class="card hasbadge" data-c="mont" style="--c:var(--violet)" href="Asistencias_Tecnicas/Ejecutable/Dashboard_Asistencias_Tecnicas.html">
+      <span class="badge">NUEVO</span>
+      <div class="top"><div class="icn">🛠️</div><div class="ttl">Asistencias Técnicas · Vendors<small>CSE · act. 25‑oct</small></div></div>
+      <div class="desc">
+        Control de las asistencias técnicas de vendors en <b>Exteriores</b> y <b>Estaciones</b>: estatus por etapa y semáforo, checklist antes de ingresar
+        (ODS, pólizas, KOM, RSPA, acta, equipo en sitio, HSE), calendario de días, contratos/ODS con vigencia y <b>valor en COP</b>, y bitácora de gestión.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">43 asistencias</span><span class="tag">22 ODS · $11,5 mil M</span><span class="tag">9 en rojo</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ====== 4 · CERTIFICACIÓN Y CALIDAD ====== -->
+  <div class="sec" data-sec="cal" style="--c:var(--pink)"><h2>4 · Certificación y calidad</h2><span class="n">AC1 / HC1 · dossieres · IDA · QA</span></div>
+  <div class="grid" data-sec="cal">
+
+    <a class="card hasbadge" data-c="cal" style="--c:var(--violet)" href="Control_Dossiers_AC1-HC1/Exteriores/Ejecutable/Dashboard_Control_Dossiers.html">
+      <span class="badge">NUEVO · V3</span>
+      <div class="top"><div class="icn">📑</div><div class="ttl">Control de Dossieres AC1 / HC1<small>PAD2 y Exteriores · corte 23‑oct</small></div></div>
+      <div class="desc">
+        Estatus de <b>937 HC1</b>, <b>1.112 AC1</b> y los dossieres CIT de M3, M4 y M5 desde la BD General oficial.
+        Medidores globales, curvas S programado vs ejecutado, embudo del dossier (arranque → entrega → envío → aprobación CIT),
+        antigüedad de pendientes, matriz responsable × estatus, AC1 vs fecha programada, comparativa semanal con tendencia
+        y ventanas emergentes con detalle y listas al hacer clic en cualquier gráfico.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">HC1 73,3 % entregados</span><span class="tag">AC1 85 % cerrados</span><span class="tag">538 aprobados CIT</span><span class="tag good">Corte 23‑oct</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <a class="card hasbadge" data-c="cal" style="--c:var(--cyan)" href="Control_Dossiers_AC1-HC1/Facilidades/Ejecutable/Dashboard_Control_Dossiers_Facilidades.html">
+      <span class="badge">NUEVO</span>
+      <div class="top"><div class="icn">🏭</div><div class="ttl">Control de Dossieres · Facilidades<small>Estaciones · corte 23‑oct</small></div></div>
+      <div class="desc">
+        Mismo tablero de Control de Dossieres, para <b>Facilidades y Estaciones</b>: Estación Centauros EP1 (M3 y M4), PAD MITO 2, PAD 3 y PAD 2.
+        Estatus de <b>HC1</b> por sistema y <b>AC1</b> por subsistema, certificados pre/com y pendientes abiertos de SmartCompletions,
+        curvas S, vencimientos, etapas, comparativa semanal y detalle con fichas.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">101 / 119 HC1 entregados</span><span class="tag">295 / 340 AC1 cerrados</span><span class="tag good">Corte 23‑oct</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <a class="card" data-c="cal" style="--c:var(--orange)" href="IDA/Ejecutable/Informe_Ejecutivo_IDA_CSE.html">
+      <div class="top"><div class="icn">⚙️</div><div class="ttl">Informe Ejecutivo IDA<small>Incorporación de activos · CSE</small></div></div>
+      <div class="desc">
+        Avance de <b>Incorporación de Activos</b> (CAR · CAT · RBI · RCM) ponderado sobre <b>66 pozos y subproyectos</b>
+        de CSE‑FAC + CSE‑POZOS. Trae KPIs por disciplina, comparativo por estación, ranking por proyecto/pozo,
+        desglose de sub‑actividades y curvas semanales S00‑S21 (ejecutado vs programado).
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">66 subproyectos</span><span class="tag">4 disciplinas</span><span class="tag good">Carga rápida</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+    <a class="card" data-c="cal" style="--c:var(--mint)" href="Consolidado_QA/Ejecutable/Dashboard_QA_CSE.html">
+      <div class="top"><div class="icn">🧪</div><div class="ttl">Dashboard Consolidado QA<small>CSE · corte 20‑oct</small></div></div>
+      <div class="desc">
+        Nueva versión fluorescente con 4 secciones: <b>Aspectos Relevantes (4.977)</b>, <b>NCR/OBS/PNC (170)</b>,
+        <b>Dossieres (268)</b> y <b>Solicitudes Técnicas (335)</b>. Pulso global de cierre, medidores, barras apiladas
+        abiertas/cerradas, antigüedad de abiertas, tiempo de ciclo, timeline 12/24 m, tablas con buscador y drill‑down.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">4 secciones</span><span class="tag">~5.750 ítems</span><span class="tag good">Corte 20‑oct</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ====== 5 · POST-ARRANQUE ====== -->
+  <div class="sec" data-sec="post" style="--c:var(--yellow)"><h2>5 · Post-arranque</h2><span class="n">garantías de equipos entregados</span></div>
+  <div class="grid" data-sec="post">
+
+    <a class="card hasbadge" data-c="post" style="--c:var(--yellow)" href="Garantias/Ejecutable/Dashboard_Garantias.html">
+      <span class="badge">NUEVO · V2</span>
+      <div class="top"><div class="icn">🛡️</div><div class="ttl">Dashboard de Garantías<small>Caño Sur Este · corte 23‑oct</small></div></div>
+      <div class="desc">
+        Seguimiento a las <b>154 garantías</b> con proveedores de M3 + M4. Flujo mensual de aperturas y cierres con saldo abierto,
+        mapa de puntos de las abiertas por días de espera, anillos por disciplina, top proveedores, matriz grupo × disciplina,
+        tiempo de cierre, cambios frente al corte anterior (21‑oct) y detalle con la bitácora completa de cada garantía.
+      </div>
+      <div class="footer">
+        <div class="tags"><span class="tag">154 garantías</span><span class="tag">17 abiertas</span><span class="tag">89,0 % cerradas</span><span class="tag good">Corte 23‑oct</span></div>
+        <span class="open">ABRIR →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ====== 6 · EQUIPO DE TRABAJO ====== -->
+  <div class="sec" data-sec="equipo" style="--c:var(--mint)"><h2>6 · Equipo de trabajo</h2><span class="n">organigrama ATIP</span></div>
+  <div class="grid" data-sec="equipo">
+
+    <a class="card hasbadge" data-c="equipo" style="--c:var(--pink)" href="Organigrama/Ejecutable/Dashboard_Organigrama.html">
       <span class="badge">NUEVO · V2</span>
       <div class="top"><div class="icn">👥</div><div class="ttl">Organigrama ATIP<small>Caño Sur Este · corte 16‑oct</small></div></div>
       <div class="desc">
@@ -351,11 +394,6 @@
       </div>
     </a>
 
-    <div class="card placeholder" data-c="plan">
-      <div class="top"><div class="icn">＋</div><div class="ttl">Próximamente</div></div>
-      <div class="desc">Próximos dashboards: Schedule · Asistencia Técnica · Cruce Aliado‑Taladro. Al subirlos al repositorio aparecerán como tarjeta aquí.</div>
-      <div class="footer"><div class="tags"><span class="tag">En preparación</span></div><span class="open" style="color:var(--muted)">—</span></div>
-    </div>
   </div>
 
   <div class="empty" id="empty">No hay dashboards que coincidan con esa búsqueda.</div>
