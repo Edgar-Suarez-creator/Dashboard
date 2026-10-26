@@ -14,20 +14,38 @@ def fecha(v):
     except (TypeError, ValueError): return str(v or "")
 
 
+# BD de Facilidades: no trae 'PEND POWER BI INTERFACE'; se usa el export de SmartCompletions (PTES_IMPORT, encabezado en la fila 2)
+PTES = {"SISTEMA": "Systemization - System (Summary)", "CATEGORIA": "Punchlist Category (Name)", "DISCIPLINA": "Discipline (Name)",
+        "ITEM": "Punchlist ID", "DESCRIPCION": "Description", "RESPONSABLE DE CIERRE": "Scheduling - Responsible Company (Name)",
+        "FECHA PROGRAMADA DE CIERRE": "Scheduling - Due Date"}
+
+
 def conteo(xlsb):
     """({sistema: Counter(campo -> pendientes abiertos)}, {sistema: [detalle]})"""
     out = collections.defaultdict(collections.Counter); det = collections.defaultdict(list)
+    hoy = (datetime.date.today() - datetime.date(1899, 12, 30)).days
     with open_workbook(xlsb) as wb:
-        name = SHEET if SHEET in wb.sheets else next(s for s in wb.sheets if s.strip() == SHEET.strip())
+        name = SHEET if SHEET in wb.sheets else next((s for s in wb.sheets if s.strip() == SHEET.strip()), None)
+        ptes = name is None
+        if ptes: name = "PTES_IMPORT"
         with wb.get_sheet(name) as s:
             H = None
-            for row in s.rows():
+            for n, row in enumerate(s.rows()):
                 v = [c.v for c in row]
+                if ptes and n == 0: continue
                 if H is None:
-                    H = [str(x or "").strip() for x in v]; ix = {h: i for i, h in enumerate(H)}; continue
-                g = lambda k: v[ix[k]] if ix[k] < len(v) else None
-                if str(g("ESTATUS") or "").strip().upper() != "ABIERTO":
+                    H = [str(x or "").strip() for x in v]; ix = {h: i for i, h in enumerate(H)}
+                    if ptes: ix = {k: ix[c] for k, c in PTES.items()} | {"_st": ix["Status"]}
                     continue
+                g = lambda k: v[ix[k]] if ix[k] < len(v) else None
+                if ptes:
+                    if not any(v) or str(g("_st") or "").strip().upper() in ("CLOSED", ""): continue
+                    f = g("FECHA PROGRAMADA DE CIERRE"); v = list(v) + [None]
+                    venc = 1 if isinstance(f, (int, float)) and f and f < hoy else 0
+                elif str(g("ESTATUS") or "").strip().upper() != "ABIERTO":
+                    continue
+                else:
+                    venc = 1 if (g("VENCIDOS") or 0) else 0
                 cat = str(g("CATEGORIA") or "").strip().upper()
                 if cat not in ("A", "B"):
                     continue
@@ -36,7 +54,7 @@ def conteo(xlsb):
                 c = out[str(g("SISTEMA") or "").strip()]
                 c[t] += 1; c[f"{t}_{d}"] += 1
                 det[str(g("SISTEMA") or "").strip()].append([str(g("ITEM") or ""), cat, str(g("DISCIPLINA") or ""), str(g("DESCRIPCION") or "").strip(),
-                    str(g("RESPONSABLE DE CIERRE") or ""), fecha(g("FECHA PROGRAMADA DE CIERRE")), 1 if (g("VENCIDOS") or 0) else 0])
+                    str(g("RESPONSABLE DE CIERRE") or ""), fecha(g("FECHA PROGRAMADA DE CIERRE")), venc])
     return out, det
 
 
