@@ -172,6 +172,7 @@ table.t{width:100%;border-collapse:collapse;font-size:12.5px}
 .fg div{font-size:12.5px}
 .fg div span{display:block;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
 .box{background:rgba(255,255,255,.03);border:1px solid var(--line2);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--text2);white-space:pre-wrap;margin-bottom:10px}
+.ccst{display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:var(--text2);font-size:13px}.ccst[hidden]{display:none}.ccst b{color:var(--text)}.ccst .chip{cursor:pointer}
 .cmpt{width:100%;border-collapse:collapse;font-size:13px}.cmpt th{text-align:left;font:700 10.5px Inter;letter-spacing:.6px;text-transform:uppercase;color:var(--text2);padding:8px 10px;border-bottom:1px solid var(--line)}
 .cmpt td{padding:8px 10px;border-bottom:1px solid var(--line2)}.cmpt td.n{text-align:right;font-variant-numeric:tabular-nums}.cmpt tr.g td{font-weight:700;background:rgba(0,229,255,.05)}
 .up{color:#39ff88;font-weight:700}.dn{color:#ff3d71;font-weight:700}.eq0{color:#6b7aa6}
@@ -274,7 +275,7 @@ footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center}
     <div class="card"><h3>Archivos unidos</h3><div class="hint">Cada subproyecto se toma del archivo más reciente que lo contiene (hojas GENERAL, ESTADO ODB y ALERTAS).</div><ul class="src" id="src"></ul></div>
   </div>
   <div class="sec"><h2>Cambios frente al corte anterior</h2><p id="cc-lbl"></p></div>
-  <div class="card"><table class="cmpt" id="cc-tbl"></table><div class="mv" id="cc-mv"></div></div>
+  <div class="card"><div class="ccst" id="cc-st" hidden></div><table class="cmpt" id="cc-tbl"></table><div class="mv" id="cc-mv"></div></div>
   <footer id="ftr"></footer>
 </div>
 <a class="home-link home-float" id="homeFloat" href="../../index.html"><span style="font-size:16px">&#8962;</span>Volver al tablero principal</a>
@@ -662,9 +663,18 @@ function pairCuts() {
 function renderChanges() {
   if (!PREV) { $('cc-lbl').textContent = 'Sin corte anterior para comparar'; $('cc-tbl').innerHTML = ''; $('cc-mv').innerHTML = ''; return; }
   if (!PAIR) pairCuts();
+  const FL = [['m', 'Módulo'], ['sp', 'Subproyecto'], ['es', st.scope === 'eq' ? 'Equipo' : 'Especialidad'], ['et', 'Etapa'], ['ll', 'Llegada'], ['pv', 'Proveedor'], ['q', 'Buscar']].filter(([k]) => st[k]).map(([, l]) => l);
+  if (FL.length) {
+    $('cc-lbl').textContent = `${fd(PREV.corte)} → ${fd(DATA.corte)} · oculto mientras haya filtros`;
+    $('cc-tbl').innerHTML = ''; $('cc-mv').innerHTML = ''; $('cc-st').hidden = false;
+    $('cc-st').innerHTML = `<span><b>Comparación pausada</b> · con filtros activos (${esc(FL.join(', '))}) no se muestran los cambios frente al corte anterior.</span><span class="chip" id="cc-clr">Quitar filtros ✕</span>`;
+    $('cc-clr').onclick = () => { ['m', 'sp', 'es', 'et', 'll', 'pv', 'q'].forEach(k => st[k] = ''); $('f-q').value = ''; st.lim = 200; render(); };
+    return;
+  }
+  $('cc-st').hidden = true;
   const eqOnly = st.scope === 'eq', inS = x => !eqOnly || x.eq;
   const N1_ = ITEMS.filter(inS), P1 = PITEMS.filter(inS);
-  $('cc-lbl').textContent = `${fd(PREV.corte)} → ${fd(DATA.corte)} · ${eqOnly ? 'solo equipos' : 'materiales y equipos'} · totales generales (no cambian con los filtros; sí con el selector de arriba)`;
+  $('cc-lbl').textContent = `${fd(PREV.corte)} → ${fd(DATA.corte)} · ${eqOnly ? 'solo equipos' : 'materiales y equipos'} · totales generales (se ocultan al filtrar; cambian con el selector de arriba)`;
   const cnt = (L, f) => L.filter(f).length, odbAb = L => new Set(L.filter(x => x.odb && x.et !== 'Recibido').map(x => x.m + x.odb)).size;
   const alN = DATA.alertas.filter(a => a.abierta).length, alP = (PREV.alertas || []).filter(a => a.abierta).length;
   const T = [
