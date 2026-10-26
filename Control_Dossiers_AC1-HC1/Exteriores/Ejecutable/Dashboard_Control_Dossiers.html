@@ -230,7 +230,10 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <button class="btn" onclick="clearF('hc1')">Limpiar</button>
     </div>
     <div class="chips" id="hc1-chips"></div>
-    <div class="kpis" id="hc1-kpis"></div>
+    <div class="g-mr">
+      <div class="kpis" id="hc1-kpis"></div>
+      <div class="card"><h3>HC1 por subproyecto</h3><div class="d">Entregados vs por entregar · clic en una barra para filtrar el subproyecto</div><div id="hc1-side"></div></div>
+    </div>
     <div class="grid g21">
       <div class="card"><h3>Curva S · HC1 programado vs arrancado</h3><div class="d">Acumulado por fecha. Arrastre para hacer zoom · la línea magenta marca hoy</div><div id="hc1-s"></div></div>
       <div class="card"><h3>Avance por módulo</h3><div class="d">% de HC1 entregados · clic para filtrar</div><div id="hc1-rad"></div></div>
@@ -238,10 +241,6 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
     <div class="grid g2">
       <div class="card"><h3>Programados vs arrancados por mes</h3><div class="d">Últimos 18 meses y próximos 12 · clic en una barra para ver los registros</div><div id="hc1-mes"></div></div>
       <div class="card"><h3>Etapas · arrancado vs no arrancado</h3><div class="d">Top 15 etapas por cantidad de HC1 · clic para ver detalle</div><div id="hc1-et"></div></div>
-    </div>
-    <div class="grid g2">
-      <div class="card"><h3>Mapa de pendientes abiertos por etapa</h3><div class="d">Tamaño = pendientes abiertos (civil, eléctrico, instrumentación, tubería)</div><div id="hc1-tree"></div></div>
-      <div class="card"><h3>Pendientes por disciplina</h3><div class="d">Certificados y pendientes abiertos por especialidad</div><div id="hc1-disc"></div></div>
     </div>
     <div class="sec">Registros HC1</div>
     <div class="tcard"><div class="thead"><div class="info" id="hc1-info"></div><button class="btn cy" onclick="csv('hc1')">⬇ Exportar CSV</button></div><div class="tw"><table id="hc1-tbl"><thead></thead><tbody></tbody></table></div><div class="more" id="hc1-more"></div></div>
@@ -259,7 +258,10 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <button class="btn" onclick="clearF('ac1')">Limpiar</button>
     </div>
     <div class="chips" id="ac1-chips"></div>
-    <div class="kpis" id="ac1-kpis"></div>
+    <div class="g-mr">
+      <div class="kpis" id="ac1-kpis"></div>
+      <div class="card"><h3>AC1 por subproyecto</h3><div class="d">Cerrados vs abiertos · clic en una barra para filtrar el subproyecto</div><div id="ac1-side"></div></div>
+    </div>
     <div class="grid g21">
       <div class="card"><h3>Curva S · AC1 programado vs cerrado en SC</h3><div class="d">Fecha programada vs fecha de cierre en SmartCompletions</div><div id="ac1-s"></div></div>
       <div class="card"><h3>Avance por módulo</h3><div class="d">% de AC1 cerrados · clic para filtrar</div><div id="ac1-rad"></div></div>
@@ -319,7 +321,10 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <button class="btn" onclick="clearF('pen')">Limpiar</button>
     </div>
     <div class="chips" id="pen-chips"></div>
-    <div class="kpis stm" id="pen-pc"></div>
+    <div class="g-mr">
+      <div class="kpis stm" id="pen-pc"></div>
+      <div class="card"><h3>Pendientes por responsable de cierre</h3><div class="d">Top 10 · tipo A y tipo B abiertos · clic para ver los HC1</div><div id="pen-side"></div></div>
+    </div>
     <div class="sec">Pendientes abiertos del filtro</div>
     <div class="tcard"><div class="thead"><div class="info" id="pv-info"></div><button class="btn cy" onclick="csvPend()">⬇ Exportar CSV</button></div>
       <div class="pv-sum" id="pv-sum"></div>
@@ -337,7 +342,10 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <button class="btn" onclick="clearF('cer')">Limpiar</button>
     </div>
     <div class="chips" id="cer-chips"></div>
-    <div class="kpis stm" id="cer-pc"></div>
+    <div class="g-mr">
+      <div class="kpis stm" id="cer-pc"></div>
+      <div class="card"><h3>Certificados pendientes por etapa</h3><div class="d">Top 10 etapas · por disciplina · clic para ver los HC1</div><div id="cer-side"></div></div>
+    </div>
     <div class="sec">Certificados pendientes del filtro</div>
     <div class="tcard"><div class="thead"><div class="info" id="cv-info"></div><button class="btn cy" onclick="csvCert()">⬇ Exportar CSV</button></div>
       <div class="pv-sum" id="cv-sum"></div>
@@ -497,7 +505,7 @@ function stmSum(v){
   const tmpl=`96px repeat(${cols.length},minmax(54px,1fr))`;
   let g=`<div class="stm-g" style="grid-template-columns:${tmpl}"><div></div>`+G.groups.map(x=>`<div class="gh" style="--c:${x.c};grid-column:span ${x.cols.length}">${x.l}</div>`).join('');
   g+='<div></div>'+cols.map(([k,l,c])=>`<div class="ch" style="--c:${c}">${l}</div>`).join('');
-  mods.forEach(m=>{ const rows=R.filter(r=>r.mod===m); g+=`<div class="rh">${m}<small>${PROY[m]||''} · ${nf(rows.length)} HC1</small></div>`+cols.map((c,i)=>cell(rows,c,i,m,false)).join(''); });
+  mods.forEach(m=>{ const rows=R.filter(r=>r.mod===m); g+=`<div class="rh">${m}<small>${PROY[m]||''} · ${nf(rows.length)}</small></div>`+cols.map((c,i)=>cell(rows,c,i,m,false)).join(''); });
   g+=`<div class="rh tot">TOTALES<small>${nf(R.length)} HC1</small></div>`+cols.map((c,i)=>`<div class="tot" style="display:contents">${cell(R,c,i,'',true)}</div>`).join('');
   $(v+'-pc').innerHTML=`<h3>${G.t}</h3><div class="d">${G.d} · clic en una celda para ver los HC1</div>`+g+'</div>';
 }
@@ -505,6 +513,36 @@ function stmSumPick(v,k,m){
   const R=rowsPEN(true,v).filter(r=>!m||r.mod===m), f=PCF[k]||(r=>(+r[k]||0)>0);
   const sk=k[0]==='_'?(k.startsWith('_hp')?'total_pend_abiertos':'total_cert_pendientes'):k;
   openList(`${PCL[k]} · ${m||'Todos los módulos'}`, R.filter(f).sort((a,b)=>(+b[sk]||0)-(+a[sk]||0)),'hc1');
+}
+// ---------- gráficas al lado de las matrices
+const SUBMOD={ECU17049:'M3',ECU21212:'M4',ECU24091:'M5'};
+const subLab=s=>{ const m=String(s).match(/^(ECU\d+)_\d+\s*-\s*(.*)$/); return m?`${SUBMOD[m[1]]||m[1]} · ${m[2]}`:s; };
+function sideSub(id,view,R,key,okF,okL,noL){
+  const subs=[...new Set(R.map(r=>r[key]).filter(Boolean))];
+  const d=subs.map(s=>{ const t=R.filter(r=>r[key]===s), ok=t.filter(okF).length; return {s,ok,no:t.length-ok}; }).sort((a,b)=>(b.ok+b.no)-(a.ok+a.no));
+  if(!d.length){ $(id).innerHTML='<div class="empty">Sin registros</div>'; return; }
+  draw(id,{chart:{type:'bar',height:Math.max(250,d.length*30+70),stacked:true,...glow,events:{dataPointSelection:(e,c,cfg)=>{ const s=d[cfg.dataPointIndex].s; S[view].sub=S[view].sub===s?'':s; S.lim[view]=300; render(); }}},
+    series:[{name:okL,data:d.map(x=>x.ok)},{name:noL,data:d.map(x=>x.no)}],colors:[C.lm,C.or],
+    plotOptions:{bar:{horizontal:true,barHeight:'62%',borderRadius:3}},xaxis:{categories:d.map(x=>subLab(x.s))},yaxis:{labels:{maxWidth:190,style:{fontSize:'11px'}}},
+    dataLabels:{enabled:true,style:{colors:['#05070f'],fontWeight:800}},legend:{position:'top'}});
+}
+function sidePenResp(){
+  const R=rowsPEN(), m={}; R.forEach(r=>(r.pl||[]).forEach(p=>{ const k=p[4]||'(sin responsable)'; m[k]=m[k]||{a:0,b:0,i:new Set()}; p[1]==='A'?m[k].a++:m[k].b++; m[k].i.add(r._i); }));
+  const d=Object.entries(m).sort((x,y)=>(y[1].a+y[1].b)-(x[1].a+x[1].b)).slice(0,10);
+  if(!d.length){ $('pen-side').innerHTML='<div class="empty">Sin pendientes abiertos en el filtro</div>'; return; }
+  draw('pen-side',{chart:{type:'bar',height:Math.max(250,d.length*30+70),stacked:true,...glow,events:{dataPointSelection:(e,c,cfg)=>{ const [k,v]=d[cfg.dataPointIndex]; openList(`Pendientes de ${k}`, H.filter(r=>v.i.has(r._i)),'hc1'); }}},
+    series:[{name:'Tipo A',data:d.map(x=>x[1].a)},{name:'Tipo B',data:d.map(x=>x[1].b)}],colors:[C.rd,C.yl],
+    plotOptions:{bar:{horizontal:true,barHeight:'62%',borderRadius:3}},xaxis:{categories:d.map(x=>x[0])},yaxis:{labels:{maxWidth:170,style:{fontSize:'11px'}}},
+    dataLabels:{enabled:true,style:{colors:['#05070f'],fontWeight:800}},legend:{position:'top'}});
+}
+function sideCerEtapa(){
+  const R=rowsCER(), m={}; R.forEach(r=>{ const t=+r.total_cert_pendientes||0; if(!t) return; const e=r.etapa||'(sin etapa)'; m[e]=m[e]||{e:0,i:0,t:0}; m[e].e+=+r.cert_electrica||0; m[e].i+=+r.cert_instr||0; m[e].t+=+r.cert_tuberia||0; });
+  const d=Object.entries(m).sort((x,y)=>(y[1].e+y[1].i+y[1].t)-(x[1].e+x[1].i+x[1].t)).slice(0,10);
+  if(!d.length){ $('cer-side').innerHTML='<div class="empty">Sin certificados pendientes en el filtro</div>'; return; }
+  draw('cer-side',{chart:{type:'bar',height:Math.max(250,d.length*30+70),stacked:true,...glow,events:{dataPointSelection:(e,c,cfg)=>{ const et=d[cfg.dataPointIndex][0]; openList(`Certificados pendientes · ${et}`, R.filter(r=>(r.etapa||'(sin etapa)')===et&&(+r.total_cert_pendientes||0)>0).sort((a,b)=>(+b.total_cert_pendientes||0)-(+a.total_cert_pendientes||0)),'hc1'); }}},
+    series:[{name:'Eléctrica',data:d.map(x=>x[1].e)},{name:'Instrumentación',data:d.map(x=>x[1].i)},{name:'Tubería',data:d.map(x=>x[1].t)}],colors:[C.lm,C.cy,C.vi],
+    plotOptions:{bar:{horizontal:true,barHeight:'62%',borderRadius:3}},xaxis:{categories:d.map(x=>x[0])},yaxis:{labels:{maxWidth:150,style:{fontSize:'11px'}}},
+    dataLabels:{enabled:true,formatter:v=>v>=8?v:'',style:{colors:['#05070f'],fontWeight:800}},legend:{position:'top'}});
 }
 // ---------- KPI
 function kpis(view, list){
@@ -655,17 +693,7 @@ function renderHC1(){
   draw('hc1-et',{chart:{type:'bar',height:Math.max(300,top.length*26+60),stacked:true,...glow,events:{dataPointSelection:(e,c,cfg)=>{ const et_=top[cfg.dataPointIndex][0], a=cfg.seriesIndex===0; openList(`${et_} · ${a?'Arrancados':'No arrancados'}`, R.filter(r=>(r.etapa||'(sin etapa)')===et_&&(a?r.e_arranque==='ARRANCADO':r.e_arranque!=='ARRANCADO')),'hc1'); }}},
     series:[{name:'Arrancado',data:top.map(x=>x[1].a)},{name:'No arrancado',data:top.map(x=>x[1].n)}],colors:[C.lm,C.yl],
     plotOptions:{bar:{horizontal:true,barHeight:'68%',borderRadius:3}},xaxis:{categories:top.map(x=>x[0])},dataLabels:{enabled:true,style:{colors:['#05070f'],fontWeight:800}},legend:{position:'top'}});
-  const tm={}; R.forEach(r=>{ const v=+r.total_pend_abiertos||0; if(v>0){ const e=r.etapa||'(sin etapa)'; tm[e]=(tm[e]||0)+v; }});
-  const tmd=Object.entries(tm).sort((a,b)=>b[1]-a[1]).slice(0,25);
-  draw('hc1-tree',{chart:{type:'treemap',height:330,events:{dataPointSelection:(e,c,cfg)=>{ const et_=tmd[cfg.dataPointIndex][0]; openList(`Pendientes abiertos · ${et_}`, R.filter(r=>(r.etapa||'(sin etapa)')===et_&&(+r.total_pend_abiertos||0)>0),'hc1'); }}},
-    series:[{data:tmd.map(([x,y])=>({x,y}))}], colors:[C.or,C.mg,C.cy,C.vi,C.yl,C.rd,C.lm,C.bl], plotOptions:{treemap:{distributed:true,enableShades:true,shadeIntensity:.35}},
-    dataLabels:{enabled:true,style:{fontSize:'12px',fontWeight:700,colors:['#05070f']},formatter:(t,o)=>[t,o.value]}, tooltip:{y:{formatter:v=>v+' pendientes'}}});
-  if(!tmd.length) $('hc1-tree').innerHTML='<div class="empty">Sin pendientes abiertos en la selección</div>';
-  const disc=['Civil','Eléctrico','Instrumentación','Tubería'], pk=['pdts_civil','pdts_elect','pdts_instr','pdts_tuber'], ck=[null,'cert_electrica','cert_instr','cert_tuberia'];
-  draw('hc1-disc',{chart:{type:'bar',height:330,...glow,events:{dataPointSelection:(e,c,cfg)=>{ const k=(cfg.seriesIndex===0?pk:ck)[cfg.dataPointIndex]; if(k) openList(`${cfg.seriesIndex===0?'Pendientes':'Certificados'} · ${disc[cfg.dataPointIndex]}`, R.filter(r=>(+r[k]||0)>0),'hc1'); }}},
-    series:[{name:'Pendientes abiertos',data:pk.map(k=>R.reduce((s,r)=>s+(+r[k]||0),0))},{name:'Certificados pendientes',data:ck.map(k=>k?R.reduce((s,r)=>s+(+r[k]||0),0):0)}],
-    colors:[C.or,C.mg],plotOptions:{bar:{columnWidth:'55%',borderRadius:6,dataLabels:{position:'top'}}},dataLabels:{enabled:true,offsetY:-18,style:{colors:[C.tx]}},xaxis:{categories:disc},legend:{position:'top'},
-    fill:{type:'gradient',gradient:{shade:'dark',type:'vertical',opacityFrom:1,opacityTo:.55}}});
+  sideSub('hc1-side','hc1',R,'subproyecto',hcEnt,'Entregados','Por entregar');
   table('hc1',R);
 }
 // ---------- certificados pendientes del filtro
@@ -685,8 +713,8 @@ function csvCert(){ const R=certRows(), cols=['mod','sistema','id_hc1','etapa','
   const lines=[cols.join(';')].concat(R.map(r=>cols.map(k=>`"${String(r[k]??'').replace(/"/g,'""')}"`).join(';')));
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'})); a.download=`certificados_pendientes_${DATA.today}.csv`; a.click(); }
 // ================= PENDIENTES
-function renderPEN(){ chips('pen'); stmSum('pen'); renderPend(); }
-function renderCER(){ chips('cer'); stmSum('cer'); renderCert(); }
+function renderPEN(){ chips('pen'); stmSum('pen'); sidePenResp(); renderPend(); }
+function renderCER(){ chips('cer'); stmSum('cer'); sideCerEtapa(); renderCert(); }
 // ================= AC1
 function renderAC1(){
   const R=rowsAC1(), n=R.length; chips('ac1');
@@ -716,6 +744,7 @@ function renderAC1(){
   draw('ac1-heat',{chart:{type:'heatmap',height:300,events:{dataPointSelection:(e,c,cfg)=>{ const m=mods[cfg.seriesIndex], [l,f]=cats[cfg.dataPointIndex]; openList(`${m} · ${l}`, R.filter(r=>r.mod===m&&f(r)),'ac1'); }}},
     series:mods.map(m=>({name:m,data:cats.map(([l,f])=>({x:l,y:R.filter(r=>r.mod===m&&f(r)).length}))})),dataLabels:{enabled:true,style:{colors:['#05070f'],fontWeight:800}},
     plotOptions:{heatmap:{radius:6,enableShades:false,colorScale:{ranges:[{from:0,to:0,color:'#141a33',name:'0'},{from:1,to:20,color:C.vi,name:'1-20'},{from:21,to:100,color:C.cy,name:'21-100'},{from:101,to:100000,color:C.lm,name:'>100'}]}}},stroke:{width:3,colors:['#05070f']}});
+  sideSub('ac1-side','ac1',R,'subpry',acCer,'Cerrados','Abiertos');
   table('ac1',R);
 }
 // ================= DOSSIERES
