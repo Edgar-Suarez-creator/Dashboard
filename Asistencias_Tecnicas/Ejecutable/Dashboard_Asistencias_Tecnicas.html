@@ -201,6 +201,21 @@ td.wrap div{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical
 @media(max-width:1500px){#kpis{grid-template-columns:repeat(4,1fr)}}@media(max-width:760px){#kpis{grid-template-columns:1fr 1fr}}
 
 .fbar .fg select{min-width:104px;max-width:170px}.fbar .fg.grow{min-width:180px}
+.ms{position:relative}
+.ms>button{position:relative;width:100%;min-width:104px;max-width:170px;height:34px;padding:7px 26px 7px 10px;background:rgba(4,6,13,.85);border:1px solid rgba(0,229,255,.22);border-radius:9px;color:var(--text);font:12.5px Inter;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.ms>button::after{content:'▾';position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--text2)}
+.ms>button.on{border-color:rgba(0,229,255,.6);color:#8ff3ff}
+.ms.open>button{border-color:var(--cy);box-shadow:0 0 10px rgba(0,229,255,.4)}
+.ms .mp{display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:80;width:max-content;min-width:220px;max-width:min(340px,calc(100vw - 32px));padding:8px;background:rgba(8,12,28,.98);border:1px solid rgba(0,229,255,.35);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.6)}
+.ms .mp.rt{left:auto;right:0}.ms.open .mp{display:block}
+.fg .ms .mq{width:100%;min-width:0;margin-bottom:6px}
+.ms .ma{display:flex;gap:12px;padding:0 6px 6px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+.ms .ma a{font:600 11px Inter;color:var(--cy);cursor:pointer}.ms .ma a:hover{text-decoration:underline}
+.ms .ml{max-height:280px;overflow:auto}
+.fg .ms label.mo{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;font:400 12.5px Inter;letter-spacing:0;text-transform:none;color:var(--text);cursor:pointer}
+.fg .ms label.mo:hover{background:rgba(0,229,255,.08)}
+.fg .ms label.mo input{width:14px;height:14px;min-width:0;margin:0;padding:0;accent-color:var(--cy);flex:none}
+.ms label.mo small{margin-left:auto;padding-left:10px;color:var(--muted)}
 .botg{grid-template-columns:minmax(0,1.42fr) minmax(0,1fr);align-items:stretch}.botg .stw{margin-bottom:0}.mxw{width:max-content}@media(max-width:1500px){.botg{grid-template-columns:1fr}.mxw{width:auto}}
 .topg{grid-template-columns:1fr}.topg>div:first-child{display:grid;grid-template-columns:1fr;gap:14px}.stw{overflow-x:auto}.topg>div:first-child .stw{margin-bottom:0}@media(max-width:1500px){.topg>div:first-child{grid-template-columns:1fr}}
 .botg table.st{border-spacing:2px}.botg table.st td{font-size:14.5px;padding:7px 2px}.botg table.st th{padding:5px 2px;font-size:8.8px;letter-spacing:.2px}.botg table.st th.g{font-size:11px}.botg table.st td.n{font-size:13px}.botg .stw{padding:12px 10px 12px}#mx2{gap:4px}#mx2 .cl{min-height:42px;width:46px;border-radius:8px}#mx2 .cl b{font-size:17px}#mx2 .cl span{font-size:8.5px;margin-top:1px}#mx2 .hd{font-size:10.5px;width:46px;height:92px;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:flex-start;padding:0;text-align:left;letter-spacing:.6px}
@@ -300,14 +315,14 @@ table.st td .z{opacity:.28}
   </div>
 
   <div class="fbar" style="position:sticky;top:0;z-index:60;background:rgba(8,12,28,.95)">
-    <div class="fg"><label>Frente</label><select id="f-fr"><option value="">Todos</option></select></div>
-    <div class="fg"><label>Módulo</label><select id="f-mod"><option value="">Todos</option></select></div>
-    <div class="fg"><label>Ubicación / clúster</label><select id="f-ubic"><option value="">Todas</option></select></div>
-    <div class="fg"><label>Vendor</label><select id="f-ven"><option value="">Todos</option></select></div>
-    <div class="fg"><label>ODS</label><select id="f-ods"><option value="">Todas</option></select></div>
-    <div class="fg"><label>Contrato marco</label><select id="f-marco"><option value="">Todos</option></select></div>
-    <div class="fg"><label>Etapa</label><select id="f-et"><option value="">Todas</option></select></div>
-    <div class="fg"><label>Semáforo</label><select id="f-sem"><option value="">Todos</option><option value="2">🔴 Rojo</option><option value="3">🟡 Amarillo</option><option value="4">🟢 Verde</option><option value="1">⚪ Cerrada</option></select></div>
+    <div class="fg"><label>Frente</label><div class="ms" id="f-fr"></div></div>
+    <div class="fg"><label>Módulo</label><div class="ms" id="f-mod"></div></div>
+    <div class="fg"><label>Ubicación / clúster</label><div class="ms" id="f-ubic"></div></div>
+    <div class="fg"><label>Vendor</label><div class="ms" id="f-ven"></div></div>
+    <div class="fg"><label>ODS</label><div class="ms" id="f-ods"></div></div>
+    <div class="fg"><label>Contrato marco</label><div class="ms" id="f-marco"></div></div>
+    <div class="fg"><label>Etapa</label><div class="ms" id="f-et"></div></div>
+    <div class="fg"><label>Semáforo</label><div class="ms" id="f-sem"></div></div>
     <div class="fg grow"><label>Buscar</label><input id="f-q" placeholder="AT-008, CASE-0610, trafo, observaciones…"></div>
     <button class="btn" onclick="resetF()">Limpiar</button>
   </div>
@@ -389,7 +404,7 @@ const ETAPAS=['0. Sin solicitud','1. Solicitud enviada','2. ODS creada · en tr�
 const EC=[C.tx,C.bl,C.vi,C.cy,C.yl,C.or,C.lm];
 const SEM={2:['Rojo',C.rd],3:['Amarillo',C.yl],4:['Verde',C.lm],1:['Cerrada',C.tx]};
 const ei=e=>Math.max(0,ETAPAS.indexOf(e));
-const F0=()=>({fr:'',mod:'',ubic:'',ven:'',ods:'',marco:'',et:'',sem:'',q:'',ck:-1,ckm:'pend'});
+const F0=()=>({fr:[],mod:[],ubic:[],ven:[],ods:[],marco:[],et:[],sem:[],q:'',ck:-1,ckm:'pend'});
 let F=F0(), TAB='rs', CH={};
 A.forEach((x,i)=>x.i=i);
 
@@ -398,9 +413,9 @@ const SHOT=location.hash.includes('shot');
 const baseOpt=()=>({chart:{background:'transparent',foreColor:C.tx,toolbar:{show:false},fontFamily:'Inter',animations:{enabled:!SHOT}},theme:{mode:'dark'},grid:{borderColor:'rgba(255,255,255,.06)',strokeDashArray:3},dataLabels:{enabled:false},legend:{labels:{colors:C.tx}},tooltip:{theme:'dark'}});
 function mk(id,o){if(CH[id])CH[id].destroy();CH[id]=new ApexCharts(document.getElementById(id),o);CH[id].render()}
 
-function rows(skip){const s=new Set(skip||[]),q=F.q.toLowerCase(),on=k=>!s.has(k)&&F[k];
-  return A.filter(x=>(!on('fr')||x.fr===F.fr)&&(!on('mod')||x.mod===F.mod)&&(!on('ubic')||x.ubic===F.ubic)&&(!on('ven')||x.ven===F.ven)&&(!on('ods')||x.ods===F.ods)&&(!on('marco')||x.marco===F.marco)
-    &&(!on('et')||x.etapa===F.et)&&(!on('sem')||String(x.sem)===F.sem)&&(s.has('ck')||F.ck<0||(ei(x.etapa)<=3&&((F.ckm==='ok')===(x.chk[F.ck]==='Sí'||x.chk[F.ck]==='N.A.'))))
+function rows(skip){const s=new Set(skip||[]),q=F.q.toLowerCase(),on=k=>!s.has(k)&&F[k].length;
+  return A.filter(x=>(!on('fr')||F.fr.includes(x.fr))&&(!on('mod')||F.mod.includes(x.mod))&&(!on('ubic')||F.ubic.includes(x.ubic))&&(!on('ven')||F.ven.includes(x.ven))&&(!on('ods')||F.ods.includes(x.ods))&&(!on('marco')||F.marco.includes(x.marco))
+    &&(!on('et')||F.et.includes(x.etapa))&&(!on('sem')||F.sem.includes(String(x.sem)))&&(s.has('ck')||F.ck<0||(ei(x.etapa)<=3&&((F.ckm==='ok')===(x.chk[F.ck]==='Sí'||x.chk[F.ck]==='N.A.'))))
     &&(!q||[x.id,x.ubic,x.eq,x.ven,x.ods,x.marco,x.falta,x.obs].join(' ').toLowerCase().includes(q)))}
 const cut=(s,n)=>!s?s:(s.length>n?s.slice(0,n-1)+'…':s);
 const mm=v=>{if(v==null||isNaN(v))return '—';const a=Math.abs(v),s=v<0?'-':'';if(a>=1e9)return s+'$'+(a/1e9).toLocaleString('es-CO',{maximumFractionDigits:1})+' mil M';if(a>=1e6)return s+'$'+Math.round(a/1e6).toLocaleString('es-CO')+' M';return s+'$'+Math.round(a).toLocaleString('es-CO')};
@@ -429,13 +444,13 @@ function kpis(){
 }
 function pipe(){
   document.getElementById('pipe').innerHTML=ETAPAS.map((e,i)=>{const r=A.filter(x=>x.etapa===e),ex=r.filter(x=>x.fr==='Exteriores').length;
-    return `<div class="stg ${F.et===e?'on':''}" style="--c:${EC[i]}" onclick="setF('et','${e}')"><div class="n">ETAPA ${i}</div><div class="t">${esc(e.replace(/^\d\.\s*/,''))}</div><div class="v">${r.length}</div><div class="s">${ex} Exteriores · ${r.length-ex} Centauros</div><div class="bar"><i style="width:${A.length?100*r.length/A.length:0}%;background:${EC[i]};box-shadow:0 0 8px ${EC[i]}"></i></div></div>`}).join('');
+    return `<div class="stg ${F.et.includes(e)?'on':''}" style="--c:${EC[i]}" onclick="setF('et','${e}')"><div class="n">ETAPA ${i}</div><div class="t">${esc(e.replace(/^\d\.\s*/,''))}</div><div class="v">${r.length}</div><div class="s">${ex} Exteriores · ${r.length-ex} Centauros</div><div class="bar"><i style="width:${A.length?100*r.length/A.length:0}%;background:${EC[i]};box-shadow:0 0 8px ${EC[i]}"></i></div></div>`}).join('');
 }
 
 // ============ Tablas de estatus y matriz (reemplazan las tarjetas) ============
 const FR=[['Exteriores','Exteriores'],['Centauros','Estaciones']];
 let MXM='pend';
-function goF(fr,et,sem){F.fr=fr||'';F.et=et||'';F.sem=sem||'';F.ck=-1;syncF();goTab('as')}
+function goF(fr,et,sem){F.fr=fr?[fr]:[];F.et=et?[et]:[];F.sem=sem?[sem]:[];F.ck=-1;syncF();goTab('as')}
 function estatus(){
   const z=v=>v?v:'<span class="z">0</span>', B=rows(['ck']), fs=[...FR.map(f=>[f[0],f[1],B.filter(x=>x.fr===f[0])]),['','TOTALES',B]];
   const G=[['POR GESTIONAR',C.tx,[0,1]],['EN TRÁMITE',C.vi,[2,3]],['EJECUCIÓN Y CIERRE',C.lm,[4,5,6]]];
@@ -465,12 +480,12 @@ function matriz(){if(!document.getElementById('mx2'))return;
   const CC=[C.cy,C.vi,C.vi,C.yl,C.or,C.mg,C.lm,C.bl,C.rd];
   let h=`<div></div>${CK.map((c,j)=>`<div class="hd" style="color:${CC[j]};text-shadow:0 0 8px ${CC[j]}66">${c}</div>`).join('')}`;
   FR.forEach(([k,n])=>{const r=open.filter(x=>x.fr===k);
-    h+=`<div class="rl">${n}<div style="font:500 10px Inter;color:var(--muted)">${r.length} por ingresar</div></div>`+CK.map((c,j)=>{const v=val(r,j),a=v/mx,on=F.ck===j&&F.fr===k;
+    h+=`<div class="rl">${n}<div style="font:500 10px Inter;color:var(--muted)">${r.length} por ingresar</div></div>`+CK.map((c,j)=>{const v=val(r,j),a=v/mx,on=F.ck===j&&F.fr.join()===k;
       const bg=MXM==='ok'?`rgba(57,255,136,${.08+.5*a})`:`rgba(0,190,220,${.08+.55*a})`, dark=a>.65;
       return `<div class="cl ${on?'on':''}" style="background:${v?bg:'rgba(255,255,255,.03)'};color:${dark?'#04121a':'#eef3ff'}" onclick="mxF('${k}',${j})" title="${n} · ${c}: ${v} de ${r.length} (${MXM==='ok'?'listo':'pendiente'})">${v?`<b>${v}</b><span style="color:${dark?'#062431':C.mg};font-weight:700">de ${r.length}</span>`:''}</div>`}).join('')});
   const el=document.getElementById('mx2'); el.style.gridTemplateColumns=`92px repeat(${CK.length},46px)`; el.innerHTML=h;
 }
-function mxF(k,j){F.fr=k;F.et='';F.sem='';F.ck=j;F.ckm=MXM;syncF();goTab('as')}
+function mxF(k,j){F.fr=[k];F.et=[];F.sem=[];F.ck=j;F.ckm=MXM;syncF();goTab('as')}
 document.querySelectorAll('#mx-tg button').forEach(b=>b.onclick=()=>{MXM=b.dataset.m;document.querySelectorAll('#mx-tg button').forEach(x=>x.classList.toggle('on',x===b));matriz()});
 
 // ============ GANTT (estilo Timeline Taladro) ============
@@ -530,23 +545,26 @@ function drag(el){let sx,sl,dn=false;el.onmousedown=e=>{if(e.target.closest('.gb
   window.addEventListener('mouseup',()=>{dn=false;el.classList.remove('drag')});el.onmousemove=e=>{if(!dn)return;el.scrollLeft=sl-(e.pageX-sx)}}
 document.querySelectorAll('.gtool [data-z]').forEach(b=>b.onclick=()=>{GZ=+b.dataset.z;Object.keys(GSC).forEach(k=>delete GSC[k]);document.querySelectorAll('.gtool [data-z]').forEach(x=>{x.style.color=x===b?'#fff':'';x.style.borderColor=x===b?'var(--cy)':''});gantt()});
 
-function setF(k,v){F[k]=F[k]===v?'':v;syncF();if(TAB==='rs'||TAB==='co'||TAB==='ca'||TAB==='bi'||TAB==='gt')goTab('as');else render()}
+function setF(k,v){F[k]=F[k].join()===v?[]:[v];syncF();if(TAB==='rs'||TAB==='co'||TAB==='ca'||TAB==='bi'||TAB==='gt')goTab('as');else render()}
 const FK=['fr','mod','ubic','ven','ods','marco','et','sem','q'];
+// Filtros con casillas: F[k] es la lista de valores marcados (vacía = todos)
+const MSL={fr:'Todos',mod:'Todos',ubic:'Todas',ven:'Todos',ods:'Todas',marco:'Todos',et:'Todas',sem:'Todos'},SEML={2:'🔴 Rojo',3:'🟡 Amarillo',4:'🟢 Verde',1:'⚪ Cerrada'};
+const msLab=(k,v)=>k==='sem'?SEML[v]:k==='fr'&&v==='Centauros'?'Estaciones':v;
 function opts(){
-  const D={fr:'Todos',mod:'Todos',ubic:'Todas',ven:'Todos',ods:'Todas',marco:'Todos',et:'Todas'};
-  Object.entries(D).forEach(([k,lab])=>{const el=document.getElementById('f-'+k), R=rows([k,'ck']);
-    let v=[...new Set(R.map(x=>k==='et'?x.etapa:x[k]).filter(Boolean))]; v=k==='et'?ETAPAS.filter(e=>v.includes(e)):v.sort();
-    if(F[k]&&!v.includes(F[k]))v.unshift(F[k]);
-    el.innerHTML=`<option value="">${lab}</option>`+v.map(o=>`<option value="${esc(o)}">${k==='fr'&&o==='Centauros'?'Estaciones':esc(o)} (${R.filter(x=>(k==='et'?x.etapa:x[k])===o).length})</option>`).join('');
-    el.value=F[k]});
-  const s=document.getElementById('f-sem'), Rs=rows(['sem','ck']);
-  s.innerHTML='<option value="">Todos</option>'+[[2,'🔴 Rojo'],[3,'🟡 Amarillo'],[4,'🟢 Verde'],[1,'⚪ Cerrada']].map(([k,l])=>`<option value="${k}">${l} (${Rs.filter(x=>x.sem===k).length})</option>`).join('');s.value=F.sem;
+  Object.keys(MSL).forEach(k=>{const el=document.getElementById('f-'+k), R=rows([k,'ck']), val=x=>k==='et'?x.etapa:k==='sem'?String(x.sem):x[k];
+    let v=k==='sem'?['2','3','4','1']:[...new Set(R.map(val).filter(Boolean))]; if(k==='et')v=ETAPAS.filter(e=>v.includes(e));else if(k!=='sem')v.sort();
+    F[k].forEach(s=>{if(!v.includes(s))v.unshift(s)});
+    const qi=el.querySelector('.mq'), q=qi?qi.value.toLowerCase():'', L=el.querySelector('.ml'), st=L.scrollTop;
+    L.innerHTML=v.map(o=>{const t=msLab(k,o);return `<label class="mo"${q&&!t.toLowerCase().includes(q)?' style="display:none"':''}><input type="checkbox" value="${esc(o)}"${F[k].includes(o)?' checked':''}><span>${esc(t)}</span><small>${R.filter(x=>val(x)===o).length}</small></label>`}).join('')||'<div class="empty">Sin opciones</div>';
+    L.scrollTop=st;
+    const b=el.querySelector('button');b.textContent=!F[k].length?MSL[k]:F[k].length===1?msLab(k,F[k][0]):F[k].length+' seleccionados';b.classList.toggle('on',F[k].length>0);b.title=F[k].map(o=>msLab(k,o)).join(', ')});
 }
-function syncF(){FK.forEach(k=>{const el=document.getElementById('f-'+k);if(el)el.value=F[k]})}
-function conF(R){const ods=new Set(R.map(x=>x.ods)),ven=new Set(R.map(x=>x.ven.toUpperCase().split(' ')[0]));const act=F.fr||F.mod||F.ubic||F.ven||F.ods||F.marco||F.et||F.sem||F.q||F.ck>=0;
-  return DATA.contratos.filter(c=>(!F.fr||c.fr===F.fr)&&(!F.marco||c.marco===F.marco)&&(!F.ods||c.ods===F.ods)&&(!act||ods.has(c.ods)||(!F.ods&&ven.has(c.ven.toUpperCase().split(' ')[0].replace(/[()]/g,'')))))}
+function syncF(){document.getElementById('f-q').value=F.q}
+function rmF(k,i){if(i<0)F[k]='';else F[k].splice(i,1);syncF();render()}
+function conF(R){const ods=new Set(R.map(x=>x.ods)),ven=new Set(R.map(x=>x.ven.toUpperCase().split(' ')[0]));const act=FK.some(k=>F[k].length)||F.ck>=0;
+  return DATA.contratos.filter(c=>(!F.fr.length||F.fr.includes(c.fr))&&(!F.marco.length||F.marco.includes(c.marco))&&(!F.ods.length||F.ods.includes(c.ods))&&(!act||ods.has(c.ods)||(!F.ods.length&&ven.has(c.ven.toUpperCase().split(' ')[0].replace(/[()]/g,'')))))}
 function chips(){const L={fr:'Frente',mod:'Módulo',ubic:'Ubicación',ven:'Vendor',ods:'ODS',marco:'Contrato marco',et:'Etapa',sem:'Semáforo',q:'Buscar'},SV={2:'Rojo',3:'Amarillo',4:'Verde',1:'Cerrada'};
-  const c=FK.filter(k=>F[k]).map(k=>`<span class="chip" onclick="F['${k}']='';syncF();render()">${L[k]}: ${esc(k==='sem'?SV[F[k]]:k==='fr'&&F[k]==='Centauros'?'Estaciones':F[k])} ✕</span>`);
+  const c=FK.flatMap(k=>k==='q'?(F.q?[[k,F.q,-1]]:[]):F[k].map((v,i)=>[k,v,i])).map(([k,v,i])=>`<span class="chip" onclick="rmF('${k}',${i})">${L[k]}: ${esc(k==='sem'?SV[v]:k==='fr'&&v==='Centauros'?'Estaciones':v)} ✕</span>`);
   if(F.ck>=0)c.push(`<span class="chip" onclick="F.ck=-1;render()">Checklist: ${esc(CK[F.ck])} ${F.ckm==='ok'?'listo':'pendiente'} ✕</span>`);
   document.getElementById('fchips').innerHTML=c.length?c.join('')+`<span class="chip" style="border-color:rgba(0,229,255,.5);color:#8ff3ff" onclick="resetF()">Quitar todos</span>`:''}
 
@@ -592,7 +610,7 @@ function tabla(){
     <td>${esc(x.ods)}</td><td>${dots(x)}</td><td>${fd(x.freq)}</td><td>${x.cons==null?'—':`<span style="color:${x.cons>=.999?C.lm:C.or}">${Math.round(x.cons*100)}%</span>`}</td><td>${fd(x.prox)}</td>
     <td>${etb(x.etapa)}</td><td>${semDot(x.sem)}</td><td style="color:var(--text2);font-size:11.5px;max-width:340px" title="${esc(x.falta)}">${esc(cut(x.falta,95)||'✔')}</td></tr>`).join('')||'<tr><td colspan="13" class="empty">Sin asistencias con los filtros actuales</td></tr>';
   document.getElementById('ct-as').textContent=R.length;
-  const fl=document.getElementById('ck-flag'); if(fl) fl.innerHTML=F.ck>=0?`Filtro de la matriz: <b style="color:var(--mg)">${esc(CK[F.ck])} · ${F.ckm==='ok'?'listo':'pendiente'}</b> · ${F.fr==='Centauros'?'Estaciones':esc(F.fr)} <span class="chip" onclick="F.ck=-1;render()">quitar ✕</span>`:'';
+  const fl=document.getElementById('ck-flag'); if(fl) fl.innerHTML=F.ck>=0?`Filtro de la matriz: <b style="color:var(--mg)">${esc(CK[F.ck])} · ${F.ckm==='ok'?'listo':'pendiente'}</b> · ${F.fr.map(v=>v==='Centauros'?'Estaciones':esc(v)).join(', ')} <span class="chip" onclick="F.ck=-1;render()">quitar ✕</span>`:'';
 }
 function heat(){
   const R=rows().filter(x=>DATA.cal[x.id]); const all=R.flatMap(x=>DATA.cal[x.id].map(m=>m[0])).concat([HOY]).sort();
@@ -667,11 +685,14 @@ function goTab(t){TAB=t;document.querySelectorAll('.tab').forEach(e=>e.classList
 function render(){opts();chips();heroVal();estatus();tabla();if(TAB==='rs')resumen();if(TAB==='ca')heat();if(TAB==='co')contratos();if(TAB==='bi')bitacora();else{document.getElementById('ct-bi').textContent=DATA.hitos.length}
   if(TAB!=='co')document.getElementById('ct-co').textContent=DATA.contratos.length;if(TAB!=='ca')document.getElementById('ct-ca').textContent=Object.keys(DATA.cal).length}
 function resetF(){F=F0();F.ckm=MXM;syncF();render()}
-const opt=(id,vals)=>{const s=document.getElementById(id);vals.forEach(v=>s.insertAdjacentHTML('beforeend',`<option>${esc(v)}</option>`))};
-const uq=k=>[...new Set(A.map(x=>x[k]).filter(Boolean))].sort();
-document.getElementById('f-fr').insertAdjacentHTML('beforeend',uq('fr').map(v=>`<option value="${esc(v)}">${v==='Centauros'?'Estaciones':esc(v)}</option>`).join(''));
-opt('f-mod',uq('mod'));opt('f-ubic',uq('ubic'));opt('f-ven',uq('ven'));opt('f-ods',uq('ods'));opt('f-marco',uq('marco'));opt('f-et',ETAPAS);
-['fr','mod','ubic','ven','ods','marco','et','sem'].forEach(k=>document.getElementById('f-'+k).onchange=e=>{F[k]=e.target.value;render()});
+Object.keys(MSL).forEach(k=>{const el=document.getElementById('f-'+k);
+  el.innerHTML=`<button type="button"></button><div class="mp">${['fr','et','sem'].includes(k)?'':'<input class="mq" placeholder="Buscar…">'}<div class="ma"><a data-a="all">Marcar todos</a><a data-a="none">Limpiar</a></div><div class="ml"></div></div>`;
+  el.querySelector('button').onclick=()=>{const o=!el.classList.contains('open');document.querySelectorAll('.ms.open').forEach(m=>m.classList.remove('open'));if(!o)return;
+    el.classList.add('open');const p=el.querySelector('.mp');p.classList.remove('rt');if(p.getBoundingClientRect().right>innerWidth-8)p.classList.add('rt');const qi=el.querySelector('.mq');if(qi)qi.focus()};
+  el.querySelector('.ml').onchange=e=>{const v=e.target.value;F[k]=e.target.checked?[...F[k],v]:F[k].filter(x=>x!==v);render()};
+  el.querySelector('.ma').onclick=e=>{const a=e.target.dataset.a;if(!a)return;F[k]=a==='all'?[...el.querySelectorAll('.mo')].filter(l=>l.style.display!=='none').map(l=>l.querySelector('input').value):[];render()};
+  const qi=el.querySelector('.mq');if(qi)qi.oninput=()=>{const q=qi.value.toLowerCase();el.querySelectorAll('.mo').forEach(l=>l.style.display=l.querySelector('span').textContent.toLowerCase().includes(q)?'':'none')}});
+document.addEventListener('click',e=>{if(e.target.isConnected&&!e.target.closest('.ms'))document.querySelectorAll('.ms.open').forEach(m=>m.classList.remove('open'))});
 let tq;document.getElementById('f-q').oninput=e=>{clearTimeout(tq);tq=setTimeout(()=>{F.q=e.target.value;render()},250)};
 document.getElementById('b-q').oninput=()=>bitacora();
 document.getElementById('gen-at').textContent=fd(HOY);
