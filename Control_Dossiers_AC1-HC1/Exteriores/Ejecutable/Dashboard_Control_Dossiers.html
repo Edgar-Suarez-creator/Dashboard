@@ -89,6 +89,11 @@ h1,h2,h3,.rj{font-family:Rajdhani,Inter,sans-serif}
 .stm-g .c span{font-size:10.5px;color:#c9d6f5;margin-top:3px;opacity:.85}
 .stm-g .c.z b{color:#3d4a70}.stm-g .c.z{cursor:default}
 .stm-g .c.nk{cursor:default}
+.stm-g{gap:5px}.stm-g .c{min-height:40px;padding:5px 4px 4px;border-radius:8px}.stm-g .c b{font-size:18px;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+.stm-g .c span{font-size:10px;margin-top:1px;color:#e6f4ff;opacity:.9}.stm-g .rh{font-size:12px;padding-left:0}.stm-g .ch{font-size:9.5px;padding-bottom:3px}
+.kpis.stm{padding:14px 16px 12px}.stm .d{margin-bottom:8px}
+.g-mr{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;margin-bottom:14px;align-items:start}.g-mr>.kpis{margin-bottom:0}
+@media(max-width:1150px){.g-mr{grid-template-columns:1fr}}
 tr.trow td{position:sticky;bottom:0;background:#131c3a!important;font-weight:800;color:#ffe14d;border-top:2px solid rgba(95,212,240,.45);cursor:default}
 .pltab{width:100%;border-collapse:collapse;font-size:12px}.pltab th{text-align:left;color:#9fb3d9;font:700 10.5px Inter;text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.1);position:sticky;top:0;background:#0d1430}
 .pltab td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}.pltab td.ds{white-space:normal;min-width:320px;line-height:1.35}
@@ -285,20 +290,20 @@ footer{margin-top:26px;color:var(--muted);font-size:11px;text-align:center;borde
       <button class="btn" onclick="clearF('dos')">Limpiar</button>
     </div>
     <div class="chips" id="dos-chips"></div>
-    <div class="kpis" id="dos-kpis"></div>
+    <div class="g-mr">
+      <div class="kpis" id="dos-kpis"></div>
+      <div class="card"><h3>Responsables × estatus</h3><div class="d">Top 12 responsables · clic en una celda para ver los dossieres</div><div id="dos-heat"></div></div>
+    </div>
     <div class="grid g3">
-      <div class="card"><h3>Embudo del dossier</h3><div class="d">De HC1 arrancado a aprobado por CIT</div><div id="dos-fun"></div></div>
+      <div class="card"><h3>Avance del dossier</h3><div class="d">Cuántos de los HC1 del filtro llegaron a cada paso · % sobre el total · clic para ver la lista</div><div id="dos-fun"></div></div>
       <div class="card"><h3>Estatus de entrega</h3><div class="d">Clic en un segmento para filtrar</div><div id="dos-don"></div></div>
       <div class="card"><h3>Antigüedad de pendientes</h3><div class="d">Días desde el arranque sin dossier enviado</div><div id="dos-age"></div></div>
     </div>
     <div class="grid g2">
       <div class="card"><h3>Curva · enviados vs aprobados CIT</h3><div class="d">Acumulado por fecha</div><div id="dos-s"></div></div>
-      <div class="card"><h3>Responsables × estatus</h3><div class="d">Top 12 responsables · clic en una celda para ver los dossieres</div><div id="dos-heat"></div></div>
-    </div>
-    <div class="grid g2">
       <div class="card"><h3>Enviados vs aprobados por mes</h3><div class="d">Últimos 12 meses</div><div id="dos-mes"></div></div>
-      <div class="card"><h3>Estatus por módulo</h3><div class="d">Clic para filtrar por módulo</div><div id="dos-mod-ch"></div></div>
     </div>
+    <div class="card" style="margin-bottom:14px"><h3>Estatus por módulo</h3><div class="d">Clic para filtrar por módulo</div><div id="dos-mod-ch"></div></div>
     <div class="sec">Dossieres</div>
     <div class="tcard"><div class="thead"><div class="info" id="dos-info"></div><button class="btn cy" onclick="csv('dos')">⬇ Exportar CSV</button></div><div class="tw"><table id="dos-tbl"><thead></thead><tbody></tbody></table></div><div class="more" id="dos-more"></div></div>
   </section>
@@ -445,7 +450,7 @@ function renderGauges(){
 }
 // ---------- matriz módulo × estatus (reemplaza las tarjetas KPI)
 const PROY={M3:'ECU17049',M4:'ECU21212',M5:'ECU24091'};
-const HEAT='#0fb5d6';
+const HEAT='#00b8ff';
 function hexA(c,a){ const n=parseInt(c.slice(1),16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
 function stmBase(view){ const s=S[view], m=s.mod, k=s.k; s.mod=''; s.k=''; const R=view==='hc1'?rowsHC1():view==='ac1'?rowsAC1():rowsDOS(); s.mod=m; s.k=k; return R; }
 function stmPick(view,mod,k){ const s=S[view]; const same=s.mod===mod&&s.k===k; s.mod=same?'':mod; s.k=same?'':k; const el=$(view+'-mod'); if(el) el.value=s.mod; S.lim[view]=300; render(); }
@@ -456,12 +461,12 @@ function stm(view, title, desc, groups){
   const mx=cols.map(c=>Math.max(1,...mods.map(m=>val(R.filter(r=>r.mod===m),c)||0)));
   const cell=(rows,c,i,m,tot)=>{
     const s=S[view], on=c.k&&s.k===c.k&&s.mod===(m||'')&&!(m===''&&!tot);
-    if(c.pct){ const a=rows.filter(c.pct[0]).length, b=rows.length, p=b?Math.round(a*100/b):0; return `<div class="c nk" style="--c:${c.c};background:${hexA(HEAT,.06+.62*p/100)}"><b>${p}%</b><span>${nf(a)} de ${nf(b)}</span></div>`; }
-    const v=val(rows,c), n=rows.length, a=tot?.10:(.06+.62*(v/mx[i]));
+    if(c.pct){ const a=rows.filter(c.pct[0]).length, b=rows.length, p=b?Math.round(a*100/b):0; return `<div class="c nk" style="--c:${c.c};background:${hexA(HEAT,.14+.80*p/100)}"><b>${p}%</b><span>${nf(a)} de ${nf(b)}</span></div>`; }
+    const v=val(rows,c), n=rows.length, a=tot?.10:(.14+.80*(v/mx[i]));
     const click=c.k!==undefined&&v?`onclick="stmPick('${view}','${m}','${c.k}')"`:'';
     return `<div class="c ${v?'':'z'} ${c.k===undefined?'nk':''} ${on?'on':''}" style="--c:${c.c};${v&&!tot?`background:${hexA(HEAT,a)}`:''}" ${click} title="${esc(c.l)}${m?' · '+m:''}: ${nf(v)}"><b>${nf(v)}</b>${c.sub!==false&&v&&n?`<span>${f1(pct(v,n))}%</span>`:''}</div>`;
   };
-  const tmpl=`minmax(150px,1.5fr) repeat(${cols.length},minmax(62px,1fr))`;
+  const tmpl=`96px repeat(${cols.length},minmax(54px,1fr))`;
   let g=`<div class="stm-g" style="grid-template-columns:${tmpl}"><div></div>`+groups.map(x=>`<div class="gh" style="--c:${x.c};grid-column:span ${x.cols.length}">${x.l}</div>`).join('');
   g+='<div></div>'+cols.map(c=>`<div class="ch" style="--c:${c.c}">${c.l}</div>`).join('');
   mods.forEach(m=>{ const rows=R.filter(r=>r.mod===m); g+=`<div class="rh">${m}<small>${PROY[m]||''} · ${nf(rows.length)}</small></div>`+cols.map((c,i)=>cell(rows,c,i,m,false)).join(''); });
@@ -488,8 +493,8 @@ function stmSum(v){
   const val=(rows,k)=>k[0]==='_'?rows.filter(fx(k)).length:rows.reduce((s,r)=>s+(+r[k]||0),0);
   const mx=cols.map(([k])=>Math.max(1,...mods.map(m=>val(R.filter(r=>r.mod===m),k))));
   const cell=(rows,[k,l,c],i,m,tot)=>{ const v_=val(rows,k), n=rows.filter(fx(k)).length;
-    return `<div class="c ${v_?'':'z'}" style="--c:${c};${v_&&!tot?`background:${hexA(HEAT,.06+.62*(v_/mx[i]))}`:''}" ${v_?`onclick="stmSumPick('${v}','${k}','${m}')"`:''} title="${esc(PCL[k]||l)}${m?' · '+m:''}: ${nf(v_)}"><b>${nf(v_)}</b>${v_&&k[0]!=='_'?`<span>en ${nf(n)} HC1</span>`:v_?`<span>${f1(pct(v_,rows.length))}% de ${nf(rows.length)}</span>`:''}</div>`; };
-  const tmpl=`minmax(150px,1.5fr) repeat(${cols.length},minmax(62px,1fr))`;
+    return `<div class="c ${v_?'':'z'}" style="--c:${c};${v_&&!tot?`background:${hexA(HEAT,.14+.80*(v_/mx[i]))}`:''}" ${v_?`onclick="stmSumPick('${v}','${k}','${m}')"`:''} title="${esc(PCL[k]||l)}${m?' · '+m:''}: ${nf(v_)}"><b>${nf(v_)}</b>${v_&&k[0]!=='_'?`<span>en ${nf(n)} HC1</span>`:v_?`<span>${f1(pct(v_,rows.length))}% de ${nf(rows.length)}</span>`:''}</div>`; };
+  const tmpl=`96px repeat(${cols.length},minmax(54px,1fr))`;
   let g=`<div class="stm-g" style="grid-template-columns:${tmpl}"><div></div>`+G.groups.map(x=>`<div class="gh" style="--c:${x.c};grid-column:span ${x.cols.length}">${x.l}</div>`).join('');
   g+='<div></div>'+cols.map(([k,l,c])=>`<div class="ch" style="--c:${c}">${l}</div>`).join('');
   mods.forEach(m=>{ const rows=R.filter(r=>r.mod===m); g+=`<div class="rh">${m}<small>${PROY[m]||''} · ${nf(rows.length)} HC1</small></div>`+cols.map((c,i)=>cell(rows,c,i,m,false)).join(''); });
@@ -723,9 +728,14 @@ function renderDOS(){
     {l:'Totales',c:C.cy,cols:[{l:'Total',f:()=>true,c:C.cy,sub:false},{l:'% cierre',pct:[dosAp],c:C.lm}]}]);
   const arr=R.filter(r=>r.e_arranque==='ARRANCADO'), ent=R.filter(hcEnt), sent=R.filter(r=>isD(r.fecha_envio_cit)||dosEnv(r)||dosAp(r)||dosDev(r));
   const fun=[['HC1 arrancados',arr],['HC1 entregados',ent],['Enviados a CIT',sent],['Aprobados CIT',R.filter(dosAp)]];
-  draw('dos-fun',{chart:{type:'bar',height:300,...glow,events:{dataPointSelection:(e,c,cfg)=>openList(fun[cfg.dataPointIndex][0],fun[cfg.dataPointIndex][1],'hc1')}},series:[{name:'Dossieres',data:fun.map(x=>x[1].length)}],
-    plotOptions:{bar:{horizontal:true,isFunnel:true,barHeight:'82%',distributed:true,borderRadius:4}},colors:[C.cy,C.vi,C.mg,C.lm],legend:{show:false},
-    dataLabels:{enabled:true,formatter:(v,o)=>`${fun[o.dataPointIndex][0]}: ${nf(v)}`,style:{colors:['#05070f'],fontWeight:800,fontSize:'12px'}},xaxis:{categories:fun.map(x=>x[0])}});
+  const NT=R.length;
+  draw('dos-fun',{chart:{type:'bar',height:300,...glow,events:{dataPointSelection:(e,c,cfg)=>openList(fun[cfg.dataPointIndex][0],fun[cfg.dataPointIndex][1],'hc1')}},
+    series:[{name:'% del total de HC1',data:fun.map(x=>+pct(x[1].length,NT).toFixed(1))}],
+    plotOptions:{bar:{horizontal:true,distributed:true,barHeight:'58%',borderRadius:6,colors:{backgroundBarColors:['rgba(255,255,255,.06)'],backgroundBarRadius:6},dataLabels:{position:'center'}}},
+    colors:[C.cy,C.vi,C.mg,C.lm],legend:{show:false},
+    dataLabels:{enabled:true,formatter:(v,o)=>`${nf(fun[o.dataPointIndex][1].length)} de ${nf(NT)} · ${f1(v)}%`,style:{colors:['#05070f'],fontWeight:800,fontSize:'12px'}},
+    xaxis:{categories:fun.map(x=>x[0]),min:0,max:100,tickAmount:4,labels:{formatter:v=>Math.round(v)+'%'}},yaxis:{labels:{style:{fontSize:'12px'}}},
+    tooltip:{y:{formatter:(v,o)=>`${nf(fun[o.dataPointIndex][1].length)} HC1 · ${f1(v)}% del total`}}});
   const dn=[['ENTREGADO','Aprobado CIT',C.lm],['ENVIADO','Enviado CIT',C.cy],['DEVUELTO','Devuelto',C.rd],['PENDIENTE','Pendiente',C.yl]].map(x=>[...x,R.filter(r=>r.estatus_entrega_dossier===x[0]).length]).filter(x=>x[3]>0);
   draw('dos-don',{chart:{type:'donut',height:300,...glow,events:{dataPointSelection:(e,c,cfg)=>{ const v=dn[cfg.dataPointIndex][0]; S.dos.est=S.dos.est===v?'':v; $('dos-est').value=S.dos.est; render(); }}},series:dn.map(x=>x[3]),labels:dn.map(x=>x[1]),colors:dn.map(x=>x[2]),stroke:{colors:['#05070f'],width:3},
     plotOptions:{pie:{donut:{size:'68%',labels:{show:true,value:{color:C.tx,fontFamily:'Rajdhani',fontSize:'26px',fontWeight:700},total:{show:true,label:'Dossieres',color:C.t2}}}}},legend:{position:'bottom'}});
@@ -838,6 +848,7 @@ function openMv(i){ const [l,c,L,kind]=window._MV[i]; if(!L.length) return;
   $('ml-tbl').querySelector('tbody').innerHTML=L.map(r=>'<tr>'+cols.map(([k])=>`<td>${esc(r[k])||'-'}</td>`).join('')+'</tr>').join(''); showM('mlist'); }
 let CC_ON=false;
 function toggleCC(){ CC_ON=!CC_ON; $('cc-box').style.display=CC_ON?'':'none'; $('cc-btn').textContent=CC_ON?'✕ Ocultar cambios frente al corte anterior':'📊 Ver cambios frente al corte anterior'; if(CC_ON){ renderChanges(); $('cc-box').scrollIntoView({behavior:'smooth',block:'start'}); } }
+setTimeout(renderChanges,60);   // se calcula al cargar (queda oculto hasta pulsar el botón)
 function render(){ clearTimeout(RT); RT=setTimeout(()=>{ if(S[S.view]&&'sub' in S[S.view]) fillSub(S.view); ({hc1:renderHC1,ac1:renderAC1,dos:renderDOS,pen:renderPEN,cer:renderCER,cmp:renderCMP})[S.view](); },30); }
 renderGauges(); render();
 </script>
