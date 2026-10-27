@@ -64,6 +64,9 @@ body{margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--text);min-hei
 .tab .chip{display:inline-block;margin-left:10px;padding:2px 9px;border-radius:9px;background:rgba(0,0,0,.35);color:var(--c);font:800 11px 'Orbitron';border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
 
 .section{display:none;animation:fade .35s ease}
+.btn-cc{margin-top:26px;border:1px solid rgba(0,229,255,.6);background:rgba(0,229,255,.1);color:#9ff6ff;padding:10px 18px;border-radius:12px;font:700 13px Inter,sans-serif;cursor:pointer}
+.btn-cc:hover{box-shadow:0 0 18px rgba(0,229,255,.45)}
+#cmpWrap{scroll-margin-top:90px}
 .section.active{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -374,8 +377,9 @@ footer b{color:var(--cyan)}
   </div>
 </div>
 
-<!-- ============ CAMBIOS FRENTE AL CORTE ANTERIOR ============ -->
-<div class="grid" id="cmpWrap" style="margin-top:26px">
+<!-- ============ CAMBIOS FRENTE AL CORTE ANTERIOR (se muestran al pulsar el botón) ============ -->
+<button class="btn-cc" id="cc-btn" onclick="toggleCC()">📊 Ver estatus de cambios frente al corte anterior</button>
+<div class="grid" id="cmpWrap" style="margin-top:18px;display:none">
   <div class="card" style="--c:var(--yellow)">
     <h3><i>⇄</i>Cambios frente al corte anterior</h3>
     <div class="cmp-head" id="cmpHead"></div>
@@ -965,9 +969,11 @@ buildSelectOpts('st', DATA.soltec.filterDims);
 const startTab = (location.hash || '').slice(1);
 showTab(['aspectos','ncr','dossier','soltec'].includes(startTab) ? startTab : 'aspectos');
 // ============ Cambios frente al corte anterior ============
+let CC_ON=false;
+function toggleCC(){ CC_ON=!CC_ON; const w=document.getElementById('cmpWrap'), b=document.getElementById('cc-btn'); w.style.display=CC_ON?'':'none'; b.textContent=CC_ON?'✕ Ocultar estatus de cambios':'📊 Ver estatus de cambios frente al corte anterior'; if(CC_ON) w.scrollIntoView({behavior:'smooth',block:'start'}); }
 (function(){
   const wrap = document.getElementById('cmpWrap');
-  if (!PREV || !PREV.secciones) { wrap.style.display = 'none'; return; }
+  if (!PREV || !PREV.secciones) { wrap.style.display = 'none'; document.getElementById('cc-btn').style.display = 'none'; return; }
   document.getElementById('cmpHead').innerHTML = 'Corte <b>' + escHtml(PREV.corte_act) + '</b> frente al corte <b>' + escHtml(PREV.corte_ant) + '</b>' +
     '<span>Anterior: ' + escHtml(PREV.fuente_ant) + '</span><span>Actual: ' + escHtml(PREV.fuente_act) + '</span>';
   const dl = (a, b, inv) => { const d = b - a; if (!d) return '<span class="cmp-eq">=</span>'; const good = inv ? d < 0 : d > 0;
