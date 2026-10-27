@@ -39,6 +39,9 @@ body{margin:0;background:radial-gradient(1200px 600px at 85% -10%,rgba(166,255,0
 .fg.grow{flex:1;min-width:220px}
 .btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:9px;padding:8px 14px;font:600 13px Inter;cursor:pointer;height:37px}
 .btn:hover{border-color:var(--cyan)}
+.btn-cc{margin-top:26px;border:1px solid rgba(0,229,255,.6);background:rgba(0,229,255,.1);color:#9ff6ff;padding:10px 18px;border-radius:12px;font:700 13px Inter;cursor:pointer}
+.btn-cc:hover{box-shadow:0 0 18px rgba(0,229,255,.45)}
+#cc-box{scroll-margin-top:200px}
 .btn.clear{color:#ff9ab4;border-color:rgba(255,59,107,.4);background:rgba(255,59,107,.10)}
 .btn.sm{height:30px;padding:4px 10px;font-size:12px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;min-height:6px;margin:0 2px 16px}
@@ -287,10 +290,13 @@ footer{margin-top:34px;color:var(--muted);font-size:12px;text-align:center}
 <div class="tblbar"><span id="eq-info"></span><button class="btn sm" onclick="exportCSV('eq')">Exportar CSV</button></div>
 <div class="tblwrap"><table class="t" id="eq-t"><thead></thead><tbody></tbody></table></div>
 
-<!-- 11. Cambios frente al corte anterior -->
+<!-- 11. Cambios frente al corte anterior (se muestran al pulsar el botón) -->
+<button class="btn-cc" id="cc-btn" onclick="toggleCC()">📊 Ver estatus de cambios frente al corte anterior</button>
+<div id="cc-box" style="display:none">
 <div class="sec"><h2>Cambios frente al corte anterior</h2><p id="cmp-sub"></p></div>
 <div class="grid g3" id="deltas" style="margin-bottom:14px"></div>
 <div class="card"><div style="overflow-x:auto"><table class="cmp" id="cmp"></table></div><div class="note" id="cmp-note"></div></div>
+</div>
 
 <footer id="ftr" style="display:none"></footer>
 </div>
@@ -524,6 +530,8 @@ function mods(){
 }
 
 /* ---------- cambios frente al corte anterior ---------- */
+let CC_ON=false;
+function toggleCC(){ CC_ON=!CC_ON; $('cc-box').style.display=CC_ON?'':'none'; $('cc-btn').textContent=CC_ON?'✕ Ocultar estatus de cambios':'📊 Ver estatus de cambios frente al corte anterior'; if(CC_ON) $('cc-box').scrollIntoView({behavior:'smooth',block:'start'}); }
 function cambios(){
   const A=PREV.tot_ant,B=PREV.tot_act;
   $('cmp-sub').innerHTML=`${esc(PREV.corte_ant)} → ${esc(PREV.corte_act)} · totales generales del anexo (no cambian con los filtros)`;
