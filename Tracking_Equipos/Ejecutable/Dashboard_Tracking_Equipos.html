@@ -129,6 +129,19 @@ button{font-family:inherit}
 .mx td:not(:first-child):hover{outline:1px solid var(--cy)}
 .mx tr.tot td{font-weight:800;border-top:1px solid var(--line)}
 /* ---------- subproyectos */
+.gyq-k{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}
+.gyq-k div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px 13px;position:relative;overflow:hidden}
+.gyq-k div:before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--c)}
+.gyq-k b{display:block;font:700 26px/1.1 Rajdhani;color:var(--c)}.gyq-k span{font:700 10px Inter;letter-spacing:.8px;text-transform:uppercase;color:var(--text2)}
+.gyq-k small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.gyq-pie{display:flex;gap:18px;align-items:center;margin-top:8px}.gyq-pie svg{flex:0 0 200px;height:200px}
+.gyq-lg{display:flex;flex-direction:column;gap:7px;font-size:12.5px;flex:1}.gyq-lg div{display:flex;justify-content:space-between;gap:8px;cursor:pointer;padding:3px 6px;border-radius:7px}
+.gyq-lg div:hover{background:rgba(255,255,255,.05)}.gyq-lg i{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--c);margin-right:6px}
+.gyq-lg b{font:700 14px Rajdhani}.gyq-lg small{color:var(--muted);font-size:11px;margin-left:6px}
+.gyq-t tr[data-k],.gyq-t tr[data-o]{cursor:pointer}.gyq-t td{font-size:12px}
+.crit{display:inline-block;padding:2px 8px;border-radius:7px;font:700 10.5px Inter;color:#04060d;background:var(--c)}
+@media(max-width:1300px){.gyq-k{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.gyq-k{grid-template-columns:1fr 1fr}.gyq-pie{flex-direction:column}}
 .subs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .sp{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px 15px;cursor:pointer;transition:.18s;position:relative;overflow:hidden}
 .sp:hover{border-color:rgba(0,229,255,.6);transform:translateY(-2px);box-shadow:0 10px 30px -14px rgba(0,229,255,.6)}
@@ -281,8 +294,15 @@ footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center}
     </div>
   </div>
 
-  <div class="sec"><h2>Subproyectos</h2><p>Una tarjeta por cada hoja de la presentación de reunión. Clic filtra todo el tablero.</p></div>
-  <div class="subs" id="subs"></div>
+  <div class="sec"><h2>Estado del suministro</h2><p id="gyq-s">Como la presentación de reunión de GyQ, en cantidades. Sigue los filtros del tablero (módulo, subproyecto, especialidad…).</p></div>
+  <div class="gyq-k" id="gyq-k"></div>
+  <div class="grid2">
+    <div class="card"><h3>Estado del proceso de suministro</h3><div class="hint">Cantidades por etapa según las MR · clic para ver las líneas</div><div class="gyq-pie"><svg id="gyq-pie" viewBox="0 0 170 170"></svg><div class="gyq-lg" id="gyq-lg"></div></div></div>
+    <div class="card"><h3>Estado de las ODB</h3><div class="hint" id="gyq-oh"></div><div class="gyq-pie"><svg id="gyq-opie" viewBox="0 0 170 170"></svg><div class="gyq-lg" id="gyq-ol"></div></div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>A. Materiales sin comprar</h3><div class="hint" id="gyq-ah"></div><div style="overflow-x:auto;max-height:440px"><table class="t gyq-t" id="gyq-a"></table></div></div>
+  <div class="card" style="margin-top:14px"><h3>B. Principales ODB</h3><div class="hint" id="gyq-bh"></div><div style="overflow-x:auto;max-height:440px"><table class="t gyq-t" id="gyq-b"></table></div></div>
+  <div class="subs" id="subs" style="display:none"></div>
 
   <div class="sec"><h2>ODB en seguimiento</h2><p>Órdenes de compra con líneas pendientes: fecha requerida vs. proyectada, avance de fabricación y último seguimiento.</p></div>
   <div class="card">
@@ -290,8 +310,8 @@ footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center}
     <div class="twrap" style="max-height:480px"><table class="t" id="odb"></table></div>
   </div>
 
-  <div class="sec"><h2>Alertas de suministro</h2><p id="al-sub">Alertas abiertas de las hojas ALERTAS, por criticidad.</p></div>
-  <div class="alerts" id="alerts"></div>
+  <div class="sec" style="display:none"><h2>Alertas de suministro</h2><p id="al-sub">Alertas abiertas de las hojas ALERTAS, por criticidad.</p></div>
+  <div class="alerts" id="alerts" style="display:none"></div>
 
   <div class="sec"><h2>Detalle de líneas</h2><p>Todas las líneas que cumplen los filtros. Clic en una fila abre la ficha; clic en un encabezado ordena.</p></div>
   <div class="card">
@@ -299,8 +319,8 @@ footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center}
     <div class="twrap"><table class="t" id="tbl"></table></div>
   </div>
 
-  <div class="sec"><h2>Calidad del dato y fuentes</h2><p>Lo que hay que tener presente al presentar estas cifras.</p></div>
-  <div class="grid2">
+  <div class="sec" style="display:none"><h2>Calidad del dato y fuentes</h2><p>Lo que hay que tener presente al presentar estas cifras.</p></div>
+  <div class="grid2" style="display:none">
     <div class="card"><h3>Calidad del dato</h3><div class="hint">Calculado sobre el filtro actual.</div><div class="qual" id="qual"></div></div>
     <div class="card"><h3>Archivos unidos</h3><div class="hint">Cada subproyecto se toma del archivo más reciente que lo contiene (hojas GENERAL, ESTADO ODB y ALERTAS).</div><ul class="src" id="src"></ul></div>
   </div>
@@ -827,10 +847,71 @@ function eqModal(g) {
 }
 document.querySelectorAll('#pv-m button').forEach(b => b.onclick = () => { st.pvm = b.dataset.m; document.querySelectorAll('#pv-m button').forEach(x => x.classList.toggle('on', x === b)); provs(rows()); });
 
+// ---------- estado del suministro (como la presentación GyQ)
+const OBE = [['VIGENTE', 'Vigente', '#00e5ff'], ['VENCIDA', 'Vencida', '#ff3d71'], ['RECIBIDA PEND. CARGUE SAP', 'Pendiente cargue', '#ffe14d'], ['CERRADA', 'Cerrada', '#39ff88'], ['CANCELADA', 'Cancelada', '#6b7aa6']];
+const qs = L => L.reduce((t, x) => t + (x.q || 0), 0);
+function lineList(t, L) {
+  L = L.slice().sort((a, b) => String(a.fre || a.eta || '9').localeCompare(String(b.fre || b.eta || '9')));
+  open_(t, `${N1(qs(L))} unidades en ${N(L.length)} líneas · clic en una línea para ver su ficha`,
+    `<table class="t"><tr><th>MR</th><th>Equipo / material</th><th>Subproyecto</th><th>Especialidad</th><th>Cant.</th><th>Etapa</th><th>Fuente</th><th>ODB</th><th>Llegada</th></tr>${L.slice(0, 1500).map(x => `<tr data-i="${ITEMS.indexOf(x)}" style="cursor:pointer"><td>${esc(x.mr)}</td><td>${esc(x.ti || x.de || '')}<br><small style="color:#6b7aa6">${esc(x.de || '')}</small></td><td>${esc(x.sp)}</td><td>${esc(x.es)}</td><td style="white-space:nowrap">${N1(x.q)} ${esc(x.u)}</td><td><span class="pill" style="--c:${ET_C[x.et] || '#9fb3d9'}">${esc(x.et)}</span></td><td>${esc(x.adq || '—')}</td><td>${esc(x.odb || '—')}</td><td>${fd(x.eta)}</td></tr>`).join('')}</table>`);
+  $('modal').classList.add('wide');
+  document.querySelectorAll('#m-b tr[data-i]').forEach(tr => tr.onclick = () => ficha(ITEMS[+tr.dataset.i]));
+}
+function dias(d) { return d ? Math.round((new Date(d + 'T00:00:00') - new Date(HOY + 'T00:00:00')) / 864e5) : null; }
+function donut(id, parts, center, sub) {   // parts: [[clave, valor, color, título]]
+  const T = parts.reduce((t, p) => t + p[1], 0); let a0 = -Math.PI / 2, s = '';
+  const P = (a, r) => [85 + r * Math.cos(a), 85 + r * Math.sin(a)];
+  parts.forEach(([k, v, c, t]) => { if (!v || !T) return; const a1 = a0 + 2 * Math.PI * v / T, big = a1 - a0 > Math.PI ? 1 : 0;
+    const [x0, y0] = P(a0, 80), [x1, y1] = P(a1, 80), [x2, y2] = P(a1, 50), [x3, y3] = P(a0, 50);
+    s += v === T ? `<circle cx="85" cy="85" r="65" fill="none" stroke="${c}" stroke-width="30" data-k="${esc(k)}" style="cursor:pointer"><title>${esc(t)}</title></circle>` :
+      `<path d="M${x0},${y0}A80,80 0 ${big} 1 ${x1},${y1}L${x2},${y2}A50,50 0 ${big} 0 ${x3},${y3}Z" fill="${c}" stroke="#0b1226" stroke-width="2" data-k="${esc(k)}" style="cursor:pointer"><title>${esc(t)}</title></path>`; a0 = a1; });
+  $(id).innerHTML = (T ? s : '<circle cx="85" cy="85" r="65" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="30"/>') +
+    `<text x="85" y="84" text-anchor="middle" fill="#eef3ff" font-size="20" font-weight="700">${center}</text><text x="85" y="102" text-anchor="middle" fill="#6b7aa6" font-size="10.5">${sub}</text>`;
+}
+function gyq(R) {
+  const tot = qs(R), sin = R.filter(PLAN), con = R.filter(x => !PLAN(x)), mrs = new Set(R.map(x => x.m + '|' + x.mr).filter(k => !k.endsWith('|undefined'))).size;
+  const keys = new Set(R.filter(x => x.odb).map(x => x.m + '|' + x.odb)), O = DATA.odb.filter(o => keys.has(o.mod + '|' + o.odb)), cov = tot ? 100 * qs(con) / tot : 0;
+  const ctx = st.sp.length === 1 ? st.sp[0] : st.sp.length ? `${st.sp.length} subproyectos` : 'todos los subproyectos del filtro';
+  $('gyq-s').textContent = `Como la presentación de reunión de GyQ, en cantidades · ${ctx} · corte ${fd(DATA.corte)}. Usa el filtro de Subproyecto de arriba para ver una hoja de la presentación.`;
+  const K = [['MR emitidas', N(mrs), '#00e5ff', `${N(R.length)} líneas`], ['Total cantidades en MR', N1(tot), '#eef3ff', 'suma de cantidades'],
+    ['Cantidades sin ODB', N1(qs(sin)), '#ff3d71', `${N(sin.length)} líneas en planeación`, 'sin'], ['Cantidades con ODB / tránsito', N1(qs(con)), '#b46bff', `${N(con.length)} líneas`, 'con'],
+    ['ODB', N(O.length), '#4d7cff', `${O.filter(o => o.n_ab > 0).length} con líneas pendientes`], ['Cobertura materiales comprados', cov.toFixed(2).replace('.', ',') + '%', cov >= 90 ? '#39ff88' : cov >= 60 ? '#ffe14d' : '#ff3d71', 'cantidades con ODB / total']];
+  $('gyq-k').innerHTML = K.map(([t, v, c, s, k]) => `<div style="--c:${c}${k ? ';cursor:pointer' : ''}"${k ? ` data-k="${k}"` : ''}><span>${t}</span><b>${v}</b><small>${s}</small></div>`).join('');
+  $('gyq-k').querySelectorAll('[data-k]').forEach(el => el.onclick = () => lineList(el.dataset.k === 'sin' ? 'Cantidades sin ODB' : 'Cantidades con ODB / tránsito', el.dataset.k === 'sin' ? sin : con));
+  // torta 1: etapas por cantidad
+  const ce = ETAPAS.map(e => [e, qs(R.filter(x => x.et === e)), ET_C[e], e]);
+  donut('gyq-pie', ce.map(([e, v, c]) => [e, v, c, `${e}: ${N1(v)}`]), cov.toFixed(1).replace('.', ',') + '%', 'comprado');
+  $('gyq-lg').innerHTML = ce.map(([e, v, c]) => `<div data-k="${esc(e)}"><span><i style="--c:${c}"></i>${e}<small>${ET_D[e] || ''}</small></span><b>${N1(v)} <small>${tot ? (100 * v / tot).toFixed(1).replace('.', ',') : 0}%</small></b></div>`).join('');
+  document.querySelectorAll('#gyq-pie [data-k],#gyq-lg [data-k]').forEach(el => el.onclick = () => lineList(el.dataset.k, R.filter(x => x.et === el.dataset.k)));
+  // torta 2: estado de las ODB
+  const co = OBE.map(([k, l, c]) => [k, O.filter(o => o.est === k).length, c, l]), ab = O.filter(o => o.est !== 'CERRADA' && o.est !== 'CANCELADA').length;
+  $('gyq-oh').textContent = O.length ? `${N(O.length)} ODB · ${N(ab)} abiertas · clic para ver las ODB` : 'No hay ODB asignadas con el filtro actual';
+  donut('gyq-opie', co.map(([k, v, c, l]) => [k, v, c, `${l}: ${v}`]), N(ab), 'ODB abiertas');
+  $('gyq-ol').innerHTML = co.map(([k, v, c, l]) => `<div data-k="${k}"><span><i style="--c:${c}"></i>${l}</span><b>${N(v)} <small>${O.length ? Math.round(100 * v / O.length) : 0}%</small></b></div>`).join('');
+  document.querySelectorAll('#gyq-opie [data-k],#gyq-ol [data-k]').forEach(el => el.onclick = () => { const Q = O.filter(o => o.est === el.dataset.k).sort((a, b) => (a.dv ?? 9e9) - (b.dv ?? 9e9)); if (!Q.length) return;
+    open_(`ODB ${OBE.find(z => z[0] === el.dataset.k)[1].toLowerCase()}`, `${Q.length} ODB · clic en una ODB para ver la ficha completa`, odbRows(Q)); $('modal').classList.add('wide'); bindOdb(); });
+  // A. materiales sin comprar (agrupado por subproyecto, MR y material)
+  const A = {}; sin.forEach(x => { const k = x.sp + '|' + x.et + '|' + x.mr + '|' + (x.ti || x.de || ''); const g = A[k] = A[k] || { sp: x.sp, et: x.et, mr: x.mr, ti: x.ti || x.de || '', q: 0, u: new Set(), fre: null, adq: new Set(), sol: new Set(), L: [] };
+    g.q += x.q || 0; if (x.u) g.u.add(x.u); if (x.adq) g.adq.add(x.adq); if (x.sol) g.sol.add(x.sol); const fx = x.fre || x.eta; if (fx && (!g.fre || fx < g.fre)) g.fre = fx; g.L.push(x); });
+  const AL = Object.values(A).map(g => (g.d = dias(g.fre), g)).sort((a, b) => (a.d ?? 9e9) - (b.d ?? 9e9) || b.q - a.q);
+  const crit = d => d === null ? ['SIN FECHA', '#6b7aa6'] : d < 0 ? ['ALTA', '#ff3d71'] : d <= 30 ? ['MEDIA', '#ffe14d'] : ['BAJA', '#39ff88'];
+  $('gyq-ah').textContent = sin.length ? `${N(AL.length)} materiales · ${N1(qs(sin))} unidades en planeación (PY, PC, ABA) · ordenado por días restantes · fecha: requerida por el proyecto o, si no la trae, la proyectada de recibo en sitio · clic para ver las líneas` : 'No hay materiales sin comprar con el filtro actual';
+  $('gyq-a').innerHTML = AL.length ? `<tr><th>Etapa</th><th>Subproyecto</th><th>Documento (MR)</th><th>Material</th><th>Cant.</th><th>Fuente</th><th>Solped</th><th>F. requerida / proyectada</th><th>Días rest.</th><th>Criticidad</th></tr>` + AL.slice(0, 500).map((g, i) => { const [cl, cc] = crit(g.d);
+    return `<tr data-k="${i}"><td><span class="pill" style="--c:${ET_C[g.et]}">${esc(g.et.replace('Planeación ', ''))}</span></td><td>${esc(g.sp)}</td><td>${esc(g.mr)}</td><td>${esc(g.ti)}</td><td style="white-space:nowrap">${N1(g.q)} ${esc([...g.u].join('/'))}</td><td>${esc([...g.adq].join(', ') || '—')}</td><td>${esc([...g.sol].join(', ') || '—')}</td><td>${fd(g.fre)}</td><td style="color:${cc};font-weight:700">${g.d ?? '—'}</td><td><span class="crit" style="--c:${cc}">${cl}</span></td></tr>`; }).join('') : '';
+  $('gyq-a').querySelectorAll('tr[data-k]').forEach(tr => tr.onclick = () => { const g = AL[+tr.dataset.k]; lineList(`${g.mr} · ${g.ti}`, g.L); });
+  // B. principales ODB (abiertas, más atrasadas primero)
+  const B = O.filter(o => o.n_ab > 0 || (o.est !== 'CERRADA' && o.est !== 'CANCELADA')).sort((a, b) => (a.dv ?? 9e9) - (b.dv ?? 9e9));
+  $('gyq-bh').textContent = B.length ? `${N(B.length)} ODB abiertas · más atrasadas primero · clic para la ficha completa` : 'No hay ODB abiertas con el filtro actual';
+  $('gyq-b').innerHTML = B.length ? `<tr><th>Material</th><th>Subproyecto</th><th>Proveedor</th><th>ODB</th><th>F. entrega ODB</th><th>F. requerida</th><th>F. proyectada</th><th>Último seguimiento</th><th>Días desv.</th></tr>` + B.slice(0, 300).map(o =>
+    `<tr data-o="${esc(o.mod + '|' + o.odb)}"><td>${esc(o.tipo)}${o.eq ? ' <span class="pill" style="--c:#ffe14d">equipo</span>' : ''}</td><td>${esc(o.sp)}</td><td>${esc(o.prov)}</td><td><b>${esc(o.odb)}</b></td><td>${fd(o.f_ent)}</td><td>${fd(o.f_req)}</td><td><b>${fd(o.f_proy)}</b></td>
+     <td style="min-width:240px;white-space:normal"><div class="clip">${esc(ultimo(o.avance)).slice(0, 240) || '—'}</div></td><td style="color:${o.dv === null ? '#6b7aa6' : o.dv < 0 ? '#ff3d71' : '#39ff88'};font-weight:700">${o.dv === null ? '—' : o.dv}</td></tr>`).join('') : '';
+  $('gyq-b').querySelectorAll('tr[data-o]').forEach(tr => tr.onclick = () => fichaOdb(tr.dataset.o));
+}
+
 // ---------- render
 function render() {
   filters(); const R = rows();
-  renderChanges(); kpis(R); bars(R); curve(R); funnel(R); matrix(R); provs(R); eqs(R); subs(); odbs(R); alerts(R); table(R); quality(R);
+  renderChanges(); kpis(R); bars(R); curve(R); funnel(R); matrix(R); provs(R); eqs(R); subs(); gyq(R); odbs(R); alerts(R); table(R); quality(R);
   document.querySelectorAll('#scope button').forEach(b => b.classList.toggle('on', b.dataset.s === st.scope));
 }
 document.querySelectorAll('#scope button').forEach(b => b.onclick = () => { st.scope = b.dataset.s; st.es = ''; render(); });
