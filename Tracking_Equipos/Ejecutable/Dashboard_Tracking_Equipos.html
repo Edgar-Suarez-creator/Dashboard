@@ -79,6 +79,7 @@ button{font-family:inherit}
 .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 /* ---------- curva */
 #curve{width:100%;height:440px;display:block}
+.sec:has(+ .card #curve),.card:has(#curve){display:none}
 #bars{width:100%;height:400px;display:block}
 #bars .b{cursor:pointer;transition:opacity .15s}
 #bars .b:hover{opacity:.8}
@@ -232,7 +233,7 @@ footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center}
     <div class="tbar">
       <div class="tools">
         <div class="seg" id="b-range"><button data-r="12" class="on">12 meses + proyección</button><button data-r="2025">Desde 2025</button><button data-r="all">Todo el histórico</button></div>
-        <div class="seg" id="b-met"><button data-m="n" class="on">Líneas</button><button data-m="q">Unidades</button></div>
+        
       </div>
       <div class="info" id="b-info"></div>
     </div>
@@ -406,7 +407,7 @@ function legModal(S, L) {
   const MAX = 1500, V = L.slice(0, MAX), col = S.k.startsWith('rec') ? '#39ff88' : S.k.startsWith('ven') ? '#ff3d71' : '#00e5ff';
   const est = rec ? 'Recibido' : S.k.startsWith('ven') ? 'Llegada vencida' : 'Proyectado';
   const odbs = new Set(L.filter(x => x.odb).map(x => x.m + '|' + x.odb)).size;
-  open_(S.n, `${N(L.length)} líneas · ${N(odbs)} ODB · ${rec ? 'fecha de recibo (más reciente primero)' : 'fecha de llegada proyectada (más próxima primero)'} · rango de meses y filtros actuales · clic en una línea para ver su ficha`,
+  open_(S.n, `${N1(L.reduce((t, x) => t + (x.q || 0), 0))} unidades en ${N(L.length)} líneas · ${N(odbs)} ODB · ${rec ? 'fecha de recibo (más reciente primero)' : 'fecha de llegada proyectada (más próxima primero)'} · rango de meses y filtros actuales · clic en una línea para ver su ficha`,
     (L.length > MAX ? `<div class="hint" style="margin-bottom:8px">Se muestran las primeras ${N(MAX)} de ${N(L.length)} líneas; usa los filtros de arriba para acotar.</div>` : '') +
     `<table class="t"><tr><th>${rec ? 'Recibido' : 'Llegada'}</th><th>Equipo / material</th><th>Mód.</th><th>Subproyecto</th><th>Cant.</th><th>Proveedor</th><th>ODB</th><th>Estado</th></tr>${V.map(x => `<tr data-i="${ITEMS.indexOf(x)}" style="cursor:pointer"><td style="white-space:nowrap"><b>${fd(fx(x))}</b></td>
       <td>${x.eq ? '<span class="pill" style="--c:#ffe14d">equipo</span> ' : ''}${esc(x.ti || x.de || x.es)}<br><small style="color:#6b7aa6">${esc(x.de || '')}</small></td><td>${x.m}</td><td>${esc(x.sp)}</td>
@@ -421,7 +422,7 @@ const BSEG = [
   { k: 'ven_eq', n: 'Equipos con llegada vencida', c: '#ff3d71' }, { k: 'ven_mt', n: 'Materiales con llegada vencida', c: 'rgba(255,61,113,.42)' },
   { k: 'pro_eq', n: 'Equipos proyectados', c: '#00e5ff' }, { k: 'pro_mt', n: 'Materiales proyectados', c: 'rgba(0,229,255,.36)' },
 ];
-st.brange = '12'; st.bmet = 'n';
+st.brange = '12'; st.bmet = 'q';
 function barsData(R) {
   const M = {};
   R.forEach(x => {
