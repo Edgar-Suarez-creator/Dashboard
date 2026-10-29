@@ -100,6 +100,16 @@ button{font-family:inherit}
 .cn .d{font-size:11.5px;color:var(--muted)}
 /* ---------- embudo */
 .funnel{display:flex;flex-direction:column;gap:9px}
+.hb{display:flex;flex-direction:column;gap:6px}
+.hr{display:grid;grid-template-columns:200px 1fr 150px;gap:10px;align-items:center;cursor:pointer;padding:3px 6px;border-radius:9px;transition:.15s}
+.hr:hover,.hr.on{background:rgba(255,255,255,.05)}.hr.on{box-shadow:inset 0 0 0 1px #00e5ff}
+.hr .n{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hr .stk{height:20px;border-radius:6px;background:rgba(255,255,255,.04);overflow:hidden;display:flex}
+.hr .stk i{height:100%;display:block}
+.hr .r{text-align:right;font:700 15px Rajdhani;color:#eef3ff;line-height:1.1}.hr .r small{display:block;font:500 10.5px Inter;color:var(--muted)}
+.hleg{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 0;font-size:11px;color:var(--text2)}.hleg span:before{content:'';display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--c);margin-right:5px}
+.ult{border-left:3px solid #00e5ff;background:rgba(0,229,255,.07);padding:8px 10px;border-radius:6px;margin:10px 0;font-size:12.5px;white-space:pre-wrap}
+@media (max-width:760px){.hr{grid-template-columns:110px 1fr 90px}}
 .fs{display:grid;grid-template-columns:150px 1fr 120px;gap:12px;align-items:center;cursor:pointer;padding:4px 6px;border-radius:10px;transition:.15s}
 .fs:hover,.fs.on{background:rgba(255,255,255,.04)}
 .fs.on{box-shadow:inset 0 0 0 1px var(--c)}
@@ -171,6 +181,7 @@ table.t{width:100%;border-collapse:collapse;font-size:12.5px}
 .mh h3{margin:0;font-size:20px}
 .mh .x{border:0;background:rgba(255,255,255,.08);color:#fff;border-radius:10px;width:36px;height:36px;font-size:20px;cursor:pointer}
 .mb{padding:16px 20px}
+.modal.wide{width:min(1420px,96vw)}
 .fg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 16px;margin-bottom:14px}
 .fg div{font-size:12.5px}
 .fg div span{display:block;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
@@ -253,6 +264,19 @@ footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center}
       <div class="tbar"><div><h3 id="mx-t">Especialidad × etapa</h3><div class="hint" id="mx-h">Líneas por especialidad y etapa. Clic en una celda filtra ambas.</div></div>
         <div class="seg" id="mx-met"><button data-m="n" class="on">Líneas</button><button data-m="q">Cantidad</button></div></div>
       <div style="overflow-x:auto"><table class="mx" id="mx"></table></div>
+    </div>
+  </div>
+
+  <div class="sec"><h2>Proveedores y equipos</h2><p>¿Cuándo llega? Clic en un proveedor o en un tipo de equipo para ver sus ODB con fecha requerida, llegada proyectada, avance de fabricación, inspección y último seguimiento.</p></div>
+  <div class="grid2">
+    <div class="card">
+      <div class="tbar"><div><h3>Proveedores</h3><div class="hint" id="pv-h"></div></div>
+        <div class="seg" id="pv-m"><button data-m="pen" class="on">Por llegar</button><button data-m="all">Todas</button></div></div>
+      <div class="hb" id="pvch"></div><div class="hleg" id="pv-leg"></div>
+    </div>
+    <div class="card">
+      <h3>Equipos por llegar</h3><div class="hint">Tipo de equipo (alcance ATIP) con líneas pendientes · el color es el estado de llegada · clic para ver ODB y fechas</div>
+      <div class="hb" id="eqch"></div>
     </div>
   </div>
 
@@ -375,6 +399,22 @@ function kpis(R) {
 }
 
 
+// ---------- ventana de un grupo de la leyenda (recibidos / vencidos / proyectados)
+function legModal(S, L) {
+  const rec = S.k.startsWith('rec'), fx = x => rec ? (x.fsap || x.eta) : x.eta;
+  L = L.slice().sort((a, b) => rec ? String(fx(b)).localeCompare(String(fx(a))) : String(fx(a)).localeCompare(String(fx(b))));
+  const MAX = 1500, V = L.slice(0, MAX), col = S.k.startsWith('rec') ? '#39ff88' : S.k.startsWith('ven') ? '#ff3d71' : '#00e5ff';
+  const est = rec ? 'Recibido' : S.k.startsWith('ven') ? 'Llegada vencida' : 'Proyectado';
+  const odbs = new Set(L.filter(x => x.odb).map(x => x.m + '|' + x.odb)).size;
+  open_(S.n, `${N(L.length)} líneas · ${N(odbs)} ODB · ${rec ? 'fecha de recibo (más reciente primero)' : 'fecha de llegada proyectada (más próxima primero)'} · rango de meses y filtros actuales · clic en una línea para ver su ficha`,
+    (L.length > MAX ? `<div class="hint" style="margin-bottom:8px">Se muestran las primeras ${N(MAX)} de ${N(L.length)} líneas; usa los filtros de arriba para acotar.</div>` : '') +
+    `<table class="t"><tr><th>${rec ? 'Recibido' : 'Llegada'}</th><th>Equipo / material</th><th>Mód.</th><th>Subproyecto</th><th>Cant.</th><th>Proveedor</th><th>ODB</th><th>Estado</th></tr>${V.map(x => `<tr data-i="${ITEMS.indexOf(x)}" style="cursor:pointer"><td style="white-space:nowrap"><b>${fd(fx(x))}</b></td>
+      <td>${x.eq ? '<span class="pill" style="--c:#ffe14d">equipo</span> ' : ''}${esc(x.ti || x.de || x.es)}<br><small style="color:#6b7aa6">${esc(x.de || '')}</small></td><td>${x.m}</td><td>${esc(x.sp)}</td>
+      <td style="white-space:nowrap">${N1(x.q)} ${esc(x.u)}</td><td>${esc(x.pv || '—')}</td><td>${esc(x.odb || '—')}</td><td><span class="pill" style="--c:${col}">${est}</span></td></tr>`).join('')}</table>`);
+  $('modal').classList.add('wide');
+  document.querySelectorAll('#m-b tr[data-i]').forEach(tr => tr.onclick = () => ficha(ITEMS[+tr.dataset.i]));
+}
+
 // ---------- barras: llegada por mes (real, proyectada, vencida)
 const BSEG = [
   { k: 'rec_eq', n: 'Equipos recibidos', c: '#39ff88' }, { k: 'rec_mt', n: 'Materiales recibidos', c: 'rgba(57,255,136,.38)' },
@@ -390,7 +430,7 @@ function barsData(R) {
     else if (!PLAN(x) && x.eta) { d = x.eta; tipo = d < HOY ? 'ven' : 'pro'; }
     else return;
     const k = mkey(d), seg = tipo + (x.eq ? '_eq' : '_mt'), v = st.bmet === 'q' ? x.q : 1;
-    (M[k] = M[k] || { k, L: [] })[seg] = (M[k][seg] || 0) + v; M[k].L.push(x);
+    (M[k] = M[k] || { k, L: [] })[seg] = (M[k][seg] || 0) + v; M[k].L.push(x); (M[k]['L_' + seg] = M[k]['L_' + seg] || []).push(x);
   });
   return M;
 }
@@ -441,7 +481,8 @@ function bars(R) {
         `<table class="t"><tr><th>Equipo / material</th><th>Subproyecto</th><th>Cant.</th><th>Estado</th><th>Fecha</th><th>Proveedor</th><th>ODB</th></tr>${L.map(x => `<tr><td>${x.eq ? '<span class="pill" style="--c:#ffe14d">equipo</span> ' : ''}${esc(x.ti || x.de || x.es)}<br><small style="color:#6b7aa6">${esc(x.de || '')}</small></td><td>${esc(x.sp)}</td><td style="white-space:nowrap">${N1(x.q)} ${esc(x.u)}</td><td><span class="pill" style="--c:${x.et === 'Recibido' ? '#39ff88' : (x.eta < HOY ? '#ff3d71' : '#00e5ff')}">${x.et === 'Recibido' ? 'Recibido' : x.eta < HOY ? 'Llegada vencida' : 'Proyectado'}</span></td><td>${fd(x.et === 'Recibido' ? (x.fsap || x.eta) : x.eta)}</td><td>${esc(x.pv || '—')}</td><td>${esc(x.odb || '—')}</td></tr>`).join('')}</table>`); };
   });
   const sum = s => months.reduce((t, k) => t + ((M[k] || {})[s] || 0), 0);
-  $('b-legend').innerHTML = segs.map(S => `<span class="lg" style="--c:${S.c};cursor:default"><i style="height:10px;width:14px;border-radius:3px"></i>${S.n} <b>${fmt(sum(S.k))}</b></span>`).join('');
+  $('b-legend').innerHTML = segs.map(S => `<span class="lg" data-s="${S.k}" style="--c:${S.c};cursor:pointer" title="Clic para ver las líneas y su fecha de llegada"><i style="height:10px;width:14px;border-radius:3px"></i>${S.n} <b>${fmt(sum(S.k))}</b></span>`).join('');
+  $('b-legend').querySelectorAll('.lg[data-s]').forEach(el => el.onclick = () => { const S = segs.find(z => z.k === el.dataset.s); legModal(S, months.flatMap(k => (M[k] || {})['L_' + S.k] || [])); });
   const futuros = months.filter(k => k >= hk).reduce((t, k) => t + ['pro_eq', 'pro_mt'].filter(x => !eqOnly || x.endsWith('_eq')).reduce((u, s2) => u + ((M[k] || {})[s2] || 0), 0), 0);
   $('b-info').textContent = `${fmt(futuros)} ${st.bmet === 'q' ? 'unidades' : 'líneas'} proyectadas desde hoy`;
 }
@@ -597,7 +638,7 @@ function fichaOdb(k) {
   open_(`ODB ${o.odb} · ${o.prov}`, `${o.mod} · ${o.sp} · ${o.tipo}`,
     `<div class="fg">${[['Estado ODB', o.est], ['Fecha de entrega ODB', fd(o.f_ent)], ['Fecha requerida proyecto', fd(o.f_req)], ['Fecha proyectada', fd(o.f_proy)], ['Desviación', o.dv === null ? '—' : o.dv + ' días'], ['Inspección', o.insp || '—'],
       ['Avance ingeniería', o.p_ing ?? '—'], ['Avance materiales', o.p_mat ?? '—'], ['Avance producción', o.p_prod ?? '—'], ['Avance ensayos', o.p_ens ?? '—'], ['Liberación', fd(o.f_lib)], ['Líneas', `${o.n} (${o.n_ab} pendientes)`]].map(([a, b]) => `<div><span>${a}</span>${esc(b)}</div>`).join('')}</div>
-     <div class="box"><b>Avance tracking</b>\n${esc(o.avance || '—')}</div>
+     <div class="ult"><b>Último seguimiento</b>\n${esc(ultimo(o.avance) || '—')}</div><div class="box"><b>Avance tracking (historial)</b>\n${esc(o.avance || '—')}</div>
      <table class="t"><tr><th>MR</th><th>Descripción</th><th>Cant.</th><th>Etapa</th><th>Llegada</th></tr>${L.map(x => `<tr><td>${esc(x.mr)}</td><td>${esc(x.de || x.ti)}</td><td>${N1(x.q)} ${esc(x.u)}</td><td>${esc(x.et)}</td><td>${fd(x.eta)}</td></tr>`).join('')}</table>`);
 }
 
@@ -634,7 +675,7 @@ function ficha(x) {
     ['Liberación', fd(x.flib)], ['Taladro (clúster)', x.tal ? x.tal + ' · llega ' + fd(x.tin) : ''], ['Área 2', x.a2]].filter(([, v]) => v && v !== '—');
   open_(x.de || x.ti || x.mr, `${x.m} · ${x.sp} · ${x.mr}`, `<div class="fg">${F.map(([a, b]) => `<div><span>${a}</span>${esc(b)}</div>`).join('')}</div>${x.ob ? `<div class="box"><b>Observaciones</b>\n${esc(x.ob)}</div>` : ''}`);
 }
-function open_(t, s, b) { $('m-t').textContent = t; $('m-s').textContent = s; $('m-b').innerHTML = b; $('back').style.display = $('modal').style.display = 'block'; }
+function open_(t, s, b) { $('modal').classList.remove('wide'); $('m-t').textContent = t; $('m-s').textContent = s; $('m-b').innerHTML = b; $('back').style.display = $('modal').style.display = 'block'; }
 function close_() { $('back').style.display = $('modal').style.display = 'none'; }
 $('m-x').onclick = close_; $('back').onclick = close_; addEventListener('keydown', e => { if (e.key === 'Escape') close_(); });
 
@@ -726,10 +767,69 @@ function openMvT(i) {
     `<table class="t"><tr><th>Material / equipo</th><th>Mód.</th><th>Subproyecto</th><th>Etapa</th><th>Llegada</th><th>ODB</th></tr>${rowsH}</table>`);
 }
 
+// ---------- proveedores y equipos
+st.pvm = 'pen';
+const LLP = ['ETA vencida', '≤30 días', '31–90 días', '>90 días', 'Sin fecha', 'Sin compra', 'Recibido'];
+function ultimo(av) { const s = String(av || ''); const find = re => { let m, last = -1; while ((m = re.exec(s))) last = m.index; return last; };
+  let last = find(/\d{1,2}\s*[\/\-]\s*(?:\d{1,2}|[A-Za-zé]{3,4})\.?\s*[\/\-]?\s*\d{2,4}\s*[:.]/g);   // inicio de la última anotación (fecha seguida de : o .)
+  if (last < 0) last = find(/\d{1,2}\s*[\/\-]\s*(?:\d{1,2}|[A-Za-zé]{3,4})\.?\s*[\/\-]?\s*\d{2,4}/g);
+  return last >= 0 ? s.slice(last).trim() : s.trim(); }
+function hbars(id, G, onClick, sel) {
+  const max = Math.max(1, ...G.map(g => g.n));
+  $(id).innerHTML = G.length ? G.map((g, i) => `<div class="hr${sel === g.k ? ' on' : ''}" data-i="${i}" title="${esc(g.k)}"><div class="n">${esc(g.k)}</div>
+    <div class="stk" style="width:${Math.max(4, 100 * g.n / max)}%">${LLP.filter(l => g.c[l]).map(l => `<i style="width:${100 * g.c[l] / g.n}%;background:${LL_C[l]}" title="${l}: ${N(g.c[l])}"></i>`).join('')}</div>
+    <div class="r">${N(g.n)} <small>${g.sub}</small></div></div>`).join('') : '<div class="hint">Sin datos con el filtro actual.</div>';
+  $(id).querySelectorAll('.hr').forEach(el => el.onclick = () => onClick(G[+el.dataset.i]));
+}
+function grpLL(L, key) {
+  const G = {};
+  L.forEach(x => { const k = key(x); if (!k) return; const g = G[k] = G[k] || { k, n: 0, c: {}, nx: null, ve: 0, odb: new Set(), L: [] };
+    g.n++; g.c[x.ll] = (g.c[x.ll] || 0) + 1; g.L.push(x); if (x.odb) g.odb.add(x.m + '|' + x.odb); if (x.ll === 'ETA vencida') g.ve++;
+    if (x.et !== 'Recibido' && x.eta && x.eta >= HOY && (!g.nx || x.eta < g.nx)) g.nx = x.eta; });
+  return Object.values(G).map(g => (g.sub = `${g.odb.size} ODB · ${g.nx ? 'próx. ' + fd(g.nx) : g.ve ? g.ve + ' vencidas' : (g.c['Recibido'] === g.n ? 'recibido' : 'sin fecha')}`, g)).sort((a, b) => b.n - a.n);
+}
+function provs(R) {
+  const L = R.filter(x => x.pv && (st.pvm === 'all' || x.et !== 'Recibido')), G = grpLL(L, x => x.pv), T = G.slice(0, 14);
+  $('pv-h').textContent = `${N(G.length)} proveedores · ${N(L.length)} líneas ${st.pvm === 'all' ? 'en total' : 'por llegar'}${G.length > 14 ? ' · se muestran los 14 con más líneas' : ''} · clic para ver sus ODB`;
+  hbars('pvch', T, g => provModal(g, R), st.pv);
+  $('pv-leg').innerHTML = LLP.filter(l => st.pvm === 'all' || l !== 'Recibido').map(l => `<span style="--c:${LL_C[l]}">${l}</span>`).join('');
+}
+function eqs(R) {
+  const L = R.filter(x => x.eq && x.et !== 'Recibido');
+  hbars('eqch', grpLL(L, x => x.eq), g => eqModal(g));
+}
+const ODB_EC = { VIGENTE: '#00e5ff', VENCIDA: '#ff3d71', CERRADA: '#39ff88', 'RECIBIDA PEND. CARGUE SAP': '#ffe14d', CANCELADA: '#6b7aa6' };
+function odbRows(O) {
+  return `<table class="t"><tr><th>ODB</th><th>Mód.</th><th>Subproyecto</th><th>Equipo / material</th><th>Estado</th><th>Requerida</th><th>Proyectada</th><th>Desv.</th><th>Producción</th><th>Inspección</th><th>Último seguimiento</th></tr>` +
+    O.map(o => `<tr data-o="${esc(o.mod + '|' + o.odb)}" style="cursor:pointer"><td><b>${esc(o.odb)}</b>${o.eq ? ' <span class="pill" style="--c:#ffe14d">equipo</span>' : ''}<br><small style="color:#6b7aa6">${o.n_ab}/${o.n} pend.</small></td><td>${o.mod}</td><td>${esc(o.sp)}</td><td>${esc(o.tipo)}</td>
+      <td><span class="pill" style="--c:${ODB_EC[o.est] || '#9fb3d9'}">${esc(o.est || '—')}</span></td><td>${fd(o.f_req)}</td><td><b>${fd(o.f_proy)}</b></td>
+      <td style="color:${o.dv === null ? '#6b7aa6' : o.dv < 0 ? '#ff3d71' : '#39ff88'};white-space:nowrap">${o.dv === null ? '—' : (o.dv > 0 ? '+' : '') + o.dv + ' d'}</td>
+      <td style="white-space:nowrap">${o.p_prod !== null && o.p_prod !== undefined ? o.p_prod + '%' : '—'}</td><td>${esc(o.insp || '—')}</td><td style="min-width:280px;white-space:normal">${esc(ultimo(o.avance)).slice(0, 420) || '—'}</td></tr>`).join('') + '</table>';
+}
+function bindOdb() { document.querySelectorAll('#m-b tr[data-o]').forEach(tr => tr.onclick = () => fichaOdb(tr.dataset.o)); }
+function provModal(g, R) {
+  const keys = new Set(g.L.map(x => x.m + '|' + x.odb).filter(k => !k.endsWith('|undefined')));
+  const O = DATA.odb.filter(o => keys.has(o.mod + '|' + o.odb)).sort((a, b) => (b.n_ab > 0) - (a.n_ab > 0) || String(a.f_proy || '9').localeCompare(String(b.f_proy || '9')));
+  const pend = g.L.filter(x => x.et !== 'Recibido').length;
+  open_(`Proveedor · ${g.k}`, `${N(g.n)} líneas · ${N(pend)} por llegar · ${O.length} ODB${g.nx ? ' · próxima llegada ' + fd(g.nx) : ''} · clic en una ODB para ver la ficha completa`,
+    `<div style="margin-bottom:10px"><button class="tbtn" id="pv-filtro">Filtrar el tablero por este proveedor</button></div>${odbRows(O)}`); $('modal').classList.add('wide');
+  $('pv-filtro').onclick = () => { close_(); st.pv = g.k; st.lim = 200; render(); };
+  bindOdb();
+}
+function eqModal(g) {
+  const keys = new Set(g.L.filter(x => x.odb).map(x => x.m + '|' + x.odb));
+  const O = DATA.odb.filter(o => keys.has(o.mod + '|' + o.odb)).sort((a, b) => String(a.f_proy || '9').localeCompare(String(b.f_proy || '9')));
+  const sin = g.L.filter(x => !x.odb);
+  open_(`Equipos por llegar · ${g.k}`, `${N(g.n)} líneas pendientes · ${O.length} ODB${sin.length ? ' · ' + N(sin.length) + ' líneas aún sin ODB' : ''}${g.nx ? ' · próxima llegada ' + fd(g.nx) : ''}`,
+    (O.length ? odbRows(O) : '') + (sin.length ? `<h3 style="margin:16px 0 6px">Sin ODB (en planeación)</h3><table class="t"><tr><th>Mód.</th><th>Subproyecto</th><th>Equipo</th><th>Cant.</th><th>Etapa</th><th>Requerida</th></tr>${sin.map(x => `<tr data-i="${ITEMS.indexOf(x)}" style="cursor:pointer"><td>${x.m}</td><td>${esc(x.sp)}</td><td>${esc(x.de || x.ti || '')}</td><td>${N1(x.q)} ${esc(x.u)}</td><td>${esc(x.et)}</td><td>${fd(x.fre)}</td></tr>`).join('')}</table>` : ''));
+  $('modal').classList.add('wide'); bindOdb(); document.querySelectorAll('#m-b tr[data-i]').forEach(tr => tr.onclick = () => ficha(ITEMS[+tr.dataset.i]));
+}
+document.querySelectorAll('#pv-m button').forEach(b => b.onclick = () => { st.pvm = b.dataset.m; document.querySelectorAll('#pv-m button').forEach(x => x.classList.toggle('on', x === b)); provs(rows()); });
+
 // ---------- render
 function render() {
   filters(); const R = rows();
-  renderChanges(); kpis(R); bars(R); curve(R); funnel(R); matrix(R); subs(); odbs(R); alerts(R); table(R); quality(R);
+  renderChanges(); kpis(R); bars(R); curve(R); funnel(R); matrix(R); provs(R); eqs(R); subs(); odbs(R); alerts(R); table(R); quality(R);
   document.querySelectorAll('#scope button').forEach(b => b.classList.toggle('on', b.dataset.s === st.scope));
 }
 document.querySelectorAll('#scope button').forEach(b => b.onclick = () => { st.scope = b.dataset.s; st.es = ''; render(); });
