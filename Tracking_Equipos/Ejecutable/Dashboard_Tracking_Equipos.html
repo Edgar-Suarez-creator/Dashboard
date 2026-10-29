@@ -238,8 +238,8 @@ footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center}
       <div class="sub" id="sub"></div>
     </div>
     <div class="scope" id="scope">
-      <button data-s="todo" class="on"><b>Materiales y equipos</b><small>Trazabilidad completa GyQ Ecopetrol</small></button>
-      <button data-s="eq"><b>Solo equipos</b><small>Alcance ATIP · preservación y arranque</small></button>
+      <button data-s="eq" class="on"><b>Equipos</b><small>Alcance ATIP · preservación y arranque</small></button>
+      <button data-s="mt"><b>Materiales</b><small>Tubería, accesorios, válvulas, cables e instrumentos</small></button>
     </div>
   </div>
 
@@ -372,13 +372,14 @@ const LL_C = { 'ETA vencida': '#ff3d71', '≤30 días': '#ff9f1c', '31–90 día
 const NIV_C = { 'MUY ALTA': '#ff3d71', 'ALTA': '#ff9f1c', 'MEDIA': '#ffe14d', 'BAJA': '#4d7cff' };
 const HOY = DATA.hoy;
 const PLAN = x => x.et.startsWith('Planeación');
-const st = { scope: 'todo', m: [], sp: [], es: [], et: [], ll: [], pv: [], q: '', range: '24', met: 'pct', mxm: 'n', odbf: 'ab', sort: 'eta', dir: 1, lim: 200, off: {} };
+const st = { scope: 'eq', m: [], sp: [], es: [], et: [], ll: [], pv: [], q: '', range: '24', met: 'pct', mxm: 'n', odbf: 'ab', sort: 'eta', dir: 1, lim: 200, off: {} };
 
 // ---------- filtros
 const grp = x => st.scope === 'eq' ? (x.eq || '—') : x.es;
-function base() { return ITEMS.filter(x => st.scope === 'todo' || x.eq); }
+function base() { return ITEMS.filter(x => st.scope === 'eq' ? x.eq : !x.eq); }
 function pass(x, skip) {
   if (st.scope === 'eq' && !x.eq) return false;
+  if (st.scope === 'mt' && x.eq) return false;
   if (skip !== 'm' && st.m.length && !st.m.includes(x.m)) return false;
   if (skip !== 'sp' && st.sp.length && !st.sp.includes(x.sp)) return false;
   if (skip !== 'es' && st.es.length && !st.es.includes(grp(x))) return false;
@@ -410,7 +411,7 @@ function filters() {
   const ch = [['m', 'Módulo'], ['sp', 'Subproyecto'], ['es', st.scope === 'eq' ? 'Equipo' : 'Especialidad'], ['et', 'Etapa'], ['ll', 'Llegada'], ['pv', 'Proveedor']]
     .flatMap(([k, l]) => st[k].map(v => `<span class="chip" data-k="${k}" data-v="${esc(v)}">${l}: <b>${esc(v)}</b> ✕</span>`));
   if (st.q) ch.push(`<span class="chip" data-k="q">Buscar: <b>${esc(st.q)}</b> ✕</span>`);
-  $('chips').innerHTML = ch.length ? ch.join('') : `<span class="chip info">${st.scope === 'eq' ? 'Solo equipos (alcance ATIP)' : 'Todos los materiales y equipos'} · sin filtros</span>`;
+  $('chips').innerHTML = ch.length ? ch.join('') : `<span class="chip info">${st.scope === 'eq' ? 'Equipos (alcance ATIP)' : 'Materiales (sin equipos)'} · sin filtros</span>`;
   $('chips').querySelectorAll('.chip[data-k]').forEach(c => c.onclick = () => { const k = c.dataset.k; if (k === 'q') { st.q = ''; $('f-q').value = ''; } else st[k] = st[k].filter(v => v !== c.dataset.v); render(); });
 }
 function set(k, v) { st[k] = st[k].length === 1 && st[k][0] === v ? [] : [v]; st.lim = 200; render(); }
@@ -422,7 +423,7 @@ function kpis(R) {
   const venc = R.filter(x => x.ll === 'ETA vencida').length;
   const tarde = R.filter(x => x.et !== 'Recibido' && x.dv < 0).length;
   const keyS = new Set(R.map(x => x.m + '|' + x.sp));
-  const al = DATA.alertas.filter(a => a.abierta && (!st.m.length || st.m.includes(a.mod)) && (!st.sp.length || st.sp.some(v => v.toUpperCase() === a.sub.toUpperCase())) && (st.scope === 'todo' || a.odb)).length;
+  const al = DATA.alertas.filter(a => a.abierta && (!st.m.length || st.m.includes(a.mod)) && (!st.sp.length || st.sp.some(v => v.toUpperCase() === a.sub.toUpperCase())) && (st.scope !== 'eq' || a.odb)).length;
   const un = {}; R.forEach(x => un[x.u] = (un[x.u] || 0) + x.q);
   const unS = Object.entries(un).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([u, q]) => `<b>${N1(q)}</b> ${u}`).join(' · ');
   const P = v => n ? (100 * v / n) : 0;
@@ -477,14 +478,14 @@ function barsData(R) {
 function bars(R) {
   const svg = $('bars'), W = svg.clientWidth || 1200, H = svg.clientHeight || 400, pad = { l: 58, r: 20, t: 30, b: 54 };
   const eqOnly = st.scope === 'eq';
-  $('b-title').textContent = eqOnly ? 'Llegada de equipos por mes' : 'Llegada de equipos y materiales por mes';
+  $('b-title').textContent = eqOnly ? 'Llegada de equipos por mes' : 'Llegada de materiales por mes';
   const M = barsData(R), hk = mkey(HOY);
   let ks = Object.keys(M).sort(); if (!ks.length) { svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" fill="#6b7aa6">Sin llegadas con fecha para el filtro actual</text>`; $('b-legend').innerHTML = ''; $('b-info').textContent = ''; return; }
   let a = ks[0], b = ks[ks.length - 1];
   if (st.brange === '12') a = a > addM(hk, -12) ? a : addM(hk, -12); else if (st.brange === '2025') a = a > '2025-01' ? a : '2025-01';
   if (b < addM(hk, 2)) b = addM(hk, 2);
   const months = []; for (let k = a; k <= b; k = addM(k, 1)) months.push(k);
-  const segs = BSEG.filter(s => !eqOnly || s.k.endsWith('_eq'));
+  const segs = BSEG.filter(s => s.k.endsWith(eqOnly ? '_eq' : '_mt'));
   const tot = k => segs.reduce((t, s) => t + ((M[k] || {})[s.k] || 0), 0);
   const maxV = Math.max(1, ...months.map(tot)), nice = (() => { const p = Math.pow(10, Math.floor(Math.log10(maxV))); const f = [1, 2, 2.5, 5, 10].find(f => f * p >= maxV); return f * p; })();
   const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b, slot = iw / months.length, bw = Math.max(3, Math.min(46, slot * .68));
@@ -523,7 +524,7 @@ function bars(R) {
   const sum = s => months.reduce((t, k) => t + ((M[k] || {})[s] || 0), 0);
   $('b-legend').innerHTML = segs.map(S => `<span class="lg" data-s="${S.k}" style="--c:${S.c};cursor:pointer" title="Clic para ver las líneas y su fecha de llegada"><i style="height:10px;width:14px;border-radius:3px"></i>${S.n} <b>${fmt(sum(S.k))}</b></span>`).join('');
   $('b-legend').querySelectorAll('.lg[data-s]').forEach(el => el.onclick = () => { const S = segs.find(z => z.k === el.dataset.s); legModal(S, months.flatMap(k => (M[k] || {})['L_' + S.k] || [])); });
-  const futuros = months.filter(k => k >= hk).reduce((t, k) => t + ['pro_eq', 'pro_mt'].filter(x => !eqOnly || x.endsWith('_eq')).reduce((u, s2) => u + ((M[k] || {})[s2] || 0), 0), 0);
+  const futuros = months.filter(k => k >= hk).reduce((t, k) => t + ['pro_eq', 'pro_mt'].filter(x => x.endsWith(eqOnly ? '_eq' : '_mt')).reduce((u, s2) => u + ((M[k] || {})[s2] || 0), 0), 0);
   $('b-info').textContent = `${fmt(futuros)} ${st.bmet === 'q' ? 'unidades' : 'líneas'} proyectadas desde hoy`;
 }
 
@@ -685,7 +686,7 @@ function fichaOdb(k) {
 // ---------- alertas
 function alerts(R) {
   const subsF = st.sp.length ? new Set(st.sp.map(v => v.toUpperCase())) : null, odbsF = new Set(R.map(x => x.odb).filter(Boolean));
-  let A = DATA.alertas.filter(a => a.abierta && (!st.m.length || st.m.includes(a.mod)) && (!subsF || subsF.has(a.sub.toUpperCase())) && (st.scope === 'todo' || (a.odb && odbsF.has(a.odb))));
+  let A = DATA.alertas.filter(a => a.abierta && (!st.m.length || st.m.includes(a.mod)) && (!subsF || subsF.has(a.sub.toUpperCase())) && (st.scope !== 'eq' || (a.odb && odbsF.has(a.odb))));
   const ord = ['MUY ALTA', 'ALTA', 'MEDIA', 'BAJA']; A.sort((a, b) => ord.indexOf(a.nivel) - ord.indexOf(b.nivel) || (a.f_act || '').localeCompare(b.f_act || ''));
   $('al-sub').textContent = `${A.length} alertas abiertas · ${ord.map(o => `${A.filter(a => a.nivel === o).length} ${o.toLowerCase()}`).join(' · ')}`;
   $('alerts').innerHTML = A.length ? A.map(a => `<div class="al" style="--c:${NIV_C[a.nivel] || '#9fb3d9'}"><div class="h"><h4>${esc(a.equipo || a.cat)}</h4><span class="pill" style="--c:${NIV_C[a.nivel] || '#9fb3d9'}">${esc(a.nivel)}</span></div>
@@ -765,9 +766,9 @@ function renderChanges() {
     return;
   }
   $('cc-st').hidden = true;
-  const eqOnly = st.scope === 'eq', inS = x => !eqOnly || x.eq;
+  const eqOnly = st.scope === 'eq', inS = x => eqOnly ? x.eq : !x.eq;
   const N1_ = ITEMS.filter(inS), P1 = PITEMS.filter(inS);
-  $('cc-lbl').textContent = `${fd(PREV.corte)} → ${fd(DATA.corte)} · ${eqOnly ? 'solo equipos' : 'materiales y equipos'} · totales generales (se ocultan al filtrar; cambian con el selector de arriba)`;
+  $('cc-lbl').textContent = `${fd(PREV.corte)} → ${fd(DATA.corte)} · ${eqOnly ? 'equipos' : 'materiales'} · totales generales (se ocultan al filtrar; cambian con el selector de arriba)`;
   const cnt = (L, f) => L.filter(f).length, odbAb = L => new Set(L.filter(x => x.odb && x.et !== 'Recibido').map(x => x.m + x.odb)).size;
   const alN = DATA.alertas.filter(a => a.abierta).length, alP = (PREV.alertas || []).filter(a => a.abierta).length;
   const T = [
