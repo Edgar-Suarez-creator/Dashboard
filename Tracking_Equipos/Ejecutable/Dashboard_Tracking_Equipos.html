@@ -142,6 +142,22 @@ button{font-family:inherit}
 .crit{display:inline-block;padding:2px 8px;border-radius:7px;font:700 10.5px Inter;color:#04060d;background:var(--c)}
 @media(max-width:1300px){.gyq-k{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:760px){.gyq-k{grid-template-columns:1fr 1fr}.gyq-pie{flex-direction:column}}
+.filters{position:relative;z-index:70}
+.ms{position:relative}
+.ms>button{position:relative;width:100%;background:rgba(4,8,22,.85);color:var(--text);border:1px solid rgba(0,229,255,.22);border-radius:10px;padding:8px 26px 8px 10px;font:500 13px Inter;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.ms>button::after{content:'▾';position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text2)}
+.ms>button.on{border-color:rgba(0,229,255,.6);color:#8ff3ff}
+.ms.open>button{border-color:var(--cy);box-shadow:0 0 0 3px rgba(0,229,255,.15)}
+.ms .mp{display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:80;width:max-content;min-width:220px;max-width:min(340px,calc(100vw - 32px));padding:8px;background:rgba(8,12,28,.98);border:1px solid rgba(0,229,255,.35);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.6)}
+.ms .mp.rt{left:auto;right:0}.ms.open .mp{display:block}
+.filters .ms .mq{margin-bottom:6px;width:100%}
+.ms .ma{display:flex;gap:12px;padding:0 6px 6px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+.ms .ma a{font:600 11px Inter;color:var(--cy);cursor:pointer}.ms .ma a:hover{text-decoration:underline}
+.ms .ml{max-height:280px;overflow:auto}
+.filters .ms label.mo{display:flex;align-items:center;gap:8px;margin:0;padding:5px 6px;border-radius:6px;font:400 12.5px Inter;letter-spacing:0;text-transform:none;color:var(--text);cursor:pointer}
+.filters .ms label.mo:hover{background:rgba(0,229,255,.08)}
+.filters .ms label.mo input{width:14px;height:14px;margin:0;padding:0;accent-color:var(--cy);flex:none}
+.ms label.mo small{margin-left:auto;padding-left:10px;color:var(--muted)}
 .subs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .sp{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px 15px;cursor:pointer;transition:.18s;position:relative;overflow:hidden}
 .sp:hover{border-color:rgba(0,229,255,.6);transform:translateY(-2px);box-shadow:0 10px 30px -14px rgba(0,229,255,.6)}
@@ -228,12 +244,12 @@ footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center}
   </div>
 
   <div class="filters">
-    <div><label>Módulo</label><select id="f-m"></select></div>
-    <div><label>Subproyecto</label><select id="f-sp"></select></div>
-    <div><label id="lb-es">Especialidad</label><select id="f-es"></select></div>
-    <div><label>Etapa</label><select id="f-et"></select></div>
-    <div><label>Llegada</label><select id="f-ll"></select></div>
-    <div><label>Proveedor</label><select id="f-pv"></select></div>
+    <div><label>Módulo</label><div class="ms" id="f-m"></div></div>
+    <div><label>Subproyecto</label><div class="ms" id="f-sp"></div></div>
+    <div><label id="lb-es">Especialidad</label><div class="ms" id="f-es"></div></div>
+    <div><label>Etapa</label><div class="ms" id="f-et"></div></div>
+    <div><label>Llegada</label><div class="ms" id="f-ll"></div></div>
+    <div><label>Proveedor</label><div class="ms" id="f-pv"></div></div>
     <div><label>Buscar</label><input id="f-q" placeholder="MR, ODB, TAG, descripción, proveedor…"></div>
     <button class="btn-clear" id="clear">Limpiar filtros</button>
   </div>
@@ -356,45 +372,48 @@ const LL_C = { 'ETA vencida': '#ff3d71', '≤30 días': '#ff9f1c', '31–90 día
 const NIV_C = { 'MUY ALTA': '#ff3d71', 'ALTA': '#ff9f1c', 'MEDIA': '#ffe14d', 'BAJA': '#4d7cff' };
 const HOY = DATA.hoy;
 const PLAN = x => x.et.startsWith('Planeación');
-const st = { scope: 'todo', m: '', sp: '', es: '', et: '', ll: '', pv: '', q: '', range: '24', met: 'pct', mxm: 'n', odbf: 'ab', sort: 'eta', dir: 1, lim: 200, off: {} };
+const st = { scope: 'todo', m: [], sp: [], es: [], et: [], ll: [], pv: [], q: '', range: '24', met: 'pct', mxm: 'n', odbf: 'ab', sort: 'eta', dir: 1, lim: 200, off: {} };
 
 // ---------- filtros
 const grp = x => st.scope === 'eq' ? (x.eq || '—') : x.es;
 function base() { return ITEMS.filter(x => st.scope === 'todo' || x.eq); }
 function pass(x, skip) {
   if (st.scope === 'eq' && !x.eq) return false;
-  if (skip !== 'm' && st.m && x.m !== st.m) return false;
-  if (skip !== 'sp' && st.sp && x.sp !== st.sp) return false;
-  if (skip !== 'es' && st.es && grp(x) !== st.es) return false;
-  if (skip !== 'et' && st.et && x.et !== st.et) return false;
-  if (skip !== 'll' && st.ll && x.ll !== st.ll) return false;
-  if (skip !== 'pv' && st.pv && (x.pv || '—') !== st.pv) return false;
+  if (skip !== 'm' && st.m.length && !st.m.includes(x.m)) return false;
+  if (skip !== 'sp' && st.sp.length && !st.sp.includes(x.sp)) return false;
+  if (skip !== 'es' && st.es.length && !st.es.includes(grp(x))) return false;
+  if (skip !== 'et' && st.et.length && !st.et.includes(x.et)) return false;
+  if (skip !== 'll' && st.ll.length && !st.ll.includes(x.ll)) return false;
+  if (skip !== 'pv' && st.pv.length && !st.pv.includes(x.pv || '—')) return false;
   if (st.q) { const h = (x.mr + ' ' + (x.odb || '') + ' ' + (x.tag || '') + ' ' + (x.de || '') + ' ' + (x.ti || '') + ' ' + (x.pv || '') + ' ' + (x.loc || '')).toLowerCase(); if (!h.includes(st.q)) return false; }
   return true;
 }
 const rows = () => ITEMS.filter(x => pass(x));
-function fillSel(id, key, vals, all, order) {
-  const el = $(id), cur = st[key];
-  const cnt = {}; vals.forEach(v => cnt[v] = (cnt[v] || 0) + 1);
-  let ks = Object.keys(cnt); ks = order ? order.filter(k => cnt[k]) : ks.sort((a, b) => cnt[b] - cnt[a]);
-  el.innerHTML = `<option value="">${all}</option>` + ks.map(k => `<option value="${esc(k)}"${k === cur ? ' selected' : ''}>${esc(k)} (${N(cnt[k])})</option>`).join('');
+// ---------- filtros con casillas: st[k] es la lista de valores marcados (vacía = todos)
+const MSK = { m: 'Todos', sp: 'Todos', es: 'Todas', et: 'Todas', ll: 'Todas', pv: 'Todos' };
+const MSV = { m: x => x.m, sp: x => x.sp, es: grp, et: x => x.et, ll: x => x.ll, pv: x => x.pv || '—' };
+const MSO = { m: ['M3', 'M4', 'M5'], et: ETAPAS, ll: LL };
+function msFill(k) {
+  const el = $('f-' + k), cnt = {};
+  ITEMS.filter(x => pass(x, k)).forEach(x => { const v = MSV[k](x); cnt[v] = (cnt[v] || 0) + 1; });
+  const ks = MSO[k] ? MSO[k].filter(v => cnt[v]) : Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]);
+  st[k].forEach(v => { if (!ks.includes(v)) ks.unshift(v); });
+  const qi = el.querySelector('.mq'), q = qi ? qi.value.toLowerCase() : '', L = el.querySelector('.ml'), sc = L.scrollTop;
+  L.innerHTML = ks.map(v => `<label class="mo"${q && !v.toLowerCase().includes(q) ? ' style="display:none"' : ''}><input type="checkbox" value="${esc(v)}"${st[k].includes(v) ? ' checked' : ''}><span>${esc(v)}</span><small>${N(cnt[v] || 0)}</small></label>`).join('') || '<div class="mo">Sin opciones</div>';
+  L.scrollTop = sc;
+  const b = el.querySelector('button'); b.textContent = !st[k].length ? MSK[k] : st[k].length === 1 ? st[k][0] : st[k].length + ' seleccionados';
+  b.classList.toggle('on', st[k].length > 0); b.title = st[k].join(', ');
 }
 function filters() {
-  const b = ITEMS;
-  fillSel('f-m', 'm', b.filter(x => pass(x, 'm')).map(x => x.m), 'Todos', ['M3', 'M4', 'M5']);
-  fillSel('f-sp', 'sp', b.filter(x => pass(x, 'sp')).map(x => x.sp), 'Todos');
-  fillSel('f-es', 'es', b.filter(x => pass(x, 'es')).map(grp), 'Todas');
-  fillSel('f-et', 'et', b.filter(x => pass(x, 'et')).map(x => x.et), 'Todas', ETAPAS);
-  fillSel('f-ll', 'll', b.filter(x => pass(x, 'll')).map(x => x.ll), 'Todas', LL);
-  fillSel('f-pv', 'pv', b.filter(x => pass(x, 'pv')).map(x => x.pv || '—'), 'Todos');
+  Object.keys(MSK).forEach(msFill);
   $('lb-es').textContent = st.scope === 'eq' ? 'Tipo de equipo' : 'Especialidad';
   const ch = [['m', 'Módulo'], ['sp', 'Subproyecto'], ['es', st.scope === 'eq' ? 'Equipo' : 'Especialidad'], ['et', 'Etapa'], ['ll', 'Llegada'], ['pv', 'Proveedor']]
-    .filter(([k]) => st[k]).map(([k, l]) => `<span class="chip" data-k="${k}">${l}: <b>${esc(st[k])}</b> ✕</span>`);
+    .flatMap(([k, l]) => st[k].map(v => `<span class="chip" data-k="${k}" data-v="${esc(v)}">${l}: <b>${esc(v)}</b> ✕</span>`));
   if (st.q) ch.push(`<span class="chip" data-k="q">Buscar: <b>${esc(st.q)}</b> ✕</span>`);
   $('chips').innerHTML = ch.length ? ch.join('') : `<span class="chip info">${st.scope === 'eq' ? 'Solo equipos (alcance ATIP)' : 'Todos los materiales y equipos'} · sin filtros</span>`;
-  $('chips').querySelectorAll('.chip[data-k]').forEach(c => c.onclick = () => { st[c.dataset.k] = ''; if (c.dataset.k === 'q') $('f-q').value = ''; render(); });
+  $('chips').querySelectorAll('.chip[data-k]').forEach(c => c.onclick = () => { const k = c.dataset.k; if (k === 'q') { st.q = ''; $('f-q').value = ''; } else st[k] = st[k].filter(v => v !== c.dataset.v); render(); });
 }
-function set(k, v) { st[k] = st[k] === v ? '' : v; st.lim = 200; render(); }
+function set(k, v) { st[k] = st[k].length === 1 && st[k][0] === v ? [] : [v]; st.lim = 200; render(); }
 
 // ---------- tarjetas
 function kpis(R) {
@@ -403,7 +422,7 @@ function kpis(R) {
   const venc = R.filter(x => x.ll === 'ETA vencida').length;
   const tarde = R.filter(x => x.et !== 'Recibido' && x.dv < 0).length;
   const keyS = new Set(R.map(x => x.m + '|' + x.sp));
-  const al = DATA.alertas.filter(a => a.abierta && (!st.m || a.mod === st.m) && (!st.sp || a.sub.toUpperCase() === st.sp.toUpperCase()) && (st.scope === 'todo' || a.odb)).length;
+  const al = DATA.alertas.filter(a => a.abierta && (!st.m.length || st.m.includes(a.mod)) && (!st.sp.length || st.sp.some(v => v.toUpperCase() === a.sub.toUpperCase())) && (st.scope === 'todo' || a.odb)).length;
   const un = {}; R.forEach(x => un[x.u] = (un[x.u] || 0) + x.q);
   const unS = Object.entries(un).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([u, q]) => `<b>${N1(q)}</b> ${u}`).join(' · ');
   const P = v => n ? (100 * v / n) : 0;
@@ -597,7 +616,7 @@ function addDays(d, k) { const x = new Date(d + 'T00:00:00'); x.setDate(x.getDat
 function funnel(R) {
   const n = R.length || 1, c = {}; R.forEach(x => c[x.et] = (c[x.et] || 0) + 1);
   const ets = ETAPAS.concat(Object.keys(c).filter(k => !ETAPAS.includes(k))), max = Math.max(1, ...Object.values(c));
-  $('funnel').innerHTML = ets.filter(e => c[e] || ETAPAS.includes(e)).map(e => `<div class="fs${st.et === e ? ' on' : ''}" style="--c:${ET_C[e] || '#9fb3d9'}" data-e="${esc(e)}">
+  $('funnel').innerHTML = ets.filter(e => c[e] || ETAPAS.includes(e)).map(e => `<div class="fs${st.et.includes(e) ? ' on' : ''}" style="--c:${ET_C[e] || '#9fb3d9'}" data-e="${esc(e)}">
      <div class="n">${esc(e)}<small>${ET_D[e] || ''}</small></div><div class="track"><div class="fill" style="width:${100 * (c[e] || 0) / max}%"></div></div>
      <div class="num">${N(c[e] || 0)}<small>${(100 * (c[e] || 0) / n).toFixed(1).replace('.', ',')}% de las líneas</small></div></div>`).join('');
   $('funnel').querySelectorAll('.fs').forEach(el => el.onclick = () => set('et', el.dataset.e));
@@ -616,7 +635,7 @@ function matrix(R) {
   $('mx').innerHTML = `<tr><th>${st.scope === 'eq' ? 'Equipo' : 'Especialidad'}</th>${ets.map(e => `<th style="color:${ET_C[e]}">${e.replace('Planeación', 'Plan.')}</th>`).join('')}<th>Total</th></tr>` +
     gs.map(g => `<tr><td>${esc(g)}</td>${ets.map(e => `<td style="${cell(rowsK[g][e] || 0, e)}" data-g="${esc(g)}" data-e="${esc(e)}">${rowsK[g][e] ? fmt(rowsK[g][e]) : '·'}</td>`).join('')}<td style="font-weight:800;cursor:pointer" data-g="${esc(g)}">${fmt(tot[g])}</td></tr>`).join('') +
     `<tr class="tot"><td>Total</td>${ets.map(e => `<td data-e="${esc(e)}" style="color:${ET_C[e]}">${fmt(gs.reduce((t, g) => t + (rowsK[g][e] || 0), 0))}</td>`).join('')}<td>${fmt(gs.reduce((t, g) => t + tot[g], 0))}</td></tr>`;
-  $('mx').querySelectorAll('td[data-g],td[data-e]').forEach(td => td.onclick = () => { if (td.dataset.g) st.es = st.es === td.dataset.g && !td.dataset.e ? '' : td.dataset.g; if (td.dataset.e) st.et = st.et === td.dataset.e && !td.dataset.g ? '' : td.dataset.e; render(); });
+  $('mx').querySelectorAll('td[data-g],td[data-e]').forEach(td => td.onclick = () => { if (td.dataset.g) st.es = st.es.join() === td.dataset.g && !td.dataset.e ? [] : [td.dataset.g]; if (td.dataset.e) st.et = st.et.join() === td.dataset.e && !td.dataset.g ? [] : [td.dataset.e]; render(); });
 }
 
 // ---------- subproyectos
@@ -630,12 +649,12 @@ function subs() {
     const cov = 100 * con / n, c = cov >= 90 ? '#39ff88' : cov >= 60 ? '#ffe14d' : '#ff3d71';
     const seg = ETAPAS.map(e => { const v = L.filter(x => x.et === e).length; return v ? `<i style="width:${100 * v / n}%;background:${ET_C[e]}" title="${e}: ${N(v)}"></i>` : ''; }).join('');
     const canc = DATA.canceladas[S.m + '|' + S.sp] || 0;
-    return `<div class="sp${st.sp === S.sp ? ' on' : ''}" style="--c:${c}" data-sp="${esc(S.sp)}"><div class="hd"><h4>${esc(S.sp)}</h4><span class="md">${S.m}</span></div>
+    return `<div class="sp${st.sp.includes(S.sp) ? ' on' : ''}" style="--c:${c}" data-sp="${esc(S.sp)}"><div class="hd"><h4>${esc(S.sp)}</h4><span class="md">${S.m}</span></div>
       <div class="nums"><div>MR<b>${N(mr)}</b></div><div>Líneas<b>${N(n)}</b></div><div>Sin compra<b style="color:${sinOdb ? '#ff2bd6' : 'inherit'}">${N(sinOdb)}</b></div><div>Recibido<b style="color:#39ff88">${Math.round(100 * rec / n)}%</b></div></div>
       <div class="bar" style="height:9px">${seg}</div>
       <div class="cov"><span>Cobertura de compra</span><b>${cov.toFixed(1).replace('.', ',')}%</b></div>
       <div class="flags">${odbAb ? `<span class="flag" style="--c:#4d7cff">${odbAb} ODB abiertas</span>` : ''}${venc ? `<span class="flag" style="--c:#ff3d71">${N(venc)} con ETA vencida</span>` : ''}${al ? `<span class="flag" style="--c:#ff9f1c">${al} alertas</span>` : ''}${canc ? `<span class="flag" style="--c:#6b7aa6">${N(canc)} canceladas</span>` : ''}${!odbAb && !venc && !al && rec === n ? '<span class="flag" style="--c:#39ff88">Completo</span>' : ''}</div></div>`; }).join('');
-  $('subs').querySelectorAll('.sp').forEach(el => el.onclick = () => { st.m = ''; set('sp', el.dataset.sp); });
+  $('subs').querySelectorAll('.sp').forEach(el => el.onclick = () => { st.m = []; set('sp', el.dataset.sp); });
 }
 
 // ---------- ODB
@@ -665,8 +684,8 @@ function fichaOdb(k) {
 
 // ---------- alertas
 function alerts(R) {
-  const subsF = st.sp ? st.sp.toUpperCase() : null, odbsF = new Set(R.map(x => x.odb).filter(Boolean));
-  let A = DATA.alertas.filter(a => a.abierta && (!st.m || a.mod === st.m) && (!subsF || a.sub.toUpperCase() === subsF) && (st.scope === 'todo' || (a.odb && odbsF.has(a.odb))));
+  const subsF = st.sp.length ? new Set(st.sp.map(v => v.toUpperCase())) : null, odbsF = new Set(R.map(x => x.odb).filter(Boolean));
+  let A = DATA.alertas.filter(a => a.abierta && (!st.m.length || st.m.includes(a.mod)) && (!subsF || subsF.has(a.sub.toUpperCase())) && (st.scope === 'todo' || (a.odb && odbsF.has(a.odb))));
   const ord = ['MUY ALTA', 'ALTA', 'MEDIA', 'BAJA']; A.sort((a, b) => ord.indexOf(a.nivel) - ord.indexOf(b.nivel) || (a.f_act || '').localeCompare(b.f_act || ''));
   $('al-sub').textContent = `${A.length} alertas abiertas · ${ord.map(o => `${A.filter(a => a.nivel === o).length} ${o.toLowerCase()}`).join(' · ')}`;
   $('alerts').innerHTML = A.length ? A.map(a => `<div class="al" style="--c:${NIV_C[a.nivel] || '#9fb3d9'}"><div class="h"><h4>${esc(a.equipo || a.cat)}</h4><span class="pill" style="--c:${NIV_C[a.nivel] || '#9fb3d9'}">${esc(a.nivel)}</span></div>
@@ -709,7 +728,7 @@ function quality(R) {
     ['#ff9f1c', pend.filter(x => x.odb && !x.eta).length, 'líneas con ODB sin fecha de llegada proyectada'],
     ['#ff3d71', R.filter(x => x.et === 'Recibido' && !x.fsap).length, 'líneas recibidas sin fecha de recibo en SAP'],
     ['#00e5ff', new Set(R.map(x => x.u)).size, 'unidades distintas (UN, M, KIT…): sumar cantidades mezcla metros con unidades; por eso el tablero cuenta líneas'],
-    ['#ffe14d', Object.entries(DATA.canceladas).filter(([k]) => (!st.m || k.startsWith(st.m + '|')) && (!st.sp || k.endsWith('|' + st.sp))).reduce((t, [, v]) => t + v, 0), 'líneas canceladas excluidas de todos los totales'],
+    ['#ffe14d', Object.entries(DATA.canceladas).filter(([k]) => (!st.m.length || st.m.some(v => k.startsWith(v + '|'))) && (!st.sp.length || st.sp.some(v => k.endsWith('|' + v)))).reduce((t, [, v]) => t + v, 0), 'líneas canceladas excluidas de todos los totales'],
   ];
   $('qual').innerHTML = Q.map(([c, v, d]) => `<div class="q" style="--c:${c}"><b>${N(v)}</b><div>${d}</div></div>`).join('');
 }
@@ -737,12 +756,12 @@ function toggleCC() { CC_ON = !CC_ON; $('cc-box').style.display = CC_ON ? '' : '
 function renderChanges() {
   if (!PREV) { $('cc-lbl').textContent = 'Sin corte anterior para comparar'; $('cc-tbl').innerHTML = ''; $('cc-mv').innerHTML = ''; return; }
   if (!PAIR) pairCuts();
-  const FL = [['m', 'Módulo'], ['sp', 'Subproyecto'], ['es', st.scope === 'eq' ? 'Equipo' : 'Especialidad'], ['et', 'Etapa'], ['ll', 'Llegada'], ['pv', 'Proveedor'], ['q', 'Buscar']].filter(([k]) => st[k]).map(([, l]) => l);
+  const FL = [['m', 'Módulo'], ['sp', 'Subproyecto'], ['es', st.scope === 'eq' ? 'Equipo' : 'Especialidad'], ['et', 'Etapa'], ['ll', 'Llegada'], ['pv', 'Proveedor'], ['q', 'Buscar']].filter(([k]) => st[k] && st[k].length).map(([, l]) => l);
   if (FL.length) {
     $('cc-lbl').textContent = `${fd(PREV.corte)} → ${fd(DATA.corte)} · oculto mientras haya filtros`;
     $('cc-tbl').innerHTML = ''; $('cc-mv').innerHTML = ''; $('cc-st').hidden = false;
     $('cc-st').innerHTML = `<span><b>Comparación pausada</b> · con filtros activos (${esc(FL.join(', '))}) no se muestran los cambios frente al corte anterior.</span><span class="chip" id="cc-clr">Quitar filtros ✕</span>`;
-    $('cc-clr').onclick = () => { ['m', 'sp', 'es', 'et', 'll', 'pv', 'q'].forEach(k => st[k] = ''); $('f-q').value = ''; st.lim = 200; render(); };
+    $('cc-clr').onclick = () => { ['m', 'sp', 'es', 'et', 'll', 'pv'].forEach(k => st[k] = []); st.q = ''; $('f-q').value = ''; st.lim = 200; render(); };
     return;
   }
   $('cc-st').hidden = true;
@@ -812,7 +831,7 @@ function grpLL(L, key) {
 function provs(R) {
   const L = R.filter(x => x.pv && (st.pvm === 'all' || x.et !== 'Recibido')), G = grpLL(L, x => x.pv), T = G.slice(0, 14);
   $('pv-h').textContent = `${N(G.length)} proveedores · ${N(L.length)} líneas ${st.pvm === 'all' ? 'en total' : 'por llegar'}${G.length > 14 ? ' · se muestran los 14 con más líneas' : ''} · clic para ver sus ODB`;
-  hbars('pvch', T, g => provModal(g, R), st.pv);
+  hbars('pvch', T, g => provModal(g, R), st.pv.length === 1 ? st.pv[0] : null);
   $('pv-leg').innerHTML = LLP.filter(l => st.pvm === 'all' || l !== 'Recibido').map(l => `<span style="--c:${LL_C[l]}">${l}</span>`).join('');
 }
 function eqs(R) {
@@ -834,7 +853,7 @@ function provModal(g, R) {
   const pend = g.L.filter(x => x.et !== 'Recibido').length;
   open_(`Proveedor · ${g.k}`, `${N(g.n)} líneas · ${N(pend)} por llegar · ${O.length} ODB${g.nx ? ' · próxima llegada ' + fd(g.nx) : ''} · clic en una ODB para ver la ficha completa`,
     `<div style="margin-bottom:10px"><button class="tbtn" id="pv-filtro">Filtrar el tablero por este proveedor</button></div>${odbRows(O)}`); $('modal').classList.add('wide');
-  $('pv-filtro').onclick = () => { close_(); st.pv = g.k; st.lim = 200; render(); };
+  $('pv-filtro').onclick = () => { close_(); st.pv = [g.k]; st.lim = 200; render(); };
   bindOdb();
 }
 function eqModal(g) {
@@ -914,10 +933,18 @@ function render() {
   renderChanges(); kpis(R); bars(R); curve(R); funnel(R); matrix(R); provs(R); eqs(R); subs(); gyq(R); odbs(R); alerts(R); table(R); quality(R);
   document.querySelectorAll('#scope button').forEach(b => b.classList.toggle('on', b.dataset.s === st.scope));
 }
-document.querySelectorAll('#scope button').forEach(b => b.onclick = () => { st.scope = b.dataset.s; st.es = ''; render(); });
-[['f-m', 'm'], ['f-sp', 'sp'], ['f-es', 'es'], ['f-et', 'et'], ['f-ll', 'll'], ['f-pv', 'pv']].forEach(([id, k]) => $(id).onchange = e => { st[k] = e.target.value; st.lim = 200; render(); });
+document.querySelectorAll('#scope button').forEach(b => b.onclick = () => { st.scope = b.dataset.s; st.es = []; render(); });
+Object.keys(MSK).forEach(k => { const el = $('f-' + k);
+  el.innerHTML = `<button type="button"></button><div class="mp">${['m', 'et', 'll'].includes(k) ? '' : '<input class="mq" placeholder="Buscar…">'}<div class="ma"><a data-a="all">Marcar todos</a><a data-a="none">Limpiar</a></div><div class="ml"></div></div>`;
+  el.querySelector('button').onclick = () => { const o = !el.classList.contains('open'); document.querySelectorAll('.ms.open').forEach(m => m.classList.remove('open')); if (!o) return;
+    el.classList.add('open'); const p = el.querySelector('.mp'); p.classList.remove('rt'); if (p.getBoundingClientRect().right > innerWidth - 8) p.classList.add('rt'); const qi = el.querySelector('.mq'); if (qi) qi.focus(); };
+  el.querySelector('.ml').onchange = e => { const v = e.target.value; st[k] = e.target.checked ? [...st[k], v] : st[k].filter(x => x !== v); st.lim = 200; render(); };
+  el.querySelector('.ma').onclick = e => { const a = e.target.dataset.a; if (!a) return; st[k] = a === 'all' ? [...el.querySelectorAll('label.mo')].filter(l => l.style.display !== 'none').map(l => l.querySelector('input').value) : []; st.lim = 200; render(); };
+  const qi = el.querySelector('.mq'); if (qi) qi.oninput = () => { const q = qi.value.toLowerCase(); el.querySelectorAll('label.mo').forEach(l => l.style.display = l.querySelector('span').textContent.toLowerCase().includes(q) ? '' : 'none'); };
+});
+document.addEventListener('click', e => { if (e.target.isConnected && !e.target.closest('.ms')) document.querySelectorAll('.ms.open').forEach(m => m.classList.remove('open')); });
 let qt; $('f-q').oninput = e => { clearTimeout(qt); qt = setTimeout(() => { st.q = e.target.value.trim().toLowerCase(); render(); }, 250); };
-$('clear').onclick = () => { Object.assign(st, { m: '', sp: '', es: '', et: '', ll: '', pv: '', q: '' }); $('f-q').value = ''; render(); };
+$('clear').onclick = () => { Object.assign(st, { m: [], sp: [], es: [], et: [], ll: [], pv: [], q: '' }); $('f-q').value = ''; render(); };
 // botón flotante "Limpiar filtros": visible al bajar (barra de filtros fuera de vista) y con filtros activos
 let FILT_VIS = true;
 function updClearFloat() { const n = ['m', 'sp', 'es', 'et', 'll', 'pv', 'q'].filter(k => st[k]).length; const b = $('clearFloat');
