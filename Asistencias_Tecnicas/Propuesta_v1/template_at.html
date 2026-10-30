@@ -158,6 +158,14 @@ table.st td .z{opacity:.28}
 .togg button{border:none;background:transparent;color:var(--text2);font:700 12px Inter;padding:6px 12px;border-radius:8px;cursor:pointer}
 .togg button.on{background:var(--cy);color:#04060d;box-shadow:0 0 14px rgba(0,229,255,.6)}
 @media(max-width:1400px){.pipe{grid-template-columns:repeat(4,1fr)}.stg:nth-child(4)::after{display:none}.logros{grid-template-columns:1fr 1fr}}
+.vtop{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.btn-dias{border:1px solid rgba(0,229,255,.6);background:rgba(0,229,255,.1);color:#9ff6ff;padding:9px 16px;border-radius:12px;font:700 13px Inter;cursor:pointer;white-space:nowrap}
+.btn-dias:hover{box-shadow:0 0 18px rgba(0,229,255,.45)}
+.segb{display:flex;gap:4px;padding:4px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.segb button{border:0;background:transparent;color:#9fb3d9;padding:7px 12px;border-radius:9px;font:600 12px Inter;cursor:pointer}.segb button.on{background:rgba(0,229,255,.18);color:#fff}
+.dsum{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}.dsum span{border:1px solid var(--c);color:var(--c);border-radius:9px;padding:4px 10px;font:600 12px Inter;background:color-mix(in srgb,var(--c) 10%,transparent)}
+.mt{width:100%;border-collapse:collapse;font-size:12.5px}.mt th{text-align:left;color:#9fb3d9;font:700 11px Inter;text-transform:uppercase;letter-spacing:.6px;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.1);position:sticky;top:0;background:#0b1226}
+.mt td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}.mt td.n{text-align:right;white-space:nowrap}.mt tr[data-i]{cursor:pointer}.mt tr[data-i]:hover td{background:rgba(0,229,255,.06)}
 @media(max-width:760px){.pipe{grid-template-columns:1fr 1fr}.logros{grid-template-columns:1fr}}
 </style>
 </head>
@@ -185,6 +193,21 @@ table.st td .z{opacity:.28}
     <button class="btn" onclick="resetF()">Limpiar</button>
   </div>
   <div id="fchips" class="chips" style="margin:-8px 0 12px"></div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="vtop"><div><h3>Valor de las ODS por año · inicial vs ejecutado</h3><div class="d" id="va-h"></div></div>
+      <button class="btn-dias" id="dias-b" onclick="togDias()">📅 Ver días programados y ejecutados</button></div>
+    <div id="c-anio"></div>
+    <div class="d" style="margin-top:2px">Año de inicio de la vigencia de la ODS (o el año del número de la ODS). Ejecutado estimado = valor actual × días ejecutados ÷ días contratados. Clic en una barra para ver las ODS de ese año.</div>
+  </div>
+  <div id="dias-p" style="display:none;margin-bottom:14px">
+    <div class="card"><div class="vtop"><div><h3>Días de asistencia programados y ejecutados</h3><div class="d">Desde la hoja Calendario · clic en una barra para ver qué asistencias y qué días</div><div class="dsum" id="dp-h"></div></div>
+      <div class="segb" id="dp-seg"><button data-g="sem" class="on">Por semana</button><button data-g="mes">Por mes</button></div></div><div id="c-dper"></div></div>
+    <div class="grid g2">
+      <div class="card"><h3>Por asistencia</h3><div class="d">Días del calendario de cada asistencia frente a los días contratados · clic para la ficha</div><div id="c-dat"></div></div>
+      <div class="card"><h3>Por ODS</h3><div class="d">Días contratados: ejecutados antes del control, ejecutados en el control, programados y saldo · clic para ver sus asistencias</div><div id="c-dods"></div></div>
+    </div>
+  </div>
 
   <div class="grid botg">
     <div class="stw"><h3>Estatus de asistencias técnicas</h3><div class="d">Por frente y etapa · clic en un número para ver esas asistencias</div><table class="st" id="st1"></table></div>
@@ -540,7 +563,86 @@ function openAT(i){
 function closeM(){document.getElementById('mback').classList.remove('on');document.getElementById('modal').classList.remove('on')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
 function goTab(t){TAB=t;document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('on',e.dataset.v===t));document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+t));render()}
-function render(){opts();chips();heroVal();estatus();tabla();if(TAB==='rs')resumen();if(TAB==='ca')heat();if(TAB==='co')contratos();if(TAB==='bi')bitacora();else{document.getElementById('ct-bi').textContent=DATA.hitos.length}
+// ---------- valor por año (inicial vs ejecutado) y días programados / ejecutados
+const yrOf=c=>(c.ini||'').slice(0,4)||((String(c.ods).match(/-(20\d\d)-/)||[])[1])||'Sin fecha';
+function openList(t,s,html){document.getElementById('m-t').textContent=t;document.getElementById('m-s').textContent=s;document.getElementById('m-c').innerHTML='';
+  document.getElementById('m-b').innerHTML=html;document.getElementById('mback').classList.add('on');document.getElementById('modal').classList.add('on');
+  document.querySelectorAll('#m-b tr[data-i]').forEach(tr=>tr.onclick=()=>openAT(+tr.dataset.i))}
+function valAnio(){
+  const Co=conF(rows()).filter(c=>c.v0||c.v1), G={};
+  Co.forEach(c=>{const y=yrOf(c);G[y]=G[y]||{y,v0:0,v1:0,e:0,L:[]};G[y].v0+=c.v0||0;G[y].v1+=cval(c);G[y].e+=cejec(c);G[y].L.push(c)});
+  const Y=Object.values(G).sort((a,b)=>a.y==='Sin fecha'?1:b.y==='Sin fecha'?-1:a.y.localeCompare(b.y));
+  const t0=Co.reduce((s,c)=>s+(c.v0||0),0),t1=Co.reduce((s,c)=>s+cval(c),0),te=Co.reduce((s,c)=>s+cejec(c),0);
+  document.getElementById('va-h').innerHTML=`${Co.length} ODS con valor · inicial <b>${S2(t0)}</b> · actual con adiciones <b>${S2(t1)}</b> · ejecutado estimado <b>${S2(te)}</b> (${t1?Math.round(100*te/t1):0}% del actual)`;
+  if(!Y.length){document.getElementById('c-anio').innerHTML='<div class="empty">Sin ODS con valor para el filtro actual</div>';if(CH['c-anio']){CH['c-anio'].destroy();delete CH['c-anio']}return}
+  mk('c-anio',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:330,events:{dataPointSelection:(e,c,o)=>anioModal(Y[o.dataPointIndex])}},
+    series:[{name:'Valor inicial',data:Y.map(g=>Math.round(g.v0))},{name:'Ejecutado (estimado)',data:Y.map(g=>Math.round(g.e))}],
+    colors:[C.cy,C.lm],plotOptions:{bar:{columnWidth:'58%',borderRadius:5,dataLabels:{position:'top'}}},
+    dataLabels:{enabled:true,formatter:v=>v?mm(v):'',offsetY:-18,style:{colors:[C.tx],fontSize:'11px',fontWeight:600}},
+    xaxis:{categories:Y.map(g=>g.y),...AX},yaxis:{labels:{style:{colors:C.tx},formatter:v=>mm(v)}},legend:{position:'top',labels:{colors:C.tx}},
+    tooltip:{theme:'dark',custom:({dataPointIndex:i})=>{const g=Y[i];return `<div style="padding:8px 11px;font-size:12px;line-height:1.55"><b>${g.y}</b> · ${g.L.length} ODS<br>Valor inicial: <b>${S2(g.v0)}</b><br>Valor actual (con adiciones): <b>${S2(g.v1)}</b><br>Ejecutado estimado: <b>${S2(g.e)}</b> · ${g.v1?Math.round(100*g.e/g.v1):0}% del actual<br><span style="color:#6b7aa6">clic para ver las ODS</span></div>`}}});
+}
+function anioModal(g){
+  const L=g.L.slice().sort((a,b)=>cval(b)-cval(a));
+  openList(`ODS con vigencia que inicia en ${g.y}`,`${L.length} ODS · inicial ${S2(g.v0)} · actual ${S2(g.v1)} · ejecutado estimado ${S2(g.e)}`,
+    `<div class="tw" style="max-height:62vh"><table class="mt"><tr><th>Vendor</th><th>ODS</th><th>Vigencia</th><th>Estado</th><th style="text-align:right">Valor inicial</th><th style="text-align:right">Valor actual</th><th style="text-align:right">Días ejec. / contr.</th><th style="text-align:right">Ejecutado est.</th></tr>`+
+    L.map(c=>{const de=(c.dant||0)+(c.dej||0);return `<tr><td>${esc(c.ven)}</td><td><b>${esc(c.ods)}</b><br><span style="color:#6b7aa6">${esc(cut(c.obj,60)||'')}</span></td><td style="white-space:nowrap">${fd(c.ini)} → ${fd(c.fin)}</td><td>${esc(c.est||'—')}</td>
+      <td class="n">${S2(c.v0)}</td><td class="n">${S2(cval(c))}</td><td class="n">${nf(de)} / ${nf(c.dc)}</td><td class="n"><b>${S2(cejec(c))}</b>${cval(c)?` · ${Math.round(100*cejec(c)/cval(c))}%`:''}</td></tr>`}).join('')+'</table></div>');
+}
+let DIAS_ON=false, DGR='sem';
+const DCAT=[['E','Ejecutado con informe',C.lm],['X','Ejecutado sin informe',C.yl],['PV','Programado ya pasado sin registrar',C.rd],['P','Programado',C.cy],['S','Stand-by',C.vi],['R','Reprogramado',C.or],['C','Cancelado','#6b7aa6']];
+const DNAME=Object.fromEntries(DCAT.map(d=>[d[0],d[1]])), DCOL=Object.fromEntries(DCAT.map(d=>[d[0],d[2]]));
+const dcat=(d,c)=>c==='P'&&d<HOY?'PV':c;
+function wk(d){const x=new Date(d+'T00:00:00'),w=(x.getDay()+6)%7;x.setDate(x.getDate()-w);return x.toISOString().slice(0,10)}
+function togDias(){DIAS_ON=!DIAS_ON;document.getElementById('dias-p').style.display=DIAS_ON?'':'none';
+  document.getElementById('dias-b').textContent=DIAS_ON?'✕ Ocultar días programados y ejecutados':'📅 Ver días programados y ejecutados';
+  if(DIAS_ON){diasPanel();document.getElementById('dias-p').scrollIntoView({behavior:'smooth',block:'start'})}}
+document.querySelectorAll('#dp-seg button').forEach(b=>b.onclick=()=>{DGR=b.dataset.g;document.querySelectorAll('#dp-seg button').forEach(x=>x.classList.toggle('on',x===b));diasPanel()});
+function diasPanel(){
+  const R=rows(), ids=new Set(R.map(x=>x.id)), M={}, T={};
+  Object.entries(DATA.cal).forEach(([at,ms])=>{if(!ids.has(at))return;ms.forEach(([d,c])=>{const k=DGR==='sem'?wk(d):d.slice(0,7),g=dcat(d,c);M[k]=M[k]||{k,L:[]};M[k][g]=(M[k][g]||0)+1;M[k].L.push([at,d,g]);T[g]=(T[g]||0)+1})});
+  const K=Object.keys(M).sort(), lab=k=>DGR==='sem'?(+k.slice(8,10))+'-'+MES[+k.slice(5,7)-1]:MES[+k.slice(5,7)-1]+" '"+k.slice(2,4), hk=DGR==='sem'?wk(HOY):HOY.slice(0,7);
+  document.getElementById('dp-h').innerHTML=DCAT.filter(d=>T[d[0]]).map(d=>`<span style="--c:${d[2]}">${d[1]}: ${T[d[0]]}</span>`).join('')||'<span style="--c:#6b7aa6">Sin días en el calendario para el filtro actual</span>';
+  mk('c-dper',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:340,stacked:true,events:{dataPointSelection:(e,c,o)=>perModal(M[K[o.dataPointIndex]],(DGR==='sem'?'semana del ':'')+lab(K[o.dataPointIndex]))}},
+    series:DCAT.map(([k,n])=>({name:n,data:K.map(p=>M[p][k]||0)})),colors:DCAT.map(d=>d[2]),
+    plotOptions:{bar:{columnWidth:DGR==='sem'?'70%':'55%',borderRadius:3}},dataLabels:{enabled:true,style:{colors:['#04060d']},formatter:v=>v||''},
+    xaxis:{categories:K.map(lab),...AX,labels:{...AX.labels,rotate:-45,hideOverlappingLabels:true}},yaxis:{labels:{style:{colors:C.tx}},title:{text:'días',style:{color:C.tx}}},legend:{position:'top',labels:{colors:C.tx}},
+    annotations:{xaxis:K.includes(hk)?[{x:lab(hk),borderColor:C.mg,strokeDashArray:4,label:{text:'HOY',borderColor:C.mg,style:{background:C.mg,color:'#04060d',fontWeight:700}}}]:[]}});
+  // por asistencia
+  const AT=R.map(x=>{const c={};(DATA.cal[x.id]||[]).forEach(([d,cc])=>{const g=dcat(d,cc);c[g]=(c[g]||0)+1});const usados=Object.values(c).reduce((s,v)=>s+v,0)-(c.C||0)-(c.R||0);
+      return {x,c,sp:Math.max(0,(x.dias||0)-usados)}}).filter(o=>Object.keys(o.c).length||o.sp)
+    .sort((a,b)=>((b.c.E||0)+(b.c.X||0))-((a.c.E||0)+(a.c.X||0))||((b.c.PV||0)+(b.c.P||0))-((a.c.PV||0)+(a.c.P||0)));
+  const SA=[...DCAT,['SP','Contratados sin programar','#3d4a70']];
+  if(AT.length) mk('c-dat',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:Math.max(320,AT.length*26+90),stacked:true,events:{dataPointSelection:(e,c,o)=>openAT(AT[o.dataPointIndex].x.i)}},
+    series:SA.map(([k,n])=>({name:n,data:AT.map(o=>k==='SP'?o.sp:(o.c[k]||0))})),colors:SA.map(d=>d[2]),
+    plotOptions:{bar:{horizontal:true,barHeight:'72%',borderRadius:3}},dataLabels:{enabled:true,style:{colors:['#04060d']},formatter:v=>v||''},
+    xaxis:{categories:AT.map(o=>`${o.x.id} · ${cut(o.x.ven,14)} · ${cut(o.x.ubic,16)}`),...AX,title:{text:'días',style:{color:C.tx}}},yaxis:{labels:{style:{colors:C.tx},maxWidth:290}},legend:{position:'top',labels:{colors:C.tx}},
+    tooltip:{theme:'dark',shared:true,intersect:false,y:{formatter:v=>v+' día(s)'}}});
+  else document.getElementById('c-dat').innerHTML='<div class="empty">Sin días para el filtro actual</div>';
+  // por ODS
+  const Co=conF(R).filter(c=>c.dc||c.dpro||c.dej).map(c=>({c,sal:Math.max(0,(c.dc||0)-(c.dant||0)-(c.dej||0)-(c.dpro||0))})).sort((a,b)=>(b.c.dc||0)-(a.c.dc||0));
+  const SO=[['dant','Ejecutados antes del control',C.bl],['dej','Ejecutados en el control',C.lm],['dpro','Programados pendientes',C.cy],['sal','Saldo sin programar','#3d4a70']];
+  if(Co.length) mk('c-dods',{...baseOpt(),chart:{...baseOpt().chart,type:'bar',height:Math.max(320,Co.length*28+90),stacked:true,events:{dataPointSelection:(e,c,o)=>odsModal(Co[o.dataPointIndex].c)}},
+    series:SO.map(([k,n])=>({name:n,data:Co.map(o=>k==='sal'?o.sal:(o.c[k]||0))})),colors:SO.map(d=>d[2]),
+    plotOptions:{bar:{horizontal:true,barHeight:'72%',borderRadius:3}},dataLabels:{enabled:true,style:{colors:['#04060d']},formatter:v=>v||''},
+    xaxis:{categories:Co.map(o=>`${cut(o.c.ven,16)} · ${o.c.ods}`),...AX,title:{text:'días',style:{color:C.tx}}},yaxis:{labels:{style:{colors:C.tx},maxWidth:290}},legend:{position:'top',labels:{colors:C.tx}},
+    tooltip:{theme:'dark',shared:true,intersect:false,y:{formatter:v=>v+' día(s)'}}});
+  else document.getElementById('c-dods').innerHTML='<div class="empty">Sin ODS con días para el filtro actual</div>';
+}
+function calRows(L){
+  const G={};L.forEach(([at,d,g])=>{const k=at+'|'+g;(G[k]=G[k]||{at,g,D:[]}).D.push(d)});
+  return Object.values(G).sort((a,b)=>a.at.localeCompare(b.at)||DCAT.findIndex(d=>d[0]===a.g)-DCAT.findIndex(d=>d[0]===b.g)).map(o=>{const x=A.find(a=>a.id===o.at);
+    return `<tr data-i="${x?x.i:0}"><td><b>${esc(o.at)}</b></td><td>${esc(x?x.ven:'')}</td><td>${esc(x?x.ubic:'')}</td><td><span class="b" style="color:${DCOL[o.g]};border-color:${DCOL[o.g]}88">${DNAME[o.g]}</span></td><td class="n">${o.D.length}</td><td>${o.D.sort().map(fd).join(', ')}</td></tr>`}).join('');
+}
+function perModal(g,l){if(!g)return;
+  openList(`Días de asistencia · ${l}`,`${g.L.length} día(s) en el calendario · clic en una fila para la ficha de la asistencia`,
+    `<div class="tw" style="max-height:62vh"><table class="mt"><tr><th>Asistencia</th><th>Vendor</th><th>Ubicación</th><th>Estado del día</th><th style="text-align:right">Días</th><th>Fechas</th></tr>${calRows(g.L)}</table></div>`)}
+function odsModal(c){const R=rows().filter(x=>x.ods===c.ods), L=[];R.forEach(x=>(DATA.cal[x.id]||[]).forEach(([d,cc])=>L.push([x.id,d,dcat(d,cc)])));
+  openList(`${c.ven} · ODS ${c.ods}`,`Contratados ${nf(c.dc)} · ejecutados antes del control ${nf(c.dant)} · en el control ${nf(c.dej)} · programados ${nf(c.dpro)} · ${R.length} asistencia(s)`,
+    L.length?`<div class="tw" style="max-height:62vh"><table class="mt"><tr><th>Asistencia</th><th>Vendor</th><th>Ubicación</th><th>Estado del día</th><th style="text-align:right">Días</th><th>Fechas</th></tr>${calRows(L)}</table></div>`
+      :`<div class="empty">Esta ODS no tiene días marcados en el calendario.</div>`+(R.length?`<table class="mt">${R.map(x=>`<tr data-i="${x.i}"><td><b>${esc(x.id)}</b></td><td>${esc(x.eq)}</td><td>${esc(x.ubic)}</td><td>${esc(x.etapa)}</td></tr>`).join('')}</table>`:''))}
+
+function render(){opts();chips();heroVal();valAnio();if(DIAS_ON)diasPanel();estatus();tabla();if(TAB==='rs')resumen();if(TAB==='ca')heat();if(TAB==='co')contratos();if(TAB==='bi')bitacora();else{document.getElementById('ct-bi').textContent=DATA.hitos.length}
   if(TAB!=='co')document.getElementById('ct-co').textContent=DATA.contratos.length;if(TAB!=='ca')document.getElementById('ct-ca').textContent=Object.keys(DATA.cal).length}
 function resetF(){F=F0();F.ckm=MXM;syncF();render()}
 Object.keys(MSL).forEach(k=>{const el=document.getElementById('f-'+k);

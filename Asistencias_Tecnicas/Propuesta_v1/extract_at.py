@@ -64,9 +64,10 @@ for r in range(5, 160):
     if marks: cal[at] = marks
 # ---------------- Contratos
 kc = wb["Contratos"]
-HC = {str(kc.cell(4, j).value).strip(): j for j in range(1, 30) if kc.cell(4, j).value}
+hr = next(r for r in range(1, 10) if any(str(kc.cell(r, j).value).strip() == "ODS" for j in range(1, 30)))   # fila de encabezados (se ha movido)
+HC = {str(kc.cell(hr, j).value).strip(): j for j in range(1, 30) if kc.cell(hr, j).value}
 contr = []
-for r in range(5, 120):
+for r in range(hr + 1, 120):
     ods = txt(kc.cell(r, HC["ODS"]).value)
     if not ods: continue
     gc = lambda n: kc.cell(r, HC[n]).value
