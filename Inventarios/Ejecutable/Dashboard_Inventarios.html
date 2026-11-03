@@ -144,10 +144,8 @@ td.n{text-align:right;font-family:'Space Grotesk',Inter;font-variant-numeric:tab
 .mvt td.up{color:#39ff88}.mvt td.down{color:#ff3d71}
 .nodata{border:1px dashed rgba(255,230,0,.45);border-radius:12px;padding:14px;color:#e8e2b0;font-size:13px;line-height:1.5;background:rgba(255,230,0,.05)}
 @media(max-width:760px){.mvk{grid-template-columns:1fr 1fr}}
-.eqg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.eqg div{border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.02)}
-.eqg b{display:block;font:700 22px 'Space Grotesk';color:var(--c)}.eqg span{font-size:11.5px;color:var(--text2)}
+@media(min-width:1201px){#kpis.k5{grid-template-columns:repeat(5,1fr)}}
 table.eqt tr{cursor:default}.b-GAR{color:var(--yellow);background:rgba(255,230,0,.10)}.b-DIS{color:var(--red);background:rgba(255,59,107,.10)}
-@media(max-width:760px){.eqg{grid-template-columns:1fr}}
 footer{margin-top:34px;color:var(--muted);font-size:12px;text-align:center}
 </style>
 </head>
@@ -178,11 +176,6 @@ footer{margin-top:34px;color:var(--muted);font-size:12px;text-align:center}
 <div class="sec"><h2>Resumen</h2><p>Todo cambia con los filtros. Haz clic en cualquier tarjeta, barra o módulo para profundizar.</p></div>
 <div class="grid g4" id="kpis"></div>
 
-<!-- 1b. Equipos en garantía y discrepancia -->
-<div id="eq-sec" style="display:none">
-<div class="sec"><h2>Equipos en garantía y discrepancia</h2><p>Tabla aparte que trae el informe al final de la hoja <i>Inventario General</i>. Es un detalle de equipos que ya están en el inventario: no se suma al valor en bodega y no cambia con los filtros.</p></div>
-<div class="card"><div class="eqg" id="eq-k"></div><div style="overflow-x:auto"><table class="t eqt" id="eq-t"></table></div></div>
-</div>
 
 <!-- 2. Módulos -->
 <div class="sec"><h2>¿Cómo se reparte por módulo?</h2><p>Clic en un módulo para filtrar todo el tablero.</p></div>
@@ -441,16 +434,22 @@ function mvTable(L,t){
 function openMv(k){ const M=PREV.movs; mvTable(M.top.filter(x=>k==='nuevo'?x.v0===0&&x.q0===0:k==='salio'?x.v1===0&&x.q1===0:k==='sube'?x.v1>x.v0&&x.v0>0:x.v1<x.v0&&x.v1>0), MVL[k][0]); }
 
 // ---------- equipos en garantía y discrepancia (tabla aparte del informe; no se suma al valor en bodega)
+const eqEst=e=>(e.estado||'').toUpperCase();
 function equiposGar(){
-  const E=DATA.equipos||[]; $('eq-sec').style.display=E.length?'':'none'; if(!E.length) return;
-  const est=e=>(e.estado||'').toUpperCase(), tot=sum(E,e=>e.valor);
-  const grp=[...new Set(E.map(est))].map(k=>({k,n:E.filter(e=>est(e)===k).length,v:sum(E.filter(e=>est(e)===k),e=>e.valor)}));
-  const col=k=>k.startsWith('GAR')?'var(--yellow)':k.startsWith('DISC')?'var(--red)':'var(--cyan)';
-  $('eq-k').innerHTML=`<div style="--c:var(--cyan)"><b>${S(tot)}</b><span>${N(E.length)} equipos · ${$$(tot)} COP</span></div>`+
-    grp.map(g=>`<div style="--c:${col(g.k)}"><b>${N(g.n)}</b><span>${esc(g.k.charAt(0)+g.k.slice(1).toLowerCase())} · ${S(g.v)}</span></div>`).join('');
-  $('eq-t').innerHTML=`<thead><tr><th>Estado</th><th>ODB · Pos.</th><th>Material</th><th>Descripción</th><th>Clúster / caso</th><th>Elemento PEP</th><th>Mód.</th><th style="text-align:right">Cant.</th><th style="text-align:right">Valor</th></tr></thead><tbody>`+
-    E.map(e=>{const k=est(e); return `<tr title="${esc(e.texto_ext||'')}"><td><span class="badge ${k.startsWith('GAR')?'b-GAR':k.startsWith('DISC')?'b-DIS':''}">${esc(k)}</span></td><td>${esc(e.odb)} · ${esc(e.pos)}</td><td><b>${esc(e.material)}</b></td><td>${esc(e.texto_breve)}${e.diam?` <span class="alm">${esc(e.diam)}</span>`:''}</td><td>${esc(e.clas2||'')}</td><td class="alm">${esc(e.pep||'')}</td><td>${e.mod?`<span class="badge b-${e.mod}">${e.mod}</span>`:''}</td><td class="n">${N(e.cantidad)} ${esc(e.umb||'')}</td><td class="n">${$$(e.valor)}</td></tr>`;}).join('')+
-    `</tbody><tfoot><tr><td colspan="8" style="text-align:right;font-weight:800">Total</td><td class="n" style="font-weight:800">${$$(tot)}</td></tr></tfoot>`;
+  const E=DATA.equipos||[]; $('kpis').classList.toggle('k5',!!E.length); if(!E.length) return;
+  const tot=sum(E,e=>e.valor), cnt=k=>E.filter(e=>eqEst(e).startsWith(k)).length;
+  $('kpis').insertAdjacentHTML('beforeend',`<div class="card kpi" style="--c:var(--orange)" onclick="openEqGar()" title="Ver el detalle de los equipos"><div class="t">Garantía y discrepancia</div><div class="kv">${S(tot)}</div><div class="s"><b>${N(cnt('GAR'))}</b> en garantía · <b>${N(cnt('DISC'))}</b> en discrepancia</div><div class="s" style="margin-top:6px;font-size:11px">Equipos ya incluidos en el valor en bodega</div></div>`);
+}
+function openEqGar(){
+  const E=[...(DATA.equipos||[])].sort((a,b)=>eqEst(b).localeCompare(eqEst(a))||(b.valor-a.valor)), tot=sum(E,e=>e.valor);
+  const grp=[...new Set(E.map(eqEst))].map(k=>({k,n:E.filter(e=>eqEst(e)===k).length,v:sum(E.filter(e=>eqEst(e)===k),e=>e.valor)}));
+  $('m-t').textContent='Equipos en garantía y discrepancia';
+  $('m-s').textContent='Tabla aparte del informe (final de la hoja Inventario General). Estos equipos ya están en el inventario: no se suman al valor en bodega ni cambian con los filtros.';
+  $('m-stats').innerHTML=`<div class="mstats"><span>Equipos<b>${N(E.length)}</b></span><span>Valor<b>${$$(tot)}</b></span>${grp.map(g=>`<span>${esc(g.k.charAt(0)+g.k.slice(1).toLowerCase())}<b>${N(g.n)} · ${S(g.v)}</b></span>`).join('')}</div>`;
+  $('m-b').innerHTML=`<table class="t eqt"><thead><tr><th>Estado</th><th>ODB · Pos.</th><th>Material</th><th>Descripción</th><th>Clúster / caso</th><th>Elemento PEP</th><th>Mód.</th><th style="text-align:right">Cant.</th><th style="text-align:right">Valor (COP)</th></tr></thead><tbody>`+
+    E.map(e=>{const k=eqEst(e); return `<tr title="${esc(e.texto_ext||'')}"><td><span class="badge ${k.startsWith('GAR')?'b-GAR':k.startsWith('DISC')?'b-DIS':''}">${esc(k)}</span></td><td>${esc(e.odb)} · ${esc(e.pos)}</td><td><b>${esc(e.material)}</b></td><td>${esc(e.texto_breve)}${e.diam?` <span class="alm">${esc(e.diam)}</span>`:''}</td><td>${esc(e.clas2||'')}</td><td class="alm">${esc(e.pep||'')}</td><td>${e.mod?`<span class="badge b-${e.mod}">${e.mod}</span>`:''}</td><td class="n">${N(e.cantidad)} ${esc(e.umb||'')}</td><td class="n" style="color:var(--cyan)">${$$(e.valor)}</td></tr>`;}).join('')+
+    `</tbody><tfoot><tr><td colspan="8" style="text-align:right;font-weight:800">Total</td><td class="n" style="font-weight:800;color:var(--cyan)">${$$(tot)}</td></tr></tfoot></table>`;
+  showM();
 }
 
 function render(){
