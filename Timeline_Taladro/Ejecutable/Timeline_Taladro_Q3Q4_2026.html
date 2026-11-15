@@ -284,6 +284,23 @@ footer{margin-top:26px;font-size:10.5px;color:var(--muted);text-align:center;let
 .rb.hit{outline:2px solid #fff;outline-offset:1px;z-index:6}
 .rnote{font-size:11px;color:var(--text-2);margin:8px 2px 0}
 /*RUTA-CSS-FIN*/
+
+/*CMP-CSS*/
+.ctab{width:100%;border-collapse:separate;border-spacing:0;font-size:11.5px}
+.ctab th{position:sticky;top:0;background:rgba(3,6,16,.96);color:var(--text-2);font:800 9.5px 'Inter';letter-spacing:1px;text-transform:uppercase;text-align:left;padding:9px 10px;border-bottom:1px solid var(--stroke);z-index:2;cursor:pointer;white-space:nowrap}
+.ctab td{padding:7px 10px;border-bottom:1px solid var(--stroke-2);color:#dbeeff;vertical-align:middle}
+.ctab tr:hover td{background:rgba(0,229,255,.05)}
+.ctab td.m{font:600 11px 'JetBrains Mono';white-space:nowrap}
+.ctab td.tl{font:800 10.5px 'Orbitron';letter-spacing:1px;color:var(--tc);white-space:nowrap}
+.cwrap{border-radius:16px;background:var(--panel);border:1px solid var(--stroke);overflow:auto;max-height:620px}
+.dchip{display:inline-block;min-width:54px;text-align:center;padding:3px 8px;border-radius:99px;font:800 10.5px 'JetBrains Mono';border:1px solid var(--dc);color:var(--dc);background:color-mix(in srgb,var(--dc) 12%,transparent)}
+.est{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--dc)}
+.est::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--dc);box-shadow:0 0 8px var(--dc)}
+.rb.ryc{border:1px solid var(--tc);background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 35%,transparent),color-mix(in srgb,var(--tc) 12%,transparent));color:#fff}
+.rb.con{border:1px dashed var(--dc);background:color-mix(in srgb,var(--dc) 22%,rgba(6,10,26,.9));color:#fff}
+.cnote{font-size:11.5px;color:var(--text-2);margin:2px 0 10px;line-height:1.5}
+.cnote b{color:#fff}
+/*CMP-CSS-FIN*/
 </style>
 </head><body>
 <div class="bg-aurora"><i></i><i></i><i></i></div>
@@ -301,6 +318,7 @@ footer{margin-top:26px;font-size:10.5px;color:var(--muted);text-align:center;let
 <div class="vsw" id="vsw">
   <button data-v="ryc"><span class="ic">&#9889;</span><span><div class="tt">RyC &middot; Ruta y Conexionado</div><div class="ss">Planeaci&oacute;n Andina-Oriente &middot; <b id="vswRyc"></b></div></span></button>
   <button data-v="ruta"><span class="ic">&#9935;</span><span><div class="tt">Ruta de perforaci&oacute;n</div><div class="ss">Construcci&oacute;n &middot; <b id="vswRuta"></b></div></span></button>
+  <button data-v="cmp"><span class="ic">&#8646;</span><span><div class="tt">Comparaci&oacute;n</div><div class="ss">RyC vs Ruta de Construcci&oacute;n &middot; <b id="vswCmp"></b></div></span></button>
 </div>
 <div id="vRyC">
 <div class="kpis" id="kpis"></div>
@@ -362,6 +380,29 @@ footer{margin-top:26px;font-size:10.5px;color:var(--muted);text-align:center;let
 <div class="rg" id="rGantt"></div>
 <div class="rnote" id="rNote"></div>
 </div>
+<!--CMP-HTML-->
+<div id="vCmp" hidden>
+<div class="kpis" id="cKpis"></div>
+<div class="cnote" id="cNote"></div>
+<div class="toolbar">
+  <div class="fld"><label>Taladro</label><select id="cTal"></select></div>
+  <div class="fld"><label>Resultado</label><select id="cEst"><option value="">Todos</option></select></div>
+  <div class="fld"><label>Tolerancia</label><select id="cTol"><option value="0">0 d&iacute;as</option><option value="2">&plusmn; 2 d&iacute;as</option><option value="5">&plusmn; 5 d&iacute;as</option><option value="7">&plusmn; 7 d&iacute;as</option></select></div>
+  <div class="fld"><label>Buscar pozo / cl&uacute;ster</label><input id="cQ" type="text" placeholder="ej: 0613H o CASE-0580"></div>
+  <div class="fld"><label>Zoom</label><div class="seg" id="cZ"><button data-z="3">Mes</button><button data-z="6">Quincena</button><button data-z="12">Semana</button></div></div>
+  <div class="spacer"></div>
+  <button class="btn" id="cHoy">&#9673; HOY</button>
+  <button class="btn hot" id="cReset">&#8634; Limpiar</button>
+</div>
+<div class="stitle"><h2><i>&#8646;</i>Ruta por taladro &middot; RyC vs Construcci&oacute;n</h2><span>Barra s&oacute;lida = RyC &middot; barra punteada = Construcci&oacute;n (color seg&uacute;n la diferencia)</span></div>
+<div class="legend" id="cLeg"></div>
+<div class="rg" id="cGantt"></div>
+<div class="stitle"><h2><i>&#9672;</i>Diferencias por cl&uacute;ster</h2><span>Inicio = 1ra perforaci&oacute;n &middot; fin = &uacute;ltimo completamiento &middot; &Delta; = Construcci&oacute;n &minus; RyC (d&iacute;as)</span></div>
+<div class="cwrap"><table class="ctab" id="cCl"></table></div>
+<div class="stitle"><h2><i>&#9673;</i>Diferencias por pozo</h2><span id="cPzHint"></span></div>
+<div class="cwrap"><table class="ctab" id="cPz"></table></div>
+</div>
+<!--/CMP-HTML-->
 </div>
 
 <div class="tip" id="tip"></div>
@@ -706,13 +747,13 @@ const $ = id => document.getElementById(id);
 // ---------- selector de vista ----------
 const vista = v => {
   document.querySelectorAll('#vsw button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
-  $('vRyC').hidden = v !== 'ryc'; $('vRuta').hidden = v !== 'ruta';
+  $('vRyC').hidden = v !== 'ryc'; $('vRuta').hidden = v !== 'ruta'; if ($('vCmp')) $('vCmp').hidden = v !== 'cmp';
   try { localStorage.setItem('ttv2.vista', v); } catch(e){}
-  if (v === 'ruta') renderRuta(); else if (typeof renderRoute === 'function') renderRoute();
+  if (v === 'ruta') renderRuta(); else if (v === 'cmp') { if (window.renderCmp) window.renderCmp(); } else if (typeof renderRoute === 'function') renderRoute();
 };
 $('vswRyc').textContent = 'Corte ' + F(DATA.corte);
 $('vswRuta').textContent = (RUTA.version || '') + ' · ' + RUTA.fuente.replace(/\.xlsx?$/i, '');
-document.querySelectorAll('#vsw button').forEach(b => b.onclick = () => vista(b.dataset.v));
+document.querySelectorAll('#vsw button').forEach(b => b.onclick = () => vista(b.dataset.v)); window.vistaTT = vista;
 
 // ---------- filtros ----------
 const hayQ = (txt) => !RS.q || String(txt).toLowerCase().replace(/[\s-]/g,'').includes(RS.q);
@@ -868,6 +909,188 @@ let v0 = 'ryc'; try { v0 = new URLSearchParams(location.search).get('vista') || 
 vista(v0 === 'ruta' ? 'ruta' : 'ryc');
 })();
 </script>
+<!--CMP-JS-->
+<script>
+(function(){
+const DAYMS = 86400000, MESR = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const HOY = new Date(); HOY.setHours(0,0,0,0);
+const E = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const D = s => new Date(s + 'T00:00:00');
+const F = s => { if (!s) return '—'; const d = D(s); return String(d.getDate()).padStart(2,'0') + '-' + MESR[d.getMonth()] + '-' + String(d.getFullYear()).slice(2); };
+const dd = (a, b) => Math.round((D(a) - D(b)) / DAYMS);
+const $ = id => document.getElementById(id);
+// ---- llaves comunes ----
+const TK = s => { s = String(s).toUpperCase(); return /147/.test(s) ? 'PW147' : /157/.test(s) ? 'PW157' : /645/.test(s) ? 'T645' : s; };
+const TN = { PW147:{n:'PETROWORKS 147', c:'#ff8c42'}, PW157:{n:'PETROWORKS 157', c:'#f472b6'}, T645:{n:'IESCO T645 (H&P)', c:'#a6ff00'} };
+const PK = s => { s = String(s).toUpperCase(); const pre = /CUMA/.test(s) ? 'CUMA' : /WDCS/.test(s) ? 'WDCS' : 'CASE';
+  const m = s.replace(/CAÑO SUR ESTE|CANO SUR ESTE|CUMANDAY|CUMA|CASE|WDCS/g, '').match(/(\d{2,4})/); return m ? pre + '-' + String(+m[1]).padStart(4,'0') : null; };
+const W0 = DATA.ventana[0], W1 = DATA.ventana[1];
+// ---- RyC por pozo: inicio = 1ra perforación, fin = último completamiento ----
+const RY = {};
+DATA.items.forEach(i => { const k = PK(i.pozo); if (!k) return; const e = String(i.evento).toUpperCase();
+  const o = RY[k] || (RY[k] = { k, pozo:i.pozo, cluster:i.cluster, tal:TK(i.taladro), ini:null, fin:null, perfFin:null });
+  if (e.startsWith('PERF')) { o.ini = !o.ini || i.ini < o.ini ? i.ini : o.ini; o.perfFin = !o.perfFin || i.fin > o.perfFin ? i.fin : o.perfFin; }
+  if (e.startsWith('COMP')) o.fin = !o.fin || i.fin > o.fin ? i.fin : o.fin; });
+Object.values(RY).forEach(o => { if (!o.ini) delete RY[o.k]; else o.fin = o.fin || o.perfFin; });
+// ---- Construcción por pozo ----
+const RU = {};
+RUTA.taladros.forEach(t => t.pozos.forEach(p => { const k = PK(p.pozo); if (!k || RU[k]) return;
+  RU[k] = { k, pozo:p.pozo, cluster:p.cluster, tal:TK(t.taladro), ini:p.ini, fin:p.fin, equipo:p.equipo, estado:p.estado }; }));
+// ---- cruce ----
+const CS = { ok:{n:'Coincide', c:'#22ffb8'}, tarde:{n:'Construcción más tarde', c:'#ff8c42'}, temprano:{n:'Construcción más temprano', c:'#00e5ff'},
+             tal:{n:'Taladro distinto', c:'#b26bff'}, soloR:{n:'Solo en RyC', c:'#ff3b6b'}, soloC:{n:'Solo en Construcción', c:'#ffd23f'} };
+const CST = { tol:2, tal:'', est:'', q:'', px:6 };
+try { const s = JSON.parse(localStorage.getItem('ttv2.cmp') || 'null'); if (s) Object.assign(CST, s, {q:''}); } catch(e){}
+const save = () => { try { localStorage.setItem('ttv2.cmp', JSON.stringify(CST)); } catch(e){} };
+function cruzar(){
+  const out = [];
+  Object.values(RY).forEach(r => { const c = RU[r.k];
+    if (!c) { out.push({ k:r.k, tal:r.tal, r, c:null, est:'soloR' }); return; }
+    const di = dd(c.ini, r.ini), df = dd(c.fin, r.fin);
+    let est = 'ok';
+    if (c.tal !== r.tal) est = 'tal';
+    else if (Math.abs(di) > CST.tol || Math.abs(df) > CST.tol) est = (Math.abs(di) >= Math.abs(df) ? di : df) > 0 ? 'tarde' : 'temprano';
+    out.push({ k:r.k, tal:r.tal, r, c, di, df, est }); });
+  Object.values(RU).forEach(c => { if (RY[c.k]) return; if (c.ini > W1 || c.fin < W0) return;
+    out.push({ k:c.k, tal:c.tal, r:null, c, est:'soloC' }); });
+  out.forEach(o => { o.cl = o.r ? o.r.cluster : '';
+    o.clC = o.c ? o.c.cluster : ''; o.ini = (o.r || o.c).ini; });
+  return out.sort((a, b) => a.tal.localeCompare(b.tal) || a.ini.localeCompare(b.ini));
+}
+const qok = o => !CST.q || (o.k + ' ' + (o.r ? o.r.pozo + ' ' + o.r.cluster : '') + ' ' + (o.c ? o.c.pozo + ' ' + o.c.cluster : '')).toLowerCase().replace(/[\s-]/g,'').includes(CST.q);
+const chip = v => { if (v == null) return '<span style="color:var(--muted)">—</span>';
+  const c = Math.abs(v) <= CST.tol ? CS.ok.c : v > 0 ? CS.tarde.c : CS.temprano.c;
+  return `<span class="dchip" style="--dc:${c}">${v > 0 ? '+' : ''}${v} d</span>`; };
+const shortC = s => String(s || '').split(' - ')[0].trim();
+
+function renderCmp(){
+  const ALL = cruzar(), L = ALL.filter(o => (!CST.tal || o.tal === CST.tal) && (!CST.est || o.est === CST.est) && qok(o));
+  const n = k => ALL.filter(o => (!CST.tal || o.tal === CST.tal) && o.est === k).length;
+  const comp = ALL.filter(o => o.r && o.c && (!CST.tal || o.tal === CST.tal));
+  const med = a => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+  const K = [['Pozos en ambas rutas', comp.length, 'ventana RyC ' + F(W0) + ' → ' + F(W1), '#9fbbd8'],
+             ['Coinciden', n('ok'), 'inicio y fin dentro de ± ' + CST.tol + ' días', CS.ok.c],
+             ['Construcción más tarde', n('tarde'), 'mediana Δ fin: ' + (med(comp.map(o => o.df)) > 0 ? '+' : '') + med(comp.map(o => o.df)) + ' d', CS.tarde.c],
+             ['Construcción más temprano', n('temprano'), 'diferencias mayores a ± ' + CST.tol + ' días', CS.temprano.c],
+             ['Solo en RyC', n('soloR'), 'pozos que Construcción no tiene', CS.soloR.c],
+             ['Solo en Construcción', n('soloC') + n('tal'), 'en la ventana · ' + n('tal') + ' con taladro distinto', CS.soloC.c]];
+  $('cKpis').innerHTML = K.map(k => `<div class="kpi" style="--k:${k[3]}"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join('');
+  $('cNote').innerHTML = `Comparación entre el <b>RyC con corte ${F(DATA.corte)}</b> (Planeación Andina-Oriente) y la <b>Ruta de perforación ${E(RUTA.version || '')}</b> de Construcción. `
+    + `Para cada pozo, el RyC va desde el inicio de la perforación hasta el fin del completamiento; Construcción, la barra del pozo en su ruta. `
+    + `<b>Δ = Construcción − RyC</b>: positivo = Construcción lo programa más tarde.`;
+  $('vswCmp').textContent = ALL.filter(o => o.est !== 'ok').length + ' diferencias';
+  gantt(ALL); tablaCl(ALL); tablaPz(L);
+  document.querySelectorAll('#cZ button').forEach(b => b.classList.toggle('on', +b.dataset.z === CST.px));
+}
+
+function gantt(ALL){
+  const PX = CST.px;
+  const fechas = ALL.flatMap(o => [o.r && o.r.ini, o.r && o.r.fin, o.c && o.c.ini, o.c && o.c.fin]).filter(Boolean).sort();
+  const i0 = D(W0 < fechas[0] ? W0 : fechas[0]); i0.setDate(1);
+  const i1 = D(fechas[fechas.length - 1] > W1 ? fechas[fechas.length - 1] : W1);
+  const days = Math.round((i1 - i0) / DAYMS) + 1, W = days * PX;
+  const x = s => Math.round((D(s) - i0) / DAYMS) * PX, w = (a, b) => Math.max(PX, (dd(b, a) + 1) * PX - 2);
+  let mh = '', vl = '';
+  for (let d = new Date(i0); d <= i1; d.setMonth(d.getMonth() + 1)) {
+    const xi = Math.round((d - i0) / DAYMS) * PX, nd = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    mh += `<div class="mh" style="left:${xi}px;width:${Math.round((nd - d) / DAYMS) * PX}px">${MESR[d.getMonth()]} ${String(d.getFullYear()).slice(2)}</div>`;
+    vl += `<div class="vl" style="left:${xi}px"></div>`; }
+  const xw0 = x(W0), xw1 = x(W1) + PX;
+  let Lh = '<div class="rgh"></div>', B = '', y = 0; const hits = [];
+  ['PW147', 'PW157', 'T645'].forEach(tk => {
+    if (CST.tal && tk !== CST.tal) return;
+    const T = TN[tk], P = ALL.filter(o => o.tal === tk && qok(o));
+    // clústeres
+    const agg = (arr, f) => { const m = {}; arr.forEach(o => { const s = f(o); if (!s) return; const k = s.k;
+      const g = m[k] || (m[k] = { n:k, ini:s.ini, fin:s.fin, pz:0 }); g.ini = s.ini < g.ini ? s.ini : g.ini; g.fin = s.fin > g.fin ? s.fin : g.fin; g.pz++; }); return Object.values(m); };
+    const clR = agg(P.filter(o => o.r), o => ({ k:o.r.cluster, ini:o.r.ini, fin:o.r.fin }));
+    const clC = agg(P.filter(o => o.c), o => ({ k:shortC(o.c.cluster), ini:o.c.ini, fin:o.c.fin }));
+    Lh += `<div class="lab tal" style="height:24px;--tc:${T.c}">${E(T.n)} <small>${P.length} pozos</small></div>`;
+    B += `<div class="row tal" style="top:${y}px;height:24px;background:color-mix(in srgb,${T.c} 7%,transparent)"></div>`; y += 24;
+    const fila = (lab, h, cont) => { Lh += `<div class="lab" style="height:${h}px">${lab}</div>`; B += `<div class="row" style="top:${y}px;height:${h}px"></div>` + cont(y); y += h; };
+    fila('Clúster · RyC', 32, yy => clR.map(c => { const id = hits.push({t:'clR', o:c, T}) - 1;
+      return `<div class="rb ryc" data-h="${id}" style="left:${x(c.ini)}px;width:${w(c.ini, c.fin)}px;top:${yy + 4}px;height:24px;--tc:${T.c}">${E(c.n)} · ${c.pz} pz</div>`; }).join(''));
+    fila('Clúster · Construcción', 32, yy => clC.map(c => { const id = hits.push({t:'clC', o:c, T}) - 1;
+      return `<div class="rb con" data-h="${id}" style="left:${x(c.ini)}px;width:${w(c.ini, c.fin)}px;top:${yy + 4}px;height:24px;--dc:#9fbbd8">${E(c.n)} · ${c.pz} pz</div>`; }).join(''));
+    fila('Pozos · RyC', 28, yy => P.filter(o => o.r).map(o => { const id = hits.push({t:'pz', o, T}) - 1;
+      return `<div class="rb ryc" data-h="${id}" style="left:${x(o.r.ini)}px;width:${w(o.r.ini, o.r.fin)}px;top:${yy + 4}px;height:20px;--tc:${T.c};font:700 9.5px 'JetBrains Mono'">${E(o.k.replace(/^CASE-/, ''))}</div>`; }).join(''));
+    fila('Pozos · Construcción', 28, yy => P.filter(o => o.c).map(o => { const id = hits.push({t:'pz', o, T}) - 1;
+      return `<div class="rb con" data-h="${id}" style="left:${x(o.c.ini)}px;width:${w(o.c.ini, o.c.fin)}px;top:${yy + 4}px;height:20px;--dc:${CS[o.est].c};font:700 9.5px 'JetBrains Mono'">${E(o.k.replace(/^CASE-/, ''))}</div>`; }).join(''));
+  });
+  const tx = HOY >= i0 && HOY <= i1 ? `<div class="today" style="left:${Math.round((HOY - i0) / DAYMS) * PX}px"></div>` : '';
+  const sombra = `<div style="position:absolute;top:0;bottom:0;left:${xw1}px;right:0;background:rgba(0,0,0,.35)"></div><div style="position:absolute;top:0;bottom:0;left:0;width:${xw0}px;background:rgba(0,0,0,.35)"></div>`;
+  $('cGantt').innerHTML = `<div class="rgwrap"><div class="rgl">${Lh}</div><div class="rgr" id="cScroll"><div class="canvas" style="width:${W}px;height:${y + 46}px"><div style="position:relative;height:46px;border-bottom:1px solid var(--stroke)">${mh}</div><div style="position:relative;height:${y}px">${vl}${sombra}${B}${tx}</div></div></div></div>`;
+  $('cLeg').innerHTML = Object.values(CS).map(v => `<span><i class="sw" style="background:${v.c};box-shadow:0 0 8px ${v.c}"></i>${v.n}</span>`).join('')
+    + '<span><i class="sw" style="background:rgba(0,0,0,.6);border:1px solid #333"></i>Fuera de la ventana del RyC</span><span>&#8644; Arrastra con el mouse o usa Shift + rueda</span>';
+  const tip = $('tip'), sc = $('cScroll');
+  sc.querySelectorAll('.rb').forEach(el => {
+    el.onmousemove = ev => { const h = hits[+el.dataset.h], o = h.o; let t, rows;
+      if (h.t === 'pz') { t = o.k; rows = `<div><b style="color:${CS[o.est].c}">${CS[o.est].n}</b></div>`
+          + `<div>RyC: ${o.r ? F(o.r.ini) + ' → ' + F(o.r.fin) + ' · ' + E(o.r.cluster) : '—'}</div>`
+          + `<div>Construcción: ${o.c ? F(o.c.ini) + ' → ' + F(o.c.fin) + ' · ' + E(shortC(o.c.cluster)) : '—'}</div>`
+          + (o.r && o.c ? `<div>Δ inicio ${o.di > 0 ? '+' : ''}${o.di} d · Δ fin ${o.df > 0 ? '+' : ''}${o.df} d</div>` : '')
+          + (o.est === 'tal' ? `<div>Taladro en Construcción: ${E(TN[o.c.tal] ? TN[o.c.tal].n : o.c.tal)}</div>` : ''); }
+      else { t = o.n; rows = `<div>${h.t === 'clR' ? 'RyC' : 'Construcción'}: ${F(o.ini)} → ${F(o.fin)}</div><div>${o.pz} pozos</div>`; }
+      tip.innerHTML = `<div class="t">${E(t)}</div><div style="color:var(--text-2);font-size:10.5px;margin-bottom:5px">${E(h.T.n)}</div>${rows}`;
+      tip.style.setProperty('--tc2', h.T.c); tip.classList.add('on');
+      tip.style.left = Math.min(ev.clientX + 16, innerWidth - 380) + 'px'; tip.style.top = Math.min(ev.clientY + 14, innerHeight - tip.offsetHeight - 10) + 'px'; };
+    el.onmouseleave = () => tip.classList.remove('on'); });
+  let dx = null;
+  sc.onmousedown = ev => { dx = { x: ev.clientX, s: sc.scrollLeft }; sc.classList.add('drag'); };
+  window.addEventListener('mouseup', () => { dx = null; sc.classList.remove('drag'); });
+  sc.onmousemove = ev => { if (dx) sc.scrollLeft = dx.s - (ev.clientX - dx.x); };
+  irHoy();
+}
+function irHoy(){ const sc = $('cScroll'); if (!sc) return; const t = sc.querySelector('.today');
+  if (t) sc.scrollLeft = Math.max(0, t.offsetLeft - sc.clientWidth * 0.35); }
+
+function tablaCl(ALL){
+  const g = {};
+  ALL.filter(o => o.r && (!CST.tal || o.tal === CST.tal)).forEach(o => {
+    const k = o.tal + '|' + o.r.cluster, x = g[k] || (g[k] = { tal:o.tal, cl:o.r.cluster, rI:o.r.ini, rF:o.r.fin, cI:null, cF:null, pzR:0, pzC:0, clC:new Set() });
+    x.rI = o.r.ini < x.rI ? o.r.ini : x.rI; x.rF = o.r.fin > x.rF ? o.r.fin : x.rF; x.pzR++;
+    if (o.c) { x.pzC++; x.cI = !x.cI || o.c.ini < x.cI ? o.c.ini : x.cI; x.cF = !x.cF || o.c.fin > x.cF ? o.c.fin : x.cF; x.clC.add(shortC(o.c.cluster)); } });
+  // pozos que solo están en Construcción, sumados al clúster de Construcción que corresponda
+  ALL.filter(o => o.est === 'soloC' && (!CST.tal || o.tal === CST.tal)).forEach(o => {
+    const x = Object.values(g).find(z => z.tal === o.tal && z.clC.has(shortC(o.c.cluster)));
+    if (x) { x.pzC++; x.cF = o.c.fin > x.cF ? o.c.fin : x.cF; x.cI = !x.cI || o.c.ini < x.cI ? o.c.ini : x.cI; }
+    else { const k = o.tal + '|C|' + shortC(o.c.cluster), y = g[k] || (g[k] = { tal:o.tal, cl:'—', rI:null, rF:null, cI:o.c.ini, cF:o.c.fin, pzR:0, pzC:0, clC:new Set([shortC(o.c.cluster)]) });
+      y.pzC++; y.cI = o.c.ini < y.cI ? o.c.ini : y.cI; y.cF = o.c.fin > y.cF ? o.c.fin : y.cF; } });
+  const R = Object.values(g).sort((a, b) => a.tal.localeCompare(b.tal) || String(a.rI || a.cI).localeCompare(String(b.rI || b.cI)));
+  $('cCl').innerHTML = '<tr><th>Taladro</th><th>Clúster RyC</th><th>Clúster Construcción</th><th>RyC</th><th>Construcción</th><th>Δ inicio</th><th>Δ fin</th><th>Pozos RyC / Constr.</th></tr>'
+    + R.map(x => `<tr><td class="tl" style="--tc:${TN[x.tal].c}">${E(TN[x.tal].n)}</td><td>${E(x.cl)}</td><td>${E([...x.clC].join(' · ') || '—')}</td>
+      <td class="m">${x.rI ? F(x.rI) + ' → ' + F(x.rF) : '—'}</td><td class="m">${x.cI ? F(x.cI) + ' → ' + F(x.cF) : '—'}</td>
+      <td>${x.rI && x.cI ? chip(dd(x.cI, x.rI)) : chip(null)}</td><td>${x.rF && x.cF ? chip(dd(x.cF, x.rF)) : chip(null)}</td>
+      <td class="m"${x.pzR !== x.pzC ? ' style="color:var(--warn)"' : ''}>${x.pzR} / ${x.pzC}</td></tr>`).join('');
+}
+function tablaPz(L){
+  $('cPzHint').textContent = L.length + ' pozos · ordenados por taladro y fecha del RyC';
+  $('cPz').innerHTML = '<tr><th>Taladro</th><th>Pozo</th><th>Clúster</th><th>RyC (perf → comp)</th><th>Construcción</th><th>Δ inicio</th><th>Δ fin</th><th>Resultado</th><th>Equipo (Construcción)</th></tr>'
+    + L.map(o => `<tr><td class="tl" style="--tc:${TN[o.tal] ? TN[o.tal].c : '#00e5ff'}">${E(TN[o.tal] ? TN[o.tal].n : o.tal)}</td>
+      <td class="m">${E(o.k)}</td><td>${E(o.r ? o.r.cluster : shortC(o.c.cluster))}</td>
+      <td class="m">${o.r ? F(o.r.ini) + ' → ' + F(o.r.fin) : '—'}</td><td class="m">${o.c ? F(o.c.ini) + ' → ' + F(o.c.fin) : '—'}</td>
+      <td>${chip(o.r && o.c ? o.di : null)}</td><td>${chip(o.r && o.c ? o.df : null)}</td>
+      <td><span class="est" style="--dc:${CS[o.est].c}">${CS[o.est].n}</span></td><td>${E(o.c ? o.c.equipo : '')}</td></tr>`).join('');
+}
+// ---- controles ----
+$('cTal').innerHTML = '<option value="">Todos</option>' + Object.entries(TN).map(([k, v]) => `<option value="${k}">${E(v.n)}</option>`).join('');
+$('cEst').innerHTML = '<option value="">Todos</option>' + Object.entries(CS).map(([k, v]) => `<option value="${k}">${v.n}</option>`).join('');
+$('cTal').value = CST.tal; $('cEst').value = CST.est; $('cTol').value = String(CST.tol);
+$('cTal').onchange = e => { CST.tal = e.target.value; save(); renderCmp(); };
+$('cEst').onchange = e => { CST.est = e.target.value; save(); renderCmp(); };
+$('cTol').onchange = e => { CST.tol = +e.target.value; save(); renderCmp(); };
+let qt; $('cQ').oninput = e => { clearTimeout(qt); qt = setTimeout(() => { CST.q = e.target.value.toLowerCase().replace(/[\s-]/g,''); renderCmp(); }, 200); };
+document.querySelectorAll('#cZ button').forEach(b => b.onclick = () => { CST.px = +b.dataset.z; save(); renderCmp(); });
+$('cHoy').onclick = irHoy;
+$('cReset').onclick = () => { Object.assign(CST, { tol:2, tal:'', est:'', q:'', px:6 }); $('cQ').value = ''; $('cTal').value = ''; $('cEst').value = ''; $('cTol').value = '2'; save(); renderCmp(); };
+window.renderCmp = renderCmp;
+$('vswCmp').textContent = cruzar().filter(o => o.est !== 'ok').length + ' diferencias';
+let v0 = ''; try { v0 = new URLSearchParams(location.search).get('vista') || localStorage.getItem('ttv2.vista') || ''; } catch(e){}
+if (v0 === 'cmp') window.vistaTT('cmp');
+})();
+</script>
+<!--/CMP-JS-->
+
 
 <a id="home-float" href="../../index.html" title="Volver al tablero principal" style="position:fixed;right:22px;bottom:22px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:11px 18px 11px 14px;border-radius:999px;border:1px solid rgba(0,229,255,.75);background:rgba(6,10,24,.92);color:#9ff6ff;font:700 13.5px/1 Inter,'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap;box-shadow:0 0 22px rgba(0,229,255,.45),0 10px 30px rgba(0,0,0,.55);backdrop-filter:blur(6px);opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .25s,transform .25s,box-shadow .15s" onmouseover="this.style.boxShadow='0 0 30px rgba(0,229,255,.75),0 10px 30px rgba(0,0,0,.55)'" onmouseout="this.style.boxShadow='0 0 22px rgba(0,229,255,.45),0 10px 30px rgba(0,0,0,.55)'"><span style="font-size:18px;line-height:1">&#8962;</span>Volver al tablero principal</a>
 <script>(function(){var f=document.getElementById('home-float'),t=document.querySelector('.home-link');if(!f)return;function show(v){f.style.opacity=v?1:0;f.style.transform=v?'none':'translateY(14px)';f.style.pointerEvents=v?'auto':'none'}if(t&&'IntersectionObserver' in window){new IntersectionObserver(function(e){show(!e[0].isIntersecting)}).observe(t)}else{window.addEventListener('scroll',function(){show(window.scrollY>220)});show(window.scrollY>220)}})();</script>
