@@ -317,7 +317,7 @@ footer{margin-top:26px;font-size:10.5px;color:var(--muted);text-align:center;let
 
 <div class="vsw" id="vsw">
   <button data-v="ryc"><span class="ic">&#9889;</span><span><div class="tt">RyC &middot; Ruta y Conexionado</div><div class="ss">Planeaci&oacute;n Andina-Oriente &middot; <b id="vswRyc"></b></div></span></button>
-  <button data-v="ruta"><span class="ic">&#9935;</span><span><div class="tt">Ruta de perforaci&oacute;n</div><div class="ss">Construcci&oacute;n &middot; <b id="vswRuta"></b></div></span></button>
+  <button data-v="ruta"><span class="ic">&#9935;</span><span><div class="tt">Ruta de construcci&oacute;n</div><div class="ss">Construcci&oacute;n &middot; <b id="vswRuta"></b></div></span></button>
   <button data-v="cmp"><span class="ic">&#8646;</span><span><div class="tt">Comparaci&oacute;n</div><div class="ss">RyC vs Ruta de Construcci&oacute;n &middot; <b id="vswCmp"></b></div></span></button>
 </div>
 <div id="vRyC">
@@ -975,7 +975,7 @@ function renderCmp(){
              ['Solo en RyC', n('soloR'), 'pozos que Construcción no tiene', CS.soloR.c],
              ['Solo en Construcción', n('soloC') + n('tal'), 'en la ventana · ' + n('tal') + ' con taladro distinto', CS.soloC.c]];
   $('cKpis').innerHTML = K.map(k => `<div class="kpi" style="--k:${k[3]}"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join('');
-  $('cNote').innerHTML = `Comparación entre el <b>RyC con corte ${F(DATA.corte)}</b> (Planeación Andina-Oriente) y la <b>Ruta de perforación ${E(RUTA.version || '')}</b> de Construcción. `
+  $('cNote').innerHTML = `Comparación entre el <b>RyC con corte ${F(DATA.corte)}</b> (Planeación Andina-Oriente) y la <b>Ruta de construcción ${E(RUTA.version || '')}</b>. `
     + `Para cada pozo, el RyC va desde el inicio de la perforación hasta el fin del completamiento; Construcción, la barra del pozo en su ruta. `
     + `<b>Δ = Construcción − RyC</b>: positivo = Construcción lo programa más tarde.`;
   $('vswCmp').textContent = ALL.filter(o => o.est !== 'ok').length + ' diferencias';
