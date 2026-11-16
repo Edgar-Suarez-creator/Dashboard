@@ -147,6 +147,7 @@ td.n{text-align:right;font-family:'Space Grotesk',Inter;font-variant-numeric:tab
 @media(min-width:1201px){#kpis.k5{grid-template-columns:repeat(5,1fr)}}
 table.eqt tr{cursor:default}.b-GAR{color:var(--yellow);background:rgba(255,230,0,.10)}.b-DIS{color:var(--red);background:rgba(255,59,107,.10)}
 footer{margin-top:34px;color:var(--muted);font-size:12px;text-align:center}
+/*SUBTOTAL-INV*/table.t tfoot td{position:sticky;bottom:0;background:#0d1a3a;font-weight:800;color:var(--text);border-top:2px solid var(--cyan);z-index:2;white-space:nowrap}table.t tfoot td.lbl{color:var(--cyan);text-transform:uppercase;font-size:11.5px;letter-spacing:.5px}
 </style>
 </head>
 <body>
@@ -387,6 +388,9 @@ function table(rows){
   $('tbl').querySelector('thead').innerHTML='<tr><th>Mód.</th><th>Material</th><th>Descripción</th><th>ø</th><th>Clasif. 1</th><th>Clasif. 2</th><th>Sistema</th><th>Almacén</th><th style="text-align:right">Cantidad</th><th>UMB</th><th style="text-align:right">Valor (COP)</th><th style="text-align:right">% del total</th></tr>';
   const tv=sum(rows,r=>r.valor);
   $('tbl').querySelector('tbody').innerHTML=show.map(r=>`<tr onclick="detail(${DATA.items.indexOf(r)})"><td><span class="badge b-${r.mod}">${r.mod}</span></td><td><b>${esc(r.material)}</b></td><td title="${esc(r.texto_ext)}">${esc(r.texto_breve)}</td><td>${dia(r.diam)}</td><td>${esc(r.clas1)}</td><td>${esc(r.clas2)}</td><td>${esc(r.sistema)}</td><td class="alm">${esc(almName(r.denom_alm))}</td><td class="n">${N(r.cantidad)}</td><td>${esc(r.umb)}</td><td class="n" style="color:var(--cyan)">${$$(r.valor)}</td><td class="n">${P(r.valor,tv)}</td></tr>`).join('');
+  const tf=$('tbl').querySelector('tfoot')||$('tbl').appendChild(document.createElement('tfoot'));
+  const um=[...new Set(rows.map(r=>r.umb||''))];
+  tf.innerHTML=rows.length?`<tr><td class="lbl" colspan="8">Subtotal · ${N(rows.length)} ítems${rows.length>800?' (incluye los que no se muestran)':''}</td><td class="n">${um.length===1?N(sum(rows,r=>r.cantidad)):'—'}</td><td>${um.length===1?esc(um[0]):'<span title="Unidades distintas: la cantidad no se suma">varias</span>'}</td><td class="n" style="color:var(--cyan)">${$$(tv)}</td><td class="n">${P(tv,sum(DATA.items,r=>r.valor))}</td></tr>`:'';
 }
 
 const FIELDS=[['Identificación',[['Módulo','mod'],['Centro','centro'],['Nombre 1','nombre1'],['Almacén','almacen'],['Denominación almacén','denom_alm'],['Material (código)','material'],['Texto breve','texto_breve'],['Texto extendido','texto_ext'],['Diámetro','diam']]],
@@ -429,7 +433,7 @@ function movsUI(){
 }
 function mvTable(L,t){
   $('mv-t').innerHTML=`<thead><tr><th colspan="9" style="text-align:left;color:var(--text)">${esc(t)} (${N(L.length)})</th></tr><tr><th>Mód.</th><th>Material</th><th>Descripción</th><th>Clasif. 2</th><th>Almacén</th><th style="text-align:right">Cant. antes → ahora</th><th style="text-align:right">Valor antes</th><th style="text-align:right">Valor ahora</th><th style="text-align:right">Variación</th></tr></thead><tbody>`+
-    L.map(x=>{const d=x.v1-x.v0; return `<tr><td><span class="badge b-${x.mod}">${x.mod}</span></td><td><b>${esc(x.mat)}</b></td><td>${esc(x.tx)}</td><td>${esc(x.c2||'')}</td><td class="alm">${esc(almName(x.alm))}</td><td class="n">${N(x.q0)} → ${N(x.q1)}</td><td class="n">${$$(x.v0)}</td><td class="n">${$$(x.v1)}</td><td class="n ${d>0?'up':'down'}">${d>0?'▲ +':'▼ −'}${$$(Math.abs(d))}</td></tr>`;}).join('')+'</tbody>';
+    L.map(x=>{const d=x.v1-x.v0; return `<tr><td><span class="badge b-${x.mod}">${x.mod}</span></td><td><b>${esc(x.mat)}</b></td><td>${esc(x.tx)}</td><td>${esc(x.c2||'')}</td><td class="alm">${esc(almName(x.alm))}</td><td class="n">${N(x.q0)} → ${N(x.q1)}</td><td class="n">${$$(x.v0)}</td><td class="n">${$$(x.v1)}</td><td class="n ${d>0?'up':'down'}">${d>0?'▲ +':'▼ −'}${$$(Math.abs(d))}</td></tr>`;}).join('')+'</tbody>'+(L.length?(()=>{const a=sum(L,x=>x.v0),b=sum(L,x=>x.v1),d=b-a;return `<tfoot><tr><td class="lbl" colspan="6">Subtotal · ${N(L.length)} materiales</td><td class="n">${$$(a)}</td><td class="n">${$$(b)}</td><td class="n ${d>0?'up':d<0?'down':''}">${d>0?'▲ +':d<0?'▼ −':''}${$$(Math.abs(d))}</td></tr></tfoot>`;})():'');
 }
 function openMv(k){ const M=PREV.movs; mvTable(M.top.filter(x=>k==='nuevo'?x.v0===0&&x.q0===0:k==='salio'?x.v1===0&&x.q1===0:k==='sube'?x.v1>x.v0&&x.v0>0:x.v1<x.v0&&x.v1>0), MVL[k][0]); }
 
