@@ -443,7 +443,30 @@ function kpis(R) {
     ['Alertas abiertas', N(al), `de las hojas ALERTAS`, '#ff9f1c', 'al'],
   ];
   $('kpis').innerHTML = K.map(([t, v, s, c, f, p], i) => `<div class="kpi" style="--c:${c}" data-i="${i}"><div class="t">${t}</div><div class="v">${v}</div><div class="s">${s}</div>${p !== undefined ? `<div class="bar"><i style="width:${p}%;background:${c}"></i></div>` : ''}</div>`).join('');
-  $('kpis').querySelectorAll('.kpi').forEach(el => el.onclick = () => { const f = K[+el.dataset.i][4]; if (f === 'al') $('alerts').scrollIntoView({ behavior: 'smooth' }); else if (f) set(f[0], f[1]); });
+  $('kpis').querySelectorAll('.kpi').forEach(el => { el.style.cursor = 'pointer'; el.title = 'Clic para ver el detalle'; el.onclick = () => kpiModal(+el.dataset.i, R); });
+}
+// ventana emergente de cada tarjeta de arriba
+function odbModal(t, O) {
+  O = O.slice().sort((a, b) => (a.dv ?? 9e9) - (b.dv ?? 9e9));
+  open_(t, `${N(O.length)} ODB · clic en una ODB para ver la ficha completa`, odbRows(O)); $('modal').classList.add('wide'); bindOdb();
+}
+function alertModal(R) {
+  const subsF = st.sp.length ? new Set(st.sp.map(v => v.toUpperCase())) : null, odbsF = new Set(R.map(x => x.odb).filter(Boolean));
+  const A = DATA.alertas.filter(a => a.abierta && (!st.m.length || st.m.includes(a.mod)) && (!subsF || subsF.has(a.sub.toUpperCase())) && (st.scope !== 'eq' || (a.odb && odbsF.has(a.odb))));
+  const ord = ['MUY ALTA', 'ALTA', 'MEDIA', 'BAJA']; A.sort((a, b) => ord.indexOf(a.nivel) - ord.indexOf(b.nivel) || (a.f_act || '').localeCompare(b.f_act || ''));
+  open_('Alertas abiertas', `${N(A.length)} alertas · ${ord.map(o => `${A.filter(a => a.nivel === o).length} ${o.toLowerCase()}`).join(' · ')}`,
+    `<table class="t"><tr><th>Nivel</th><th>Equipo / categoría</th><th>Mód.</th><th>Subproyecto</th><th>ODB</th><th>Activa desde</th><th>Descripción</th></tr>${A.map(a =>
+      `<tr><td><span class="pill" style="--c:${NIV_C[a.nivel] || '#9fb3d9'}">${esc(a.nivel)}</span></td><td>${esc(a.equipo || a.cat)}</td><td>${a.mod}</td><td>${esc(a.sub)}</td><td>${esc(a.odb || '—')}</td><td style="white-space:nowrap">${fd(a.f_act)}</td><td style="min-width:320px;white-space:normal">${esc(a.desc)}</td></tr>`).join('')}</table>`);
+  $('modal').classList.add('wide');
+}
+function kpiModal(i, R) {
+  const abiertas = new Set(R.filter(x => x.odb && x.et !== 'Recibido').map(x => x.m + '|' + x.odb));
+  if (i === 0) lineList('MR emitidas', R);
+  else if (i === 1) lineList('Cobertura de compra · líneas sin comprar', R.filter(x => PLAN(x)));
+  else if (i === 2) lineList('Recibido en sitio', R.filter(x => x.et === 'Recibido'));
+  else if (i === 3) odbModal('ODB abiertas · con líneas pendientes por recibir', DATA.odb.filter(o => abiertas.has(o.mod + '|' + o.odb)));
+  else if (i === 4) lineList('ETA vencida', R.filter(x => x.ll === 'ETA vencida'));
+  else if (i === 5) alertModal(R);
 }
 
 
@@ -902,11 +925,14 @@ function gyq(R) {
   const keys = new Set(R.filter(x => x.odb).map(x => x.m + '|' + x.odb)), O = DATA.odb.filter(o => keys.has(o.mod + '|' + o.odb)), cov = tot ? 100 * qs(con) / tot : 0;
   const ctx = st.sp.length === 1 ? st.sp[0] : st.sp.length ? `${st.sp.length} subproyectos` : 'todos los subproyectos del filtro';
   $('gyq-s').textContent = `Como la presentación de reunión de GyQ, en cantidades · ${ctx} · corte ${fd(DATA.corte)}. Usa el filtro de Subproyecto de arriba para ver una hoja de la presentación.`;
-  const K = [['MR emitidas', N(mrs), '#00e5ff', `${N(R.length)} líneas`], ['Total cantidades en MR', N1(tot), '#eef3ff', 'suma de cantidades'],
+  const K = [['MR emitidas', N(mrs), '#00e5ff', `${N(R.length)} líneas`, 'mr'], ['Total cantidades en MR', N1(tot), '#eef3ff', 'suma de cantidades', 'tot'],
     ['Cantidades sin ODB', N1(qs(sin)), '#ff3d71', `${N(sin.length)} líneas en planeación`, 'sin'], ['Cantidades con ODB / tránsito', N1(qs(con)), '#b46bff', `${N(con.length)} líneas`, 'con'],
-    ['ODB', N(O.length), '#4d7cff', `${O.filter(o => o.n_ab > 0).length} con líneas pendientes`], ['Cobertura materiales comprados', cov.toFixed(2).replace('.', ',') + '%', cov >= 90 ? '#39ff88' : cov >= 60 ? '#ffe14d' : '#ff3d71', 'cantidades con ODB / total']];
+    ['ODB', N(O.length), '#4d7cff', `${O.filter(o => o.n_ab > 0).length} con líneas pendientes`, 'odb'], ['Cobertura materiales comprados', cov.toFixed(2).replace('.', ',') + '%', cov >= 90 ? '#39ff88' : cov >= 60 ? '#ffe14d' : '#ff3d71', 'cantidades con ODB / total', 'cov']];
   $('gyq-k').innerHTML = K.map(([t, v, c, s, k]) => `<div style="--c:${c}${k ? ';cursor:pointer' : ''}"${k ? ` data-k="${k}"` : ''}><span>${t}</span><b>${v}</b><small>${s}</small></div>`).join('');
-  $('gyq-k').querySelectorAll('[data-k]').forEach(el => el.onclick = () => lineList(el.dataset.k === 'sin' ? 'Cantidades sin ODB' : 'Cantidades con ODB / tránsito', el.dataset.k === 'sin' ? sin : con));
+  $('gyq-k').querySelectorAll('[data-k]').forEach(el => { el.title = 'Clic para ver el detalle'; el.onclick = () => { const k = el.dataset.k;
+    if (k === 'mr') lineList('MR emitidas', R); else if (k === 'tot') lineList('Total cantidades en MR', R);
+    else if (k === 'sin') lineList('Cantidades sin ODB', sin); else if (k === 'con') lineList('Cantidades con ODB / tránsito', con);
+    else if (k === 'odb') odbModal('ODB del filtro', O); else if (k === 'cov') lineList('Cobertura · materiales comprados (con ODB / tránsito)', con); }; });
   // torta 1: etapas por cantidad
   const ce = ETAPAS.map(e => [e, qs(R.filter(x => x.et === e)), ET_C[e], e]);
   donut('gyq-pie', ce.map(([e, v, c]) => [e, v, c, `${e}: ${N1(v)}`]), cov.toFixed(1).replace('.', ',') + '%', 'comprado');
