@@ -237,7 +237,7 @@ footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center}
       <h1>TRACKING DE MATERIALES Y EQUIPOS · CAÑO SUR ESTE</h1><a class="home-link" href="../../index.html"><span style="font-size:16px">&#8962;</span>Volver al tablero principal</a>
       <div class="sub" id="sub"></div>
     </div>
-    <div class="scope" id="scope">
+    <div class="scope" id="scope" style="display:none">
       <button data-s="eq" class="on"><b>Equipos</b><small>Alcance ATIP · preservación y arranque</small></button>
       <button data-s="mt"><b>Materiales</b><small>Tubería, accesorios, válvulas, cables e instrumentos</small></button>
     </div>
@@ -376,11 +376,11 @@ const LL_C = { 'ETA vencida': '#ff3d71', '≤30 días': '#ff9f1c', '31–90 día
 const NIV_C = { 'MUY ALTA': '#ff3d71', 'ALTA': '#ff9f1c', 'MEDIA': '#ffe14d', 'BAJA': '#4d7cff' };
 const HOY = DATA.hoy;
 const PLAN = x => x.et.startsWith('Planeación');
-const st = { dup: 'una', scope: 'eq', m: [], sp: [], es: [], et: [], ll: [], pv: [], q: '', range: '24', met: 'pct', mxm: 'n', odbf: 'ab', sort: 'eta', dir: 1, lim: 200, off: {} };
+const st = { dup: 'una', scope: 'all', m: [], sp: [], es: [], et: [], ll: [], pv: [], q: '', range: '24', met: 'pct', mxm: 'n', odbf: 'ab', sort: 'eta', dir: 1, lim: 200, off: {} };
 
 // ---------- filtros
 const grp = x => st.scope === 'eq' ? (x.eq || '—') : x.es;
-function base() { return ITEMS.filter(x => !oculta(x)).filter(x => st.scope === 'eq' ? x.eq : !x.eq); }
+function base() { return ITEMS.filter(x => !oculta(x)).filter(x => st.scope === 'all' || (st.scope === 'eq' ? x.eq : !x.eq)); }
 function pass(x, skip) {
   if (st.scope === 'eq' && !x.eq) return false;
   if (oculta(x)) return false;
@@ -418,7 +418,7 @@ function filters() {
   if (st.dup === 'mr' && NREP) ch.push(`<span class="chip" data-k="dup">Sin <b>${N(NREP)}</b> líneas de ítems MR en varias OC ✕</span>`);
   if (st.dup === 'todas' && NDUP) ch.push(`<span class="chip" data-k="dup">Incluye <b>${N(NDUP)}</b> líneas duplicadas ✕</span>`);
   if (st.q) ch.push(`<span class="chip" data-k="q">Buscar: <b>${esc(st.q)}</b> ✕</span>`);
-  $('chips').innerHTML = ch.length ? ch.join('') : `<span class="chip info">${st.scope === 'eq' ? 'Equipos (alcance ATIP)' : 'Materiales (sin equipos)'} · sin filtros</span>`;
+  $('chips').innerHTML = ch.length ? ch.join('') : `<span class="chip info">${st.scope === 'all' ? 'Equipos y materiales' : st.scope === 'eq' ? 'Equipos (alcance ATIP)' : 'Materiales (sin equipos)'} · sin filtros</span>`;
   $('chips').querySelectorAll('.chip[data-k]').forEach(c => c.onclick = () => { const k = c.dataset.k; if (k === 'q') { st.q = ''; $('f-q').value = ''; } else if (k === 'dup') { st.dup = 'una'; $('f-dup').value = 'una'; } else st[k] = st[k].filter(v => v !== c.dataset.v); render(); });
 }
 function set(k, v) { st[k] = st[k].length === 1 && st[k][0] === v ? [] : [v]; st.lim = 200; render(); }
@@ -508,14 +508,14 @@ function barsData(R) {
 function bars(R) {
   const svg = $('bars'), W = svg.clientWidth || 1200, H = svg.clientHeight || 400, pad = { l: 58, r: 20, t: 30, b: 54 };
   const eqOnly = st.scope === 'eq';
-  $('b-title').textContent = eqOnly ? 'Llegada de equipos por mes' : 'Llegada de materiales por mes';
+  $('b-title').textContent = st.scope === 'all' ? 'Llegada de equipos y materiales por mes' : eqOnly ? 'Llegada de equipos por mes' : 'Llegada de materiales por mes';
   const M = barsData(R), hk = mkey(HOY);
   let ks = Object.keys(M).sort(); if (!ks.length) { svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" fill="#6b7aa6">Sin llegadas con fecha para el filtro actual</text>`; $('b-legend').innerHTML = ''; $('b-info').textContent = ''; return; }
   let a = ks[0], b = ks[ks.length - 1];
   if (st.brange === '12') a = a > addM(hk, -12) ? a : addM(hk, -12); else if (st.brange === '2025') a = a > '2025-01' ? a : '2025-01';
   if (b < addM(hk, 2)) b = addM(hk, 2);
   const months = []; for (let k = a; k <= b; k = addM(k, 1)) months.push(k);
-  const segs = BSEG.filter(s => s.k.endsWith(eqOnly ? '_eq' : '_mt'));
+  const segs = BSEG.filter(s => st.scope === 'all' || s.k.endsWith(eqOnly ? '_eq' : '_mt'));
   const tot = k => segs.reduce((t, s) => t + ((M[k] || {})[s.k] || 0), 0);
   const maxV = Math.max(1, ...months.map(tot)), nice = (() => { const p = Math.pow(10, Math.floor(Math.log10(maxV))); const f = [1, 2, 2.5, 5, 10].find(f => f * p >= maxV); return f * p; })();
   const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b, slot = iw / months.length, bw = Math.max(3, Math.min(46, slot * .68));
@@ -796,11 +796,11 @@ function renderChanges() {
     return;
   }
   $('cc-st').hidden = true;
-  const eqOnly = st.scope === 'eq', inS = x => eqOnly ? x.eq : !x.eq;
+  const eqOnly = st.scope === 'eq', inS = x => st.scope === 'all' || (eqOnly ? x.eq : !x.eq);
   // 'Contar una vez' quita las duplicadas de los dos cortes (si el corte anterior no trae la marca, se quita la línea emparejada con la duplicada actual)
   const pd = new Set([...PAIR.M].filter(([x]) => oculta(x)).map(([, p]) => p));
   const N1_ = ITEMS.filter(x => inS(x) && !oculta(x)), P1 = PITEMS.filter(p => inS(p) && !oculta(p) && !pd.has(p));
-  $('cc-lbl').textContent = `${fd(PREV.corte)} → ${fd(DATA.corte)} · ${eqOnly ? 'equipos' : 'materiales'} · totales generales (se ocultan al filtrar; cambian con el selector de arriba)`;
+  $('cc-lbl').textContent = `${fd(PREV.corte)} → ${fd(DATA.corte)} · ${st.scope === 'all' ? 'equipos y materiales' : eqOnly ? 'equipos' : 'materiales'} · totales generales (se ocultan al filtrar; cambian con el selector de arriba)`;
   const cnt = (L, f) => L.filter(f).length, odbAb = L => new Set(L.filter(x => x.odb && x.et !== 'Recibido').map(x => x.m + x.odb)).size;
   const alN = DATA.alertas.filter(a => a.abierta).length, alP = (PREV.alertas || []).filter(a => a.abierta).length;
   const T = [
